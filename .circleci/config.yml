@@ -35,9 +35,12 @@ commands:
   selenium_tests:
     steps:
     - run:
+        command: PATH=$PATH:. chromedriver --version
+        working_directory: selenium_tests
+    - run:
         command: |
           . ../venv/bin/activate
-          pytest
+          PATH=$PATH:. pytest
         working_directory: selenium_tests
 
 ################################################################################
@@ -46,7 +49,7 @@ executors:
     description: |
       Python Django runtime environment
     docker:
-    - image: circleci/python:<<parameters.python>>
+    - image: circleci/python:<<parameters.python>>-browsers
     parameters:
       python:
         default: "3.7"
