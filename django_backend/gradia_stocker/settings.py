@@ -77,10 +77,10 @@ WSGI_APPLICATION = "gradia_stocker.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "HOST": "GradiaExchange.mysql.pythonanywhere-services.com",
-        "NAME": "GradiaExchange$default",
-        "USER": "GradiaExchange",
-        "PASSWORD": "fY4=]3jie!_Y(`YDcs{f",
+        "HOST": "GradiaLab.mysql.pythonanywhere-services.com",
+        "NAME": "GradiaLab$default",
+        "USER": "GradiaLab",
+        "PASSWORD": "T&u)h!KA8Xt48E>D`M4=",
         "OPTIONS": {
             "init_command": "SET innodb_strict_mode=1",
             "sql_mode": "traditional",
