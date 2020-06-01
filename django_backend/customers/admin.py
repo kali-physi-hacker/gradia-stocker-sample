@@ -20,6 +20,11 @@ class EntityAdmin(admin.ModelAdmin):
     inlines = [AuthorizedPersonnelInline]
 
 
+class ConsignmentIn(Consignment):
+    class Meta:
+        proxy = True
+
+
 class ParcelInline(admin.TabularInline):
     model = Parcel
     fields = ["name", "code", "total_carats", "total_pieces", "reference_price_per_carat"]
@@ -27,9 +32,9 @@ class ParcelInline(admin.TabularInline):
     extra = 1
 
 
-@admin.register(Consignment)
+@admin.register(ConsignmentIn)
 class ConsignmentAdmin(admin.ModelAdmin):
-    model = Consignment
+    model = ConsignmentIn
 
     readonly_fields = ["intake_by", "intake_date", "release_by", "release_date"]
 
@@ -71,7 +76,7 @@ class ParcelAdmin(admin.ModelAdmin):
         return False
 
 
-class EndConsignment(Consignment):
+class ConsignmentOut(Consignment):
     class Meta:
         proxy = True
 
@@ -101,9 +106,9 @@ class ParcelOutInline(admin.StackedInline):
         return False
 
 
-@admin.register(EndConsignment)
-class EndConsignmentAdmin(admin.ModelAdmin):
-    model = EndConsignment
+@admin.register(ConsignmentOut)
+class ConsignmentOutAdmin(admin.ModelAdmin):
+    model = ConsignmentOut
     readonly_fields = ["entity", "receipt_number", "intake_by", "intake_date", "release_by", "release_date"]
 
     inlines = [ParcelOutInline]
