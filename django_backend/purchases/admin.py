@@ -1,8 +1,7 @@
 from django.contrib import admin
 
-from .models import AuthorizedPersonnel, Entity
-
 # Register your models here.
+from .models import AuthorizedPersonnel, Seller
 
 
 class AuthorizedPersonnelInline(admin.StackedInline):
@@ -11,8 +10,8 @@ class AuthorizedPersonnelInline(admin.StackedInline):
     extra = 1
 
 
-@admin.register(Entity)
-class EntityAdmin(admin.ModelAdmin):
-    model = Entity
+@admin.register(Seller)
+class SellerAdmin(admin.ModelAdmin):
+    model = Seller
 
     inlines = [AuthorizedPersonnelInline]
