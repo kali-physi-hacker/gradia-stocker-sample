@@ -20,6 +20,9 @@ class AbstractReceipt(models.Model):
     class Meta:
         abstract = True
 
+    def closed_out(self):
+        return self.release_by and self.release_date
+
 
 class Receipt(AbstractReceipt):
     pass

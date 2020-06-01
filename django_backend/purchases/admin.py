@@ -59,7 +59,7 @@ class CreateReceiptAdmin(admin.ModelAdmin):
 class ParcelRejection(Parcel):
     class Meta:
         proxy = True
-        verbose_name = "2. Parcel rejection"
+        verbose_name = "2. View parcel info and record rejection"
 
 
 class ParcelRejectionForm(forms.ModelForm):
@@ -94,16 +94,15 @@ class ParcelRejectionAdmin(admin.ModelAdmin):
         return False
 
     def has_change_permission(self, request, obj=None):
-        if obj:
-            if obj.rejected_carats is None or obj.total_price_paid is None or obj.rejected_pieces is None:
-                return True
+        if obj and not obj.closed_out():
+            return True
         return False
 
 
 class CloseOutReceipt(Receipt):
     class Meta:
         proxy = True
-        verbose_name = "3. Close out receipt for stone release"
+        verbose_name = "3. View receipts and close out receipt on stone release"
 
 
 @admin.register(CloseOutReceipt)
@@ -132,15 +131,17 @@ class CloseOutReceiptAdmin(admin.ModelAdmin):
         return False
 
     def has_change_permission(self, request, obj=None):
-        if obj:
-            if obj.release_by is None or obj.release_date is None:
-                return True
+        if obj and not obj.closed_out():
+            return True
         return False
 
     def response_change(self, request, obj):
         if "_close_out" in request.POST:
-            if obj.release_by:
-                return HttpResponse("This receipt has already been closed out")
+            if obj.closed_out():
+                return HttpResponse("Error: This receipt has already been closed out")
+            for parcel in obj.parcel_set.all():
+                if not parcel.closed_out():
+                    return HttpResponse(f"Error: Parcel {parcel} has not been closed out yet")
             obj.release_by = request.user
             obj.release_date = datetime.now()
             obj.save()

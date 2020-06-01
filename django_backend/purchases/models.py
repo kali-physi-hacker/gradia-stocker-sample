@@ -29,3 +29,6 @@ class Parcel(AbstractParcel):
 
     reference_price_per_carat = models.PositiveIntegerField()
     total_price_paid = models.IntegerField(null=True, blank=True)
+
+    def closed_out(self):
+        return (self.rejected_pieces is not None) and (self.total_price_paid is not None)
