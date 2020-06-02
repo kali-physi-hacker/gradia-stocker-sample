@@ -32,3 +32,5 @@ class Parcel(AbstractParcel):
 
     def closed_out(self):
         return (self.rejected_pieces is not None) and (self.total_price_paid is not None)
+
+    closed_out.boolean = True

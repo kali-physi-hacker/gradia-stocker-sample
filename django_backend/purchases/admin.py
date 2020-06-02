@@ -24,7 +24,7 @@ class SellerAdmin(admin.ModelAdmin):
 class CreateReceipt(Receipt):
     class Meta:
         proxy = True
-        verbose_name = "1. Create receipt for stone intake"
+        verbose_name = "Step 1. Create receipt for stone intake"
 
 
 class ParcelInline(admin.TabularInline):
@@ -59,7 +59,7 @@ class CreateReceiptAdmin(admin.ModelAdmin):
 class ParcelRejection(Parcel):
     class Meta:
         proxy = True
-        verbose_name = "2. View parcel info and record rejection"
+        verbose_name = "Step 2. View parcel info and record rejection"
 
 
 class ParcelRejectionForm(forms.ModelForm):
@@ -86,6 +86,7 @@ class ParcelRejectionAdmin(admin.ModelAdmin):
     fields = readonly_fields + ["rejected_carats", "rejected_pieces", "total_price_paid"]
 
     search_fields = ["name", "code", "receipt__code", "receipt__entity__name"]
+    list_display = ["__str__", "closed_out"]
 
     def has_add_permission(self, request):
         return False
@@ -102,7 +103,7 @@ class ParcelRejectionAdmin(admin.ModelAdmin):
 class CloseOutReceipt(Receipt):
     class Meta:
         proxy = True
-        verbose_name = "3. View receipts and close out receipt on stone release"
+        verbose_name = "Step 3. View receipts and close out receipt on stone release"
 
 
 @admin.register(CloseOutReceipt)
@@ -110,7 +111,7 @@ class CloseOutReceiptAdmin(admin.ModelAdmin):
     model = CloseOutReceipt
 
     list_filter = ["release_date", "intake_date"]
-
+    list_display = ["__str__", "closed_out", "intake_date", "release_date"]
     search_fields = ["code", "entity__name"]
 
     readonly_fields = ["code", "entity", "intake_by", "intake_date", "release_by", "release_date"]

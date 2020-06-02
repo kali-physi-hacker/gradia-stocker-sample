@@ -21,7 +21,9 @@ class AbstractReceipt(models.Model):
         abstract = True
 
     def closed_out(self):
-        return self.release_by and self.release_date
+        return self.release_by is not None and self.release_date is not None
+
+    closed_out.boolean = True
 
 
 class Receipt(AbstractReceipt):

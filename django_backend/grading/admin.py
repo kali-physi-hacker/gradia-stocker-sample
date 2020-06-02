@@ -9,7 +9,7 @@ from .models import Parcel, Receipt
 class CreateReceipt(Receipt):
     class Meta:
         proxy = True
-        verbose_name = "1. Create receipt for stone intake"
+        verbose_name = "Step 1. Create receipt for stone intake"
 
 
 class ParcelInline(admin.TabularInline):
@@ -44,7 +44,7 @@ class CreateReceiptAdmin(admin.ModelAdmin):
 class ParcelView(Parcel):
     class Meta:
         proxy = True
-        verbose_name = "2. View parcel info"
+        verbose_name = "Step 2. View parcel info"
 
 
 @admin.register(ParcelView)
@@ -68,7 +68,7 @@ class ParcelViewAdmin(admin.ModelAdmin):
 class CloseOutReceipt(Receipt):
     class Meta:
         proxy = True
-        verbose_name = "3. View receipts and close out receipt on stone release"
+        verbose_name = "Step 3. View receipts and close out receipt on stone release"
 
 
 @admin.register(CloseOutReceipt)
@@ -81,6 +81,7 @@ class CloseOutReceiptAdmin(admin.ModelAdmin):
 
     readonly_fields = ["code", "entity", "intake_by", "intake_date", "release_by", "release_date"]
 
+    list_display = ["__str__", "closed_out", "intake_date", "release_date"]
     change_form_template = "grading/admin_item_change_form_with_button.html"
 
     def change_view(self, request, object_id, form_url="", extra_context=None):
