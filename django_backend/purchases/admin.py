@@ -4,7 +4,6 @@ from django import forms
 from django.contrib import admin
 from django.http import HttpResponse
 
-# Register your models here.
 from .models import AuthorizedPersonnel, Parcel, Receipt, Seller
 
 
@@ -120,21 +119,10 @@ class CloseOutReceiptAdmin(admin.ModelAdmin):
 
     def change_view(self, request, object_id, form_url="", extra_context=None):
         extra_context = extra_context or {}
-        extra_context["has_change_permission"] = self.has_change_permission(
+        extra_context["has_close_out_permission"] = self.has_change_permission(
             request, Receipt.objects.get(id=object_id)
         )
         return super().change_view(request, object_id, form_url, extra_context=extra_context)
-
-    def has_add_permission(self, request, obj=None):
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        if obj and not obj.closed_out():
-            return True
-        return False
 
     def response_change(self, request, obj):
         if "_close_out" in request.POST:
@@ -147,3 +135,14 @@ class CloseOutReceiptAdmin(admin.ModelAdmin):
             obj.release_date = datetime.now()
             obj.save()
         return super().response_change(request, obj)
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        if obj and not obj.closed_out():
+            return True
+        return False

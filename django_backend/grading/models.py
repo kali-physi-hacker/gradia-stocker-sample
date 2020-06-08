@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.db import models
 
 from customers.models import Entity
+from ownerships.models import ParcelTransfer
 
 
 class AbstractReceipt(models.Model):
@@ -46,4 +47,6 @@ class AbstractParcel(models.Model):
 
 
 class Parcel(AbstractParcel):
-    pass
+    def current_owner(self):
+        most_recent = ParcelTransfer.most_recent_transfer(self)
+        return most_recent.to_user, "unconfirmed" if most_recent.in_transit() else "confirmed"
