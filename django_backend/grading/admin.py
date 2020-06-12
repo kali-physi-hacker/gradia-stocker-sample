@@ -6,7 +6,7 @@ from django.http import HttpResponse
 
 from ownerships.models import ParcelTransfer
 
-from .models import Parcel, Receipt
+from .models import Parcel, Receipt, SplitParcel
 
 
 class CreateReceipt(Receipt):
@@ -50,8 +50,23 @@ class CreateReceiptAdmin(admin.ModelAdmin):
             if isinstance(instance, Parcel):
                 instance.save()
                 ParcelTransfer.objects.create(
-                    parcel=instance, from_user=request.user, to_user=User.objects.get(username="vault")
+                    item=instance, from_user=request.user, to_user=User.objects.get(username="vault")
                 )
+
+
+class SplitParcelInline(admin.TabularInline):
+    model = SplitParcel
+
+    fields = ["total_carats", "total_pieces", "split_by", "split_date", "current_owner"]
+    readonly_fields = fields
+
+    extra = 0
+
+    def has_add_permission(self, request, parenthing):
+        return False
+
+    def has_delete_permission(self, request, object):
+        return False
 
 
 class VerboseParcel(Parcel):
@@ -101,6 +116,7 @@ confirm_parcel_or_return_to_vault.allow_tags = True
 @admin.register(VerboseParcel)
 class VerboseParcelAdmin(admin.ModelAdmin):
     model = VerboseParcel
+    inlines = [SplitParcelInline]
 
     readonly_fields = ["receipt", "code", "total_carats", "total_pieces", "current_owner"]
 
@@ -153,6 +169,23 @@ class VerboseParcelAdmin(admin.ModelAdmin):
         return True
 
 
+class ReadOnlyParcelInline(admin.TabularInline):
+    model = Parcel
+    readonly_fields = ["code", "total_carats", "total_pieces"]
+    fields = ["code", "total_carats", "total_pieces"]
+
+    extra = 0
+
+    def has_add_permission(self, request, parent):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
 class CloseOutReceipt(Receipt):
     class Meta:
         proxy = True
@@ -171,6 +204,8 @@ class CloseOutReceiptAdmin(admin.ModelAdmin):
 
     list_display = ["__str__", "closed_out", "intake_date", "release_date"]
     change_form_template = "grading/admin_item_change_form_with_button.html"
+
+    inlines = [ReadOnlyParcelInline]
 
     def change_view(self, request, object_id, form_url="", extra_context=None):
         extra_context = extra_context or {}
@@ -198,3 +233,27 @@ class CloseOutReceiptAdmin(admin.ModelAdmin):
         if obj and not obj.closed_out():
             return True
         return False
+
+
+@admin.register(SplitParcel)
+class SplitParcelAdmin(admin.ModelAdmin):
+    model = SplitParcel
+
+    readonly_fields = ["split_by", "split_date"]
+    fields = ["parcel", "split_parcel_code", "total_carats", "total_pieces"] + readonly_fields
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_view_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request):
+        return True
+
+    def save_model(self, request, obj, form, change):
+        obj.split_by = request.user
+        obj.save()

@@ -2,8 +2,7 @@ from django.contrib.auth.models import User
 from django.db import models
 
 
-class ParcelTransfer(models.Model):
-    parcel = models.ForeignKey("grading.Parcel", on_delete=models.PROTECT)
+class AbstractTransfer(models.Model):
     from_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="gave_parcels")
     initiated_date = models.DateTimeField(auto_now_add=True)
     to_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="received_parcels")
@@ -11,16 +10,13 @@ class ParcelTransfer(models.Model):
     expired = models.BooleanField(default=False)
     remarks = models.TextField(blank=True)
 
-    def __str__(self):
-        return f"{self.parcel}: {self.from_user} -> {self.to_user}"
-
     def in_transit(self):
         return self.confirmed_date is None
 
     @classmethod
-    def most_recent_transfer(cls, parcel):
+    def most_recent_transfer(cls, item):
         try:
-            return cls.objects.filter(parcel=parcel).latest("initiated_date")
+            return cls.objects.filter(item=item).latest("initiated_date")
         except cls.DoesNotExist:
             return None
 
@@ -32,16 +28,27 @@ class ParcelTransfer(models.Model):
             return None
         if latest_holding.expired:
             return None
-        return latest_holding.parcel
+        return latest_holding.item
 
     @classmethod
-    def initiate_transfer(cls, parcel, from_user, to_user):
-        last_transfer = cls.most_recent_transfer(parcel)
+    def initiate_transfer(cls, item, from_user, to_user):
+        last_transfer = cls.most_recent_transfer(item)
         assert last_transfer.to_user == from_user, "you are not the current owner"
         assert last_transfer.to_user != to_user, "you are transferring to yourself"
-        assert not last_transfer.expired, "your ownership is stale- you may not currently own this parcel"
+        assert not last_transfer.expired, "your ownership is stale- you may not currently own this item"
         assert not last_transfer.in_transit(), "have not confirmed transfer yet"
 
-        cls.objects.create(parcel=last_transfer.parcel, from_user=from_user, to_user=to_user)
-        parcel.expired = True
-        parcel.save()
+        cls.objects.create(item=last_transfer.item, from_user=from_user, to_user=to_user)
+        last_transfer.expired = True
+        last_transfer.save()
+
+    def __str__(self):
+        return f"{self.item}: {self.from_user} -> {self.to_user}"
+
+
+class ParcelTransfer(AbstractTransfer):
+    item = models.ForeignKey("grading.Parcel", on_delete=models.PROTECT)
+
+
+class SplitParcelTransfer(AbstractTransfer):
+    item = models.ForeignKey("grading.SplitParcel", on_delete=models.PROTECT)
