@@ -17,7 +17,7 @@ class CreateReceipt(Receipt):
 
 class ParcelInline(admin.TabularInline):
     model = Parcel
-    fields = ["name", "code", "total_carats", "total_pieces"]
+    fields = ["code", "total_carats", "total_pieces"]
 
     extra = 1
 
@@ -57,38 +57,64 @@ class CreateReceiptAdmin(admin.ModelAdmin):
 class VerboseParcel(Parcel):
     class Meta:
         proxy = True
-        verbose_name = "Step 2. View parcel info and return parcels to vault"
+        verbose_name = "Step 2. View parcels, confirm received parcels, return parcels to vault"
 
 
 class ParcelOwnerFilter(admin.SimpleListFilter):
     title = "current owner"
     parameter_name = "owner"
+    default_value = "me"
 
     def lookups(self, request, model_admin):
-        return (("me", "owned by me"), ("vault", "owned by the vault"), ("all", "all"))
+        return (("me", "Owned by me"), ("vault", "Owned by the vault"), ("all", "All"))
+
+    def choices(self, changelist):
+        # override choices so that we don't have initial 'All'
+        value = self.value() or self.default_value
+        for lookup, title in self.lookup_choices:
+            yield {
+                "selected": value == str(lookup),
+                "query_string": changelist.get_query_string({self.parameter_name: lookup}),
+                "display": title,
+            }
 
     def queryset(self, request, queryset):
-        if self.value() == "me":
+        if self.value() is None or self.value() == "me":
             parcel = ParcelTransfer.get_current_holding(request.user)
             parcel_id = parcel.id if parcel else -1
             return queryset.filter(id=parcel_id)
         if self.value == "vault":
-            parcels = ParcelTransfer.objects.filter(to_user__username="vault")
+            parcels = ParcelTransfer.objects.filter(to_user__username="vault", expired=False)
             parcel_ids = (p.id for p in parcels)
             return queryset.filter(id__in=parcel_ids)
         if self.value == "__all__":
             return queryset
 
 
+def confirm_parcel_or_return_to_vault(parcel):
+    return "Go to Actions"
+
+
+confirm_parcel_or_return_to_vault.allow_tags = True
+
+
 @admin.register(VerboseParcel)
 class VerboseParcelAdmin(admin.ModelAdmin):
     model = VerboseParcel
 
-    readonly_fields = ["receipt", "name", "code", "total_carats", "total_pieces", "current_owner"]
+    readonly_fields = ["receipt", "code", "total_carats", "total_pieces", "current_owner"]
 
-    search_fields = ["name", "code", "receipt__code", "receipt__entity__name"]
+    search_fields = ["code", "receipt__code", "receipt__entity__name"]
     list_filter = [ParcelOwnerFilter]
-    list_display = ["__str__", "current_owner"]
+    list_display = [
+        "code",
+        "receipt",
+        "total_carats",
+        "total_pieces",
+        "current_owner",
+        confirm_parcel_or_return_to_vault,
+    ]
+    list_display_links = [confirm_parcel_or_return_to_vault]
 
     change_form_template = "grading/admin_item_change_form_with_button.html"
 
@@ -130,7 +156,7 @@ class VerboseParcelAdmin(admin.ModelAdmin):
 class CloseOutReceipt(Receipt):
     class Meta:
         proxy = True
-        verbose_name = "Step 3. View receipts and close out receipt on stone release"
+        verbose_name = "Step 3. View receipts, close out receipt on stone release"
 
 
 @admin.register(CloseOutReceipt)

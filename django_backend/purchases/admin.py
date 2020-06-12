@@ -28,7 +28,7 @@ class CreateReceipt(Receipt):
 
 class ParcelInline(admin.TabularInline):
     model = Parcel
-    fields = ["name", "code", "total_carats", "total_pieces", "reference_price_per_carat"]
+    fields = ["code", "total_carats", "total_pieces", "reference_price_per_carat"]
 
     extra = 1
 
@@ -81,10 +81,10 @@ class ParcelRejectionAdmin(admin.ModelAdmin):
     model = ParcelRejection
     form = ParcelRejectionForm
 
-    readonly_fields = ["name", "code", "total_carats", "total_pieces", "reference_price_per_carat"]
+    readonly_fields = ["code", "total_carats", "total_pieces", "reference_price_per_carat"]
     fields = readonly_fields + ["rejected_carats", "rejected_pieces", "total_price_paid"]
 
-    search_fields = ["name", "code", "receipt__code", "receipt__entity__name"]
+    search_fields = ["code", "receipt__code", "receipt__entity__name"]
     list_display = ["__str__", "closed_out"]
 
     def has_add_permission(self, request):

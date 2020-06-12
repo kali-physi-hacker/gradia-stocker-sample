@@ -33,14 +33,13 @@ class Receipt(AbstractReceipt):
 
 class AbstractParcel(models.Model):
     receipt = models.ForeignKey(Receipt, on_delete=models.PROTECT)
-    name = models.CharField(max_length=15)
     code = models.CharField(max_length=15)
 
     total_carats = models.DecimalField(max_digits=5, decimal_places=3)
     total_pieces = models.IntegerField()
 
     def __str__(self):
-        return f"parcel {self.name} ({self.total_carats}ct, {self.total_pieces}pcs, {self.receipt})"
+        return f"parcel {self.code} ({self.total_carats}ct, {self.total_pieces}pcs, {self.receipt})"
 
     class Meta:
         abstract = True
