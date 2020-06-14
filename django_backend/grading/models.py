@@ -2,7 +2,17 @@ from django.contrib.auth.models import User
 from django.db import models
 
 from customers.models import Entity
-from ownerships.models import ParcelTransfer, SplitParcelTransfer
+from ownerships.models import ParcelTransfer
+
+
+class Split(models.Model):
+    original_parcel = models.OneToOneField("Parcel", on_delete=models.PROTECT, primary_key=True)
+
+    split_by = models.ForeignKey(User, on_delete=models.PROTECT)
+    split_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Split of {self.original_parcel}"
 
 
 class AbstractReceipt(models.Model):
@@ -46,33 +56,10 @@ class AbstractParcel(models.Model):
 
 
 class Parcel(AbstractParcel):
+    split_from = models.ForeignKey(Split, on_delete=models.PROTECT, blank=True, null=True)
+
     def current_owner(self):
         most_recent = ParcelTransfer.most_recent_transfer(self)
-        ownership = [most_recent.to_user]
-        if most_recent.in_transit():
-            ownership.append("unconfirmed")
-        if most_recent.expired:
-            ownership.append("expired")
-        if len(ownership) == 1:
-            ownership.append("confirmed")
-
-        return ownership
-
-
-class SplitParcel(models.Model):
-    parcel = models.ForeignKey(Parcel, on_delete=models.PROTECT)
-    split_parcel_code = models.CharField(max_length=15)
-    total_carats = models.DecimalField(max_digits=5, decimal_places=3)
-    total_pieces = models.IntegerField()
-
-    split_by = models.ForeignKey(User, on_delete=models.PROTECT)
-    split_date = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.split_parcel_code}"
-
-    def current_owner(self):
-        most_recent = SplitParcelTransfer.most_recent_transfer(self)
         ownership = [most_recent.to_user]
         if most_recent.in_transit():
             ownership.append("unconfirmed")
@@ -111,3 +98,5 @@ class Stone(models.Model):
     grader_2_inclusion = models.TextField(blank=True)
     grader_3_inclusion = models.TextField(blank=True)
     rejection_remarks = models.TextField(blank=True)
+
+    split_from = models.ForeignKey(Split, on_delete=models.PROTECT, blank=True, null=True)

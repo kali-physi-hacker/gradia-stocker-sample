@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.db import models
 
 
-class AbstractTransfer(models.Model):
+class AbstractItemTransfer(models.Model):
     from_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="gave_parcels")
     initiated_date = models.DateTimeField(auto_now_add=True)
     to_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="received_parcels")
@@ -46,9 +46,5 @@ class AbstractTransfer(models.Model):
         return f"{self.item}: {self.from_user} -> {self.to_user}"
 
 
-class ParcelTransfer(AbstractTransfer):
+class ParcelTransfer(AbstractItemTransfer):
     item = models.ForeignKey("grading.Parcel", on_delete=models.PROTECT)
-
-
-class SplitParcelTransfer(AbstractTransfer):
-    item = models.ForeignKey("grading.SplitParcel", on_delete=models.PROTECT)

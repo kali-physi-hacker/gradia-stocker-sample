@@ -6,7 +6,7 @@ from django.http import HttpResponse
 
 from ownerships.models import ParcelTransfer
 
-from .models import Parcel, Receipt, SplitParcel, Stone
+from .models import Parcel, Receipt, Stone
 
 
 class CreateReceipt(Receipt):
@@ -57,21 +57,6 @@ class CreateReceiptAdmin(admin.ModelAdmin):
                 )
 
 
-class SplitParcelInline(admin.TabularInline):
-    model = SplitParcel
-
-    fields = ["total_carats", "total_pieces", "split_by", "split_date", "current_owner"]
-    readonly_fields = fields
-
-    extra = 0
-
-    def has_add_permission(self, request, parenthing):
-        return False
-
-    def has_delete_permission(self, request, object):
-        return False
-
-
 class VerboseParcel(Parcel):
     class Meta:
         proxy = True
@@ -119,7 +104,6 @@ confirm_parcel_or_return_to_vault.allow_tags = True
 @admin.register(VerboseParcel)
 class VerboseParcelAdmin(admin.ModelAdmin):
     model = VerboseParcel
-    inlines = [SplitParcelInline]
 
     readonly_fields = ["receipt", "code", "total_carats", "total_pieces", "current_owner"]
 
@@ -236,30 +220,6 @@ class CloseOutReceiptAdmin(admin.ModelAdmin):
         if obj and not obj.closed_out():
             return True
         return False
-
-
-@admin.register(SplitParcel)
-class SplitParcelAdmin(admin.ModelAdmin):
-    model = SplitParcel
-
-    readonly_fields = ["split_by", "split_date"]
-    fields = ["parcel", "split_parcel_code", "total_carats", "total_pieces"] + readonly_fields
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        return False
-
-    def has_view_permission(self, request, obj=None):
-        return False
-
-    def has_add_permission(self, request):
-        return True
-
-    def save_model(self, request, obj, form, change):
-        obj.split_by = request.user
-        obj.save()
 
 
 @admin.register(Stone)

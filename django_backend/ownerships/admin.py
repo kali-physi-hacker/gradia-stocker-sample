@@ -3,7 +3,7 @@ from datetime import datetime
 from django.contrib import admin
 from django.contrib.auth.models import User
 
-from .models import ParcelTransfer, SplitParcelTransfer
+from .models import ParcelTransfer
 
 
 class ParcelConfirmation(ParcelTransfer):
@@ -52,18 +52,6 @@ class ParcelConfirmationAdmin(admin.ModelAdmin):
         return False
 
 
-class SplitParcelTransferConfirmation(SplitParcelTransfer):
-    class Meta:
-        proxy = True
-        verbose_name = "[tmp] Confirm carats and pieces in received split parcel"
-
-
-@admin.register(SplitParcelTransferConfirmation)
-class ParcelTransferToVaultAdmin(admin.ModelAdmin):
-    model = SplitParcelTransferConfirmation
-    model_transfer = SplitParcelTransfer
-
-
 class ParcelTransferFromVault(ParcelTransfer):
     class Meta:
         proxy = True
@@ -93,19 +81,6 @@ class ParcelTransferFromVaultAdmin(admin.ModelAdmin):
     def has_view_permission(self, request, obj=None):
         return False
 
-    def save_model(self, request, obj, form, change):
-        obj.from_user = User.objects.get(username="vault")
-        obj.save()
-
-
-class SplitParcelTransferFromVault(SplitParcelTransfer):
-    class Meta:
-        proxy = True
-        verbose_name = "[admin] Initiate withdraw of split parcels from vault"
-
-
-@admin.register(SplitParcelTransferFromVault)
-class SplitParcelTransferFromVaultAdmin(ParcelTransferFromVaultAdmin):
     def save_model(self, request, obj, form, change):
         obj.from_user = User.objects.get(username="vault")
         obj.save()
