@@ -7,9 +7,10 @@
 - take out user / received by option
 
 - split -> bigger ownership gets expired
-- parcel admin view has split parcels in it
-- new stone entry can be linked to parcel or splitparcel
 
+- generate stone ID
+- link parcel or split parcel to stone
+- stone table view
 
 - deal with permission for creating split parcels
 
@@ -20,3 +21,4 @@
 
 ### done
 - in the transfer thing. default to only showing their stuff
+- parcel admin view has split parcels in it

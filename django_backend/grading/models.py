@@ -82,3 +82,32 @@ class SplitParcel(models.Model):
             ownership.append("confirmed")
 
         return ownership
+
+
+class Stone(models.Model):
+    data_entry_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="entered_data_for_stone")
+    grader_1 = models.ForeignKey(User, on_delete=models.PROTECT, related_name="grader_1_for_stone")
+    grader_2 = models.ForeignKey(
+        User, on_delete=models.PROTECT, related_name="grader_2_for_stone", null=True, blank=True
+    )
+    grader_3 = models.ForeignKey(
+        User, on_delete=models.PROTECT, related_name="grader_3_for_stone", null=True, blank=True
+    )
+    sequence_number = models.IntegerField()
+    stone_id = models.CharField(max_length=15)
+    carats = models.DecimalField(max_digits=5, decimal_places=3)
+    color = models.CharField(max_length=1)
+    grader_1_color = models.CharField(max_length=1, blank=True)
+    grader_2_color = models.CharField(max_length=1, blank=True)
+    grader_3_color = models.CharField(max_length=1, blank=True)
+    clarity = models.CharField(max_length=4)
+    grader_1_clarity = models.CharField(max_length=4, blank=True)
+    grader_2_clarity = models.CharField(max_length=4, blank=True)
+    grader_3_clarity = models.CharField(max_length=4, blank=True)
+    fluo = models.CharField(max_length=4)
+    culet = models.CharField(max_length=2)
+    inclusion_remarks = models.TextField(blank=True)
+    grader_1_inclusion = models.TextField(blank=True)
+    grader_2_inclusion = models.TextField(blank=True)
+    grader_3_inclusion = models.TextField(blank=True)
+    rejection_remarks = models.TextField(blank=True)

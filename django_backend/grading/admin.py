@@ -6,7 +6,7 @@ from django.http import HttpResponse
 
 from ownerships.models import ParcelTransfer
 
-from .models import Parcel, Receipt, SplitParcel
+from .models import Parcel, Receipt, SplitParcel, Stone
 
 
 class CreateReceipt(Receipt):
@@ -20,6 +20,9 @@ class ParcelInline(admin.TabularInline):
     fields = ["code", "total_carats", "total_pieces"]
 
     extra = 1
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 @admin.register(CreateReceipt)
@@ -256,4 +259,50 @@ class SplitParcelAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         obj.split_by = request.user
+        obj.save()
+
+
+@admin.register(Stone)
+class StoneAdmin(admin.ModelAdmin):
+    model = Stone
+
+    readonly_fields = ["data_entry_user", "stone_id"]
+    fields = readonly_fields + [
+        "grader_1",
+        "grader_2",
+        "grader_3",
+        "sequence_number",
+        "carats",
+        "color",
+        "grader_1_color",
+        "grader_2_color",
+        "grader_3_color",
+        "clarity",
+        "grader_1_clarity",
+        "grader_2_clarity",
+        "grader_3_clarity",
+        "fluo",
+        "culet",
+        "inclusion_remarks",
+        "grader_1_inclusion",
+        "grader_2_inclusion",
+        "grader_3_inclusion",
+        "rejection_remarks",
+    ]
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_view_permission(self, request, obj=None):
+        return True
+
+    def has_add_permission(self, request):
+        return True
+
+    def save_model(self, request, obj, form, change):
+        obj.data_entry_user = request.user
+        obj.stone_id = "G124081208"
         obj.save()
