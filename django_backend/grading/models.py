@@ -134,3 +134,6 @@ class Stone(models.Model):
 
     class Meta:
         verbose_name = "Stone- Check Inventory"
+
+    def __str__(self):
+        return f"{self.stone_id} ({self.carats}ct {self.color} {self.clarity})"
