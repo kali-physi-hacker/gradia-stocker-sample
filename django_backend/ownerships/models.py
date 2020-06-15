@@ -48,3 +48,7 @@ class AbstractItemTransfer(models.Model):
 
 class ParcelTransfer(AbstractItemTransfer):
     item = models.ForeignKey("grading.Parcel", on_delete=models.PROTECT)
+
+
+class StoneTransfer(AbstractItemTransfer):
+    item = models.ForeignKey("grading.Stone", on_delete=models.PROTECT)

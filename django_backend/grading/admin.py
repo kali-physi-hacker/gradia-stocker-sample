@@ -1,9 +1,11 @@
+from datetime import datetime
+
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.http import HttpResponse
 from django.utils.html import format_html
 
-from ownerships.models import ParcelTransfer
+from ownerships.models import ParcelTransfer, StoneTransfer
 
 from .forms import StoneForm
 from .models import Parcel, Receipt, Split, Stone
@@ -52,14 +54,31 @@ class SplitAdmin(admin.ModelAdmin):
 
     def save_formset(self, request, form, formset, change):
         instances = formset.save(commit=False)
+        parcel = Parcel.objects.get(pk=request.POST["original_parcel"])
+        split = Split.objects.get(original_parcel=parcel)
         for instance in instances:
             if isinstance(instance, Parcel):
-                parcel = request.POST["original_parcel"]
-                instance.receipt = Parcel.objects.get(pk=parcel).receipt
+                instance.receipt = parcel.receipt
+                instance.split_from = split
                 instance.save()
                 ParcelTransfer.objects.create(
-                    item=instance, from_user=request.user, to_user=User.objects.get(username="vault")
+                    item=instance,
+                    from_user=User.objects.get(username="split"),
+                    to_user=request.user,
+                    confirmed_date=datetime.now(),
                 )
+            if isinstance(instance, Stone):
+                instance.split_from = split
+                instance.save()
+                StoneTransfer.objects.create(
+                    item=instance,
+                    from_user=User.objects.get(username="split"),
+                    to_user=request.user,
+                    confirmed_date=datetime.now(),
+                )
+        parent_transfer = ParcelTransfer.most_recent_transfer(parcel)
+        parent_transfer.fresh = False
+        parent_transfer.save()
 
     def has_delete_permission(self, request, obj=None):
         return False
