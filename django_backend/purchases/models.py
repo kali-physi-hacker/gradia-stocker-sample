@@ -23,6 +23,7 @@ class Receipt(AbstractReceipt):
 
 class Parcel(AbstractParcel):
     receipt = models.ForeignKey(Receipt, on_delete=models.PROTECT)
+    code = models.CharField(max_length=15)
 
     rejected_carats = models.DecimalField(max_digits=5, decimal_places=3, null=True, blank=True)
     rejected_pieces = models.IntegerField(null=True, blank=True)

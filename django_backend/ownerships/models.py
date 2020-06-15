@@ -7,7 +7,7 @@ class AbstractItemTransfer(models.Model):
     initiated_date = models.DateTimeField(auto_now_add=True)
     to_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="received_parcels")
     confirmed_date = models.DateTimeField(blank=True, null=True)
-    expired = models.BooleanField(default=False)
+    fresh = models.BooleanField(default=True)
     remarks = models.TextField(blank=True)
 
     def in_transit(self):
@@ -26,7 +26,7 @@ class AbstractItemTransfer(models.Model):
             latest_holding = cls.objects.filter(to_user=user).latest("initiated_date")
         except cls.DoesNotExist:
             return None
-        if latest_holding.expired:
+        if not latest_holding.fresh:
             return None
         return latest_holding.item
 
@@ -35,11 +35,11 @@ class AbstractItemTransfer(models.Model):
         last_transfer = cls.most_recent_transfer(item)
         assert last_transfer.to_user == from_user, "you are not the current owner"
         assert last_transfer.to_user != to_user, "you are transferring to yourself"
-        assert not last_transfer.expired, "your ownership is stale- you may not currently own this item"
+        assert last_transfer.fresh, "your ownership is stale- you may not currently own this item"
         assert not last_transfer.in_transit(), "have not confirmed transfer yet"
 
         cls.objects.create(item=last_transfer.item, from_user=from_user, to_user=to_user)
-        last_transfer.expired = True
+        last_transfer.fresh = False
         last_transfer.save()
 
     def __str__(self):

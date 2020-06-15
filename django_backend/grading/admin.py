@@ -1,66 +1,71 @@
-from datetime import datetime
-
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.http import HttpResponse
+from django.utils.html import format_html
 
 from ownerships.models import ParcelTransfer
 
-from .models import Parcel, Receipt, Stone
+from .forms import StoneForm
+from .models import Parcel, Receipt, Split, Stone
 
 
-class CreateReceipt(Receipt):
-    class Meta:
-        proxy = True
-        verbose_name = "Step 1. Create receipt for stone intake"
-
-
-class ParcelInline(admin.TabularInline):
-    model = Parcel
-    fields = ["code", "total_carats", "total_pieces"]
-
-    extra = 1
+class StoneInline(admin.TabularInline):
+    model = Stone
+    form = StoneForm
 
     def has_delete_permission(self, request, obj=None):
         return False
-
-
-@admin.register(CreateReceipt)
-class CreateReceiptAdmin(admin.ModelAdmin):
-    model = CreateReceipt
-
-    readonly_fields = ["intake_by", "intake_date", "release_by", "release_date"]
-
-    inlines = [ParcelInline]
 
     def has_change_permission(self, request, obj=None):
         return False
 
+    extra = 0
+    max_number = 50
+
+
+class ParcelInline(admin.TabularInline):
+    model = Parcel
+
+    fields = [
+        "get_parcel_with_html_link",
+        "gradia_parcel_code",
+        "customer_parcel_code",
+        "total_carats",
+        "total_pieces",
+    ]
+    readonly_fields = ["get_parcel_with_html_link"]
+
+    extra = 0
+    max_number = 10
+
     def has_delete_permission(self, request, obj=None):
         return False
 
-    def has_view_permission(self, request, obj=None):
+    def has_change_permission(self, request, obj=None):
         return False
 
-    def save_model(self, request, obj, form, change):
-        obj.intake_by = request.user
-        obj.save()
+
+@admin.register(Split)
+class SplitAdmin(admin.ModelAdmin):
+    model = Split
+    inlines = [ParcelInline, StoneInline]
 
     def save_formset(self, request, form, formset, change):
         instances = formset.save(commit=False)
-
         for instance in instances:
             if isinstance(instance, Parcel):
+                parcel = request.POST["original_parcel"]
+                instance.receipt = Parcel.objects.get(pk=parcel).receipt
                 instance.save()
                 ParcelTransfer.objects.create(
                     item=instance, from_user=request.user, to_user=User.objects.get(username="vault")
                 )
 
+    def has_delete_permission(self, request, obj=None):
+        return False
 
-class VerboseParcel(Parcel):
-    class Meta:
-        proxy = True
-        verbose_name = "Step 2. View parcels, confirm received parcels, return parcels to vault"
+    def has_change_permission(self, request, obj=None):
+        return False
 
 
 class ParcelOwnerFilter(admin.SimpleListFilter):
@@ -87,44 +92,65 @@ class ParcelOwnerFilter(admin.SimpleListFilter):
             parcel_id = parcel.id if parcel else -1
             return queryset.filter(id=parcel_id)
         if self.value == "vault":
-            parcels = ParcelTransfer.objects.filter(to_user__username="vault", expired=False)
+            parcels = ParcelTransfer.objects.filter(to_user__username="vault", fresh=True)
             parcel_ids = (p.id for p in parcels)
             return queryset.filter(id__in=parcel_ids)
         if self.value == "__all__":
             return queryset
 
 
-def confirm_parcel_or_return_to_vault(parcel):
-    return "Go to Actions"
+def make_parcel_actions(user):
+    def actions(parcel):
+        transfer = ParcelTransfer.most_recent_transfer(parcel)
+        if transfer.fresh:
+            if transfer.to_user == user:
+                if transfer.confirmed_date is None:
+                    return format_html(f"<a href='/'>Confirm Stones</a>")
+                else:
+                    return format_html(f"<a href='/'>Return to Vault</a>")
+            if transfer.to_user.username == "vault" and user.username in ["anthjony", "admin", "gary"]:
+                return format_html(f"<a href='/'>Confirm Stones for Vault</a>")
+        return "-"
+
+    return actions
 
 
-confirm_parcel_or_return_to_vault.allow_tags = True
+@admin.register(Parcel)
+class ParcelAdmin(admin.ModelAdmin):
+    model = Parcel
 
-
-@admin.register(VerboseParcel)
-class VerboseParcelAdmin(admin.ModelAdmin):
-    model = VerboseParcel
-
-    readonly_fields = ["receipt", "code", "total_carats", "total_pieces", "current_owner"]
-
-    search_fields = ["code", "receipt__code", "receipt__entity__name"]
-    list_filter = [ParcelOwnerFilter]
-    list_display = [
-        "code",
+    readonly_fields = [
+        "split_from",
+        "gradia_parcel_code",
+        "customer_parcel_code",
         "receipt",
         "total_carats",
         "total_pieces",
-        "current_owner",
-        confirm_parcel_or_return_to_vault,
+        "current_location",
     ]
-    list_display_links = [confirm_parcel_or_return_to_vault]
+
+    search_fields = ["gradia_parcel_code", "customer_parcel_code", "receipt__code", "receipt__entity__name"]
+    list_filter = [ParcelOwnerFilter]
+    list_display_links = ["gradia_parcel_code"]
 
     change_form_template = "grading/admin_item_change_form_with_button.html"
+
+    def get_list_display(self, request):
+        return [
+            "gradia_parcel_code",
+            "customer_parcel_code",
+            "get_receipt_with_html_link",
+            "total_carats",
+            "total_pieces",
+            "finished_basic_grading",
+            "current_location",
+            make_parcel_actions(request.user),
+        ]
 
     def change_view(self, request, object_id, form_url="", extra_context=None):
         extra_context = extra_context or {}
         parcel = Parcel.objects.get(id=object_id)
-        current_owner, confirmed = parcel.current_owner()
+        current_owner, confirmed = parcel.current_location()
         if request.user == current_owner and confirmed:
             extra_context["can_return_to_vault"] = True
         return super().change_view(request, object_id, form_url, extra_context=extra_context)
@@ -149,77 +175,59 @@ class VerboseParcelAdmin(admin.ModelAdmin):
         return False
 
     def has_change_permission(self, request, obj=None):
-        if obj:
-            current_owner, confirmed = obj.current_owner()
-            if request.user == current_owner and confirmed:
-                return True
-        return True
-
-
-class ReadOnlyParcelInline(admin.TabularInline):
-    model = Parcel
-    readonly_fields = ["code", "total_carats", "total_pieces"]
-    fields = ["code", "total_carats", "total_pieces"]
-
-    extra = 0
-
-    def has_add_permission(self, request, parent):
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        return False
-
-    def has_change_permission(self, request, obj=None):
         return False
 
 
-class CloseOutReceipt(Receipt):
-    class Meta:
-        proxy = True
-        verbose_name = "Step 3. View receipts, close out receipt on stone release"
+def make_receipt_actions(user):
+    def actions(parcel):
+        # in the future might have to check user permissions here
+        if not parcel.closed_out():
+            return format_html(f"<a href='/'>Close Out</a>")
+        return "-"
+
+    return actions
 
 
-@admin.register(CloseOutReceipt)
-class CloseOutReceiptAdmin(admin.ModelAdmin):
-    model = CloseOutReceipt
+@admin.register(Receipt)
+class ReceiptAdmin(admin.ModelAdmin):
+    model = Receipt
 
     list_filter = ["release_date", "intake_date"]
 
     search_fields = ["code", "entity__name"]
 
-    readonly_fields = ["code", "entity", "intake_by", "intake_date", "release_by", "release_date"]
+    readonly_fields = ["intake_by", "intake_date", "release_by", "release_date"]
+    # readonly_fields = ["code", "entity", "intake_by", "intake_date", "release_by", "release_date"]
 
-    list_display = ["__str__", "closed_out", "intake_date", "release_date"]
-    change_form_template = "grading/admin_item_change_form_with_button.html"
+    inlines = [ParcelInline]
 
-    inlines = [ReadOnlyParcelInline]
-
-    def change_view(self, request, object_id, form_url="", extra_context=None):
-        extra_context = extra_context or {}
-        extra_context["has_close_out_permission"] = self.has_change_permission(
-            request, Receipt.objects.get(id=object_id)
-        )
-        return super().change_view(request, object_id, form_url, extra_context=extra_context)
-
-    def response_change(self, request, obj):
-        if "_close_out" in request.POST:
-            if obj.closed_out():
-                return HttpResponse("Error: This receipt has already been closed out")
-            obj.release_by = request.user
-            obj.release_date = datetime.now()
-            obj.save()
-        return super().response_change(request, obj)
+    def get_list_display(self, request):
+        return ["__str__", "intake_date", "release_date", "closed_out", make_receipt_actions(request.user)]
 
     def has_add_permission(self, request, obj=None):
-        return False
+        return True
+
+    def has_view_permission(self, request, obj=None):
+        return True
 
     def has_delete_permission(self, request, obj=None):
         return False
 
     def has_change_permission(self, request, obj=None):
-        if obj and not obj.closed_out():
-            return True
         return False
+
+    def save_model(self, request, obj, form, change):
+        obj.intake_by = request.user
+        obj.save()
+
+    def save_formset(self, request, form, formset, change):
+        instances = formset.save(commit=False)
+        for instance in instances:
+            if isinstance(instance, Parcel):
+                instance.save()
+                ParcelTransfer.objects.create(
+                    item=instance, from_user=request.user, to_user=User.objects.get(username="vault")
+                )
 
 
 @admin.register(Stone)
@@ -260,7 +268,7 @@ class StoneAdmin(admin.ModelAdmin):
         return True
 
     def has_add_permission(self, request):
-        return True
+        return False
 
     def save_model(self, request, obj, form, change):
         obj.data_entry_user = request.user

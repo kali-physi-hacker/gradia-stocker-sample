@@ -1,5 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
+from django.urls import reverse
+from django.utils.html import format_html
 
 from customers.models import Entity
 from ownerships.models import ParcelTransfer
@@ -13,6 +15,9 @@ class Split(models.Model):
 
     def __str__(self):
         return f"Split of {self.original_parcel}"
+
+    class Meta:
+        verbose_name = "Split parcel into smaller parcels or individual stones"
 
 
 class AbstractReceipt(models.Model):
@@ -38,18 +43,18 @@ class AbstractReceipt(models.Model):
 
 
 class Receipt(AbstractReceipt):
-    pass
+    class Meta:
+        verbose_name = "Customer Receipt"
 
 
 class AbstractParcel(models.Model):
     receipt = models.ForeignKey(Receipt, on_delete=models.PROTECT)
-    code = models.CharField(max_length=15)
 
     total_carats = models.DecimalField(max_digits=5, decimal_places=3)
     total_pieces = models.IntegerField()
 
     def __str__(self):
-        return f"parcel {self.code} ({self.total_carats}ct, {self.total_pieces}pcs, {self.receipt})"
+        return f"parcel {self.gradia_parcel_code} ({self.total_carats}ct, {self.total_pieces}pcs, {self.receipt})"
 
     class Meta:
         abstract = True
@@ -57,18 +62,44 @@ class AbstractParcel(models.Model):
 
 class Parcel(AbstractParcel):
     split_from = models.ForeignKey(Split, on_delete=models.PROTECT, blank=True, null=True)
+    gradia_parcel_code = models.CharField(max_length=15)
+    customer_parcel_code = models.CharField(max_length=15)
 
-    def current_owner(self):
+    def current_location(self):
         most_recent = ParcelTransfer.most_recent_transfer(self)
-        ownership = [most_recent.to_user]
+        location = [most_recent.to_user]
         if most_recent.in_transit():
-            ownership.append("unconfirmed")
-        if most_recent.expired:
-            ownership.append("expired")
-        if len(ownership) == 1:
-            ownership.append("confirmed")
+            location.append("unconfirmed")
+        if not most_recent.fresh:
+            location.append("expired")
+        if len(location) == 1:
+            location.append("confirmed")
 
-        return ownership
+        return location
+
+    def finished_basic_grading(self):
+        if Stone.objects.filter(split_from__parcel=self).count() == self.total_pieces:
+            return True
+        return False
+
+    finished_basic_grading.boolean = True
+
+    def get_receipt_with_html_link(self):
+        link = reverse("admin:grading_receipt_change", args=[self.receipt.id])
+        return format_html(f'<a href="{link}">{self.receipt}</a>')
+
+    get_receipt_with_html_link.short_description = "receipt"
+    get_receipt_with_html_link.admin_order_field = "receipt"
+
+    def get_parcel_with_html_link(self):
+        link = reverse("admin:grading_parcel_change", args=[self.id])
+        return format_html(f'<a href="{link}">{self}</a>')
+
+    get_parcel_with_html_link.short_description = "parcel"
+    get_parcel_with_html_link.admin_order_field = "id"
+
+    class Meta:
+        verbose_name = "Parcel- Check Inventory"
 
 
 class Stone(models.Model):
@@ -100,3 +131,6 @@ class Stone(models.Model):
     rejection_remarks = models.TextField(blank=True)
 
     split_from = models.ForeignKey(Split, on_delete=models.PROTECT, blank=True, null=True)
+
+    class Meta:
+        verbose_name = "Stone- Check Inventory"
