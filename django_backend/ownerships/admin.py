@@ -15,8 +15,8 @@ class ParcelTransferFromVaultAdmin(admin.ModelAdmin):
     model = ParcelTransferFromVault
 
     readonly_fields = ["from_user", "initiated_date", "confirmed_date", "fresh"]
-    fields = ["item"] + readonly_fields + ["remarks"]
-    list_display = ["item"] + readonly_fields
+    fields = ["item", "from_user", "initiated_date", "to_user", "confirmed_date", "remarks", "fresh"]
+    list_display = fields
     list_filter = ["fresh", "from_user", "to_user", "initiated_date", "confirmed_date"]
 
     def has_add_permission(self, request):

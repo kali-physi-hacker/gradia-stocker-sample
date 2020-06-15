@@ -76,9 +76,12 @@ class SplitAdmin(admin.ModelAdmin):
                     to_user=request.user,
                     confirmed_date=datetime.now(),
                 )
-        parent_transfer = ParcelTransfer.most_recent_transfer(parcel)
-        parent_transfer.fresh = False
-        parent_transfer.save()
+
+    def save_model(self, request, obj, form, change):
+        obj.save()
+        ParcelTransfer.initiate_transfer(
+            obj.original_parcel, from_user=request.user, to_user=User.objects.get(username="split")
+        )
 
     def has_delete_permission(self, request, obj=None):
         return False
