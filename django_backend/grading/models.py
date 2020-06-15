@@ -17,7 +17,7 @@ class Split(models.Model):
         return f"Split of {self.original_parcel}"
 
     class Meta:
-        verbose_name = "Split parcel into smaller parcels or individual stones"
+        verbose_name = "Split parcel into smaller parcels or individual stone"
 
 
 class AbstractReceipt(models.Model):
