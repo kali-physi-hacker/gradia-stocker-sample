@@ -3,6 +3,7 @@ from datetime import datetime
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.http import HttpResponse
+from django.urls import reverse
 from django.utils.html import format_html
 
 from ownerships.models import ParcelTransfer, StoneTransfer
@@ -126,12 +127,22 @@ def make_parcel_actions(user):
         transfer = ParcelTransfer.most_recent_transfer(parcel)
         if transfer.fresh:
             if transfer.to_user == user:
-                if transfer.confirmed_date is None:
-                    return format_html(f"<a href='/'>Confirm Stones</a>")
+                if transfer.in_transit():
+                    return format_html(
+                        f"<a href='{reverse('grading:confirm_received', args=[parcel.id])}'>Confirm Received</a>"
+                    )
                 else:
-                    return format_html(f"<a href='/'>Return to Vault</a>")
-            if transfer.to_user.username == "vault" and user.username in ["anthjony", "admin", "gary"]:
-                return format_html(f"<a href='/'>Confirm Stones for Vault</a>")
+                    return format_html(
+                        f"<a href='{reverse('grading:return_to_vault', args=[parcel.id])}'>Return to Vault</a>"
+                    )
+            if (
+                transfer.in_transit()
+                and transfer.to_user.username == "vault"
+                and user.username in ["anthjony", "admin", "gary"]
+            ):
+                return format_html(
+                    f"<a href='{reverse('grading:confirm_received', args=[parcel.id])}'>Confirm Stones for Vault</a>"
+                )
         return "-"
 
     return actions
@@ -149,6 +160,7 @@ class ParcelAdmin(admin.ModelAdmin):
         "total_carats",
         "total_pieces",
         "current_location",
+        "most_recent_transfer",
     ]
 
     search_fields = ["gradia_parcel_code", "customer_parcel_code", "receipt__code", "receipt__entity__name"]
@@ -204,7 +216,7 @@ def make_receipt_actions(user):
     def actions(parcel):
         # in the future might have to check user permissions here
         if not parcel.closed_out():
-            return format_html(f"<a href='/'>Close Out</a>")
+            return format_html(f"<a href='{reverse('grading:return_to_vault')}'>Close Out</a>")
         return "-"
 
     return actions

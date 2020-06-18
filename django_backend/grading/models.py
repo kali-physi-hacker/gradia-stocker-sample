@@ -68,10 +68,10 @@ class Parcel(AbstractParcel):
     def current_location(self):
         most_recent = ParcelTransfer.most_recent_transfer(self)
         location = [most_recent.to_user]
-        if most_recent.in_transit():
-            location.append("unconfirmed")
         if not most_recent.fresh:
             location.append("expired")
+        if most_recent.in_transit():
+            location.append("unconfirmed")
         if len(location) == 1:
             location.append("confirmed")
 
@@ -97,6 +97,10 @@ class Parcel(AbstractParcel):
 
     get_parcel_with_html_link.short_description = "parcel"
     get_parcel_with_html_link.admin_order_field = "id"
+
+    def most_recent_transfer(self):
+        parcel = ParcelTransfer.most_recent_transfer(self)
+        return f"{parcel.from_user} -> {parcel.to_user} (on {parcel.initiated_date:%D})"
 
     class Meta:
         verbose_name = "Parcel- Check Inventory"

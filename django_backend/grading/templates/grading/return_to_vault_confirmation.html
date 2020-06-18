@@ -1,0 +1,9 @@
+Hi {{ username }},
+
+
+<form action="{% url 'grading:return_to_vault' item.id %}" method="post">
+      {% csrf_token %}
+      <p>You are about to confirm that you want to return the following to the vault:</p>
+      <p>{{ item.get_parcel_with_html_link }}</p>
+      <input type="submit" value="Proceed">
+</form>
