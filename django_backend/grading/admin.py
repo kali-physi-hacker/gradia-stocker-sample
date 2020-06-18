@@ -53,6 +53,8 @@ class SplitAdmin(admin.ModelAdmin):
     model = Split
     inlines = [ParcelInline, StoneInline]
 
+    readonly_fields = ["split_by"]
+
     def save_formset(self, request, form, formset, change):
         instances = formset.save(commit=False)
         parcel = Parcel.objects.get(pk=request.POST["original_parcel"])
@@ -79,6 +81,7 @@ class SplitAdmin(admin.ModelAdmin):
                 )
 
     def save_model(self, request, obj, form, change):
+        obj.split_by = request.user
         obj.save()
         ParcelTransfer.initiate_transfer(
             obj.original_parcel, from_user=request.user, to_user=User.objects.get(username="split")

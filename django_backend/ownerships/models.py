@@ -36,13 +36,13 @@ class AbstractItemTransfer(models.Model):
     def can_create_transfer(cls, item, from_user, to_user):
         last_transfer = cls.most_recent_transfer(item)
         if last_transfer.to_user != from_user:
-            raise "you are not the current owner"
+            raise Exception("you are not the current owner")
         if last_transfer.to_user == to_user:
-            raise "you are transferring to yourself"
+            raise Exception("you are transferring to yourself")
         if not last_transfer.fresh:
-            raise "your ownership is stale- you may not currently own this item"
+            raise Exception("your ownership is stale- you may not currently own this item")
         if last_transfer.in_transit():
-            raise "have not confirmed transfer yet"
+            raise Exception("have not confirmed transfer yet")
 
     @classmethod
     def initiate_transfer(cls, item, from_user, to_user):
@@ -59,9 +59,11 @@ class AbstractItemTransfer(models.Model):
         owner, status = item.current_location()
         if owner != user:
             if not (owner.username == "vault" and user.username in ["anthony", "admin", "gary"]):
-                raise f"you are not in possession of the parcel- it should be with {owner}"
+                raise Exception(f"you are not in possession of the parcel- it should be with {owner}")
         if status != "unconfirmed":
-            raise f"You are in possession of the parcel but its status shows up as {status} so you cannot confirm it"
+            raise Exception(
+                f"You are in possession of the parcel but its status shows up as {status} so you cannot confirm it"
+            )
 
     @classmethod
     def confirm_received(cls, item):
