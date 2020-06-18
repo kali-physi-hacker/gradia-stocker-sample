@@ -219,7 +219,7 @@ def make_receipt_actions(user):
     def actions(parcel):
         # in the future might have to check user permissions here
         if not parcel.closed_out():
-            return format_html(f"<a href='{reverse('grading:return_to_vault')}'>Close Out</a>")
+            return format_html(f"<a href='{reverse('grading:close_receipt', args=[parcel.id])}'>Close Out</a>")
         return "-"
 
     return actions

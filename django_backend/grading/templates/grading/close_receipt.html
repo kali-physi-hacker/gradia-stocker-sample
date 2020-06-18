@@ -1,0 +1,10 @@
+Hi {{ username }},
+
+
+<form action="{% url 'grading:close_receipt' receipt.id %}" method="post">
+      {% csrf_token %}
+      <p>You are about to close out the receipt:</p>
+      <p>{{ receipt.get_receipt_with_html_link }}</p>
+      <p>This means that you have already retrieved the physical copy of the receipt from the client.</p>
+      <input type="submit" value="Proceed">
+</form>

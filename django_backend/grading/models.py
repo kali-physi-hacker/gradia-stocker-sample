@@ -41,6 +41,13 @@ class AbstractReceipt(models.Model):
 
     closed_out.boolean = True
 
+    def get_receipt_with_html_link(self):
+        link = reverse("admin:grading_receipt_change", args=[self.id])
+        return format_html(f'<a href="{link}">{self}</a>')
+
+    get_receipt_with_html_link.short_description = "receipt"
+    get_receipt_with_html_link.admin_order_field = "receipt"
+
 
 class Receipt(AbstractReceipt):
     class Meta:
@@ -85,8 +92,7 @@ class Parcel(AbstractParcel):
     finished_basic_grading.boolean = True
 
     def get_receipt_with_html_link(self):
-        link = reverse("admin:grading_receipt_change", args=[self.receipt.id])
-        return format_html(f'<a href="{link}">{self.receipt}</a>')
+        return self.receipt.get_receipt_with_html_link()
 
     get_receipt_with_html_link.short_description = "receipt"
     get_receipt_with_html_link.admin_order_field = "receipt"
