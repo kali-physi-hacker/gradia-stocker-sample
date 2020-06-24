@@ -4,6 +4,8 @@ from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db import models
 
+VAULT_USERNAMES = ["anthony", "admin", "gary"]
+
 
 class AbstractItemTransfer(models.Model):
     from_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="gave_parcels")
@@ -53,12 +55,12 @@ class AbstractItemTransfer(models.Model):
             )
 
     @classmethod
-    def initiate_transfer(cls, item, from_user, to_user):
+    def initiate_transfer(cls, item, from_user, to_user, remarks=""):
         last_transfer = cls.most_recent_transfer(item)
 
         cls.can_create_transfer(item, from_user, to_user)
 
-        cls.objects.create(item=last_transfer.item, from_user=from_user, to_user=to_user)
+        cls.objects.create(item=last_transfer.item, from_user=from_user, to_user=to_user, remarks=remarks)
         last_transfer.fresh = False
         last_transfer.save()
 
@@ -66,7 +68,7 @@ class AbstractItemTransfer(models.Model):
     def can_confirm_received(cls, item, user):
         owner, status = item.current_location()
         if owner != user:
-            if not (owner.username == "vault" and user.username in ["anthony", "admin", "gary"]):
+            if not (owner.username == "vault" and user.username in VAULT_USERNAMES):
                 raise PermissionDenied(
                     f"you are not in possession of the parcel- it is currently with {owner}, "
                     "so you cannot confirm you have received it"

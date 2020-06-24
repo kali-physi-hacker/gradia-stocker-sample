@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.models import User
 
-from .models import ParcelTransfer
+from .models import VAULT_USERNAMES, ParcelTransfer
 
 
 class ParcelTransferFromVault(ParcelTransfer):
@@ -20,7 +20,7 @@ class ParcelTransferFromVaultAdmin(admin.ModelAdmin):
     list_filter = ["fresh", "from_user", "to_user", "initiated_date", "confirmed_date"]
 
     def has_add_permission(self, request):
-        if request.user.username in ["admin", "anthony", "gary"]:
+        if request.user.username in VAULT_USERNAMES:
             return True
         return False
 
@@ -34,5 +34,5 @@ class ParcelTransferFromVaultAdmin(admin.ModelAdmin):
         return True
 
     def save_model(self, request, obj, form, change):
-        obj.from_user = User.objects.get(username="vault")
-        obj.save()
+        vault = User.objects.get(username="vault")
+        ParcelTransfer.initiate_transfer(obj.item, vault, obj.to_user, obj.remarks)
