@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.contrib.auth.models import User
+from django.core.exceptions import PermissionDenied
 from django.db import models
 
 
@@ -36,13 +37,20 @@ class AbstractItemTransfer(models.Model):
     def can_create_transfer(cls, item, from_user, to_user):
         last_transfer = cls.most_recent_transfer(item)
         if last_transfer.to_user != from_user:
-            raise Exception("you are not the current owner")
+            raise PermissionDenied(
+                f"you are not the current owner, only the user signed in as {from_user} can make this transfer"
+            )
         if last_transfer.to_user == to_user:
-            raise Exception("you are transferring to yourself")
+            raise PermissionDenied("you are creating a transfer from yourself to yourself")
         if not last_transfer.fresh:
-            raise Exception("your ownership is stale- you may not currently own this item")
+            raise PermissionDenied(
+                "even though the most recent transfer is to you, your ownership "
+                "is stale- you may not currently own this item. did you split it?"
+            )
         if last_transfer.in_transit():
-            raise Exception("have not confirmed transfer yet")
+            raise PermissionDenied(
+                "you have not confirmed you received this item yet, so you cannot transfer it away"
+            )
 
     @classmethod
     def initiate_transfer(cls, item, from_user, to_user):
@@ -59,9 +67,12 @@ class AbstractItemTransfer(models.Model):
         owner, status = item.current_location()
         if owner != user:
             if not (owner.username == "vault" and user.username in ["anthony", "admin", "gary"]):
-                raise Exception(f"you are not in possession of the parcel- it should be with {owner}")
+                raise PermissionDenied(
+                    f"you are not in possession of the parcel- it is currently with {owner}, "
+                    "so you cannot confirm you have received it"
+                )
         if status != "unconfirmed":
-            raise Exception(
+            raise PermissionDenied(
                 f"You are in possession of the parcel but its status shows up as {status} so you cannot confirm it"
             )
 
