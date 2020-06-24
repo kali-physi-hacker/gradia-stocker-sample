@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from django.urls import reverse
 from django.utils.html import format_html
 
-from ownerships.models import ParcelTransfer, StoneTransfer
+from ownerships.models import VAULT_USERNAMES, ParcelTransfer, StoneTransfer
 
 from .forms import StoneForm
 from .models import Parcel, Receipt, Split, Stone
@@ -138,11 +138,7 @@ def make_parcel_actions(user):
                     return format_html(
                         f"<a href='{reverse('grading:return_to_vault', args=[parcel.id])}'>Return to Vault</a>"
                     )
-            if (
-                transfer.in_transit()
-                and transfer.to_user.username == "vault"
-                and user.username in ["anthjony", "admin", "gary"]
-            ):
+            if transfer.in_transit() and transfer.to_user.username == "vault" and user.username in VAULT_USERNAMES:
                 return format_html(
                     f"<a href='{reverse('grading:confirm_received', args=[parcel.id])}'>Confirm Stones for Vault</a>"
                 )
