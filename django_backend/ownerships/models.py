@@ -60,9 +60,10 @@ class AbstractItemTransfer(models.Model):
 
         cls.can_create_transfer(item, from_user, to_user)
 
-        cls.objects.create(item=last_transfer.item, from_user=from_user, to_user=to_user, remarks=remarks)
+        created = cls.objects.create(item=last_transfer.item, from_user=from_user, to_user=to_user, remarks=remarks)
         last_transfer.fresh = False
         last_transfer.save()
+        return created
 
     @classmethod
     def can_confirm_received(cls, item, user):

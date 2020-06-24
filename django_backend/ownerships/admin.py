@@ -35,4 +35,6 @@ class ParcelTransferFromVaultAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         vault = User.objects.get(username="vault")
-        ParcelTransfer.initiate_transfer(obj.item, vault, obj.to_user, obj.remarks)
+        created = ParcelTransfer.initiate_transfer(obj.item, vault, obj.to_user, obj.remarks)
+        obj.from_user = vault
+        obj.id = created.id
