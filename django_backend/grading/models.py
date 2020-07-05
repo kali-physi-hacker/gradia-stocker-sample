@@ -30,6 +30,8 @@ class AbstractReceipt(models.Model):
         User, on_delete=models.PROTECT, related_name="signed_off_on_stone_release", null=True, blank=True
     )
 
+    admin_url = "admin:grading_receipt_change"
+
     def __str__(self):
         return "receipt " + self.code
 
@@ -42,7 +44,7 @@ class AbstractReceipt(models.Model):
     closed_out.boolean = True
 
     def get_receipt_with_html_link(self):
-        link = reverse("admin:grading_receipt_change", args=[self.id])
+        link = reverse(self.admin_url, args=[self.id])
         return format_html(f'<a href="{link}">{self}</a>')
 
     get_receipt_with_html_link.short_description = "receipt"
@@ -56,21 +58,40 @@ class Receipt(AbstractReceipt):
 
 class AbstractParcel(models.Model):
     receipt = models.ForeignKey(Receipt, on_delete=models.PROTECT)
+    customer_parcel_code = models.CharField(max_length=15)
 
     total_carats = models.DecimalField(max_digits=5, decimal_places=3)
     total_pieces = models.IntegerField()
+    reference_price_per_carat = models.PositiveIntegerField()
+
+    admin_url = "admin:grading_parcel_change"
 
     def __str__(self):
-        return f"parcel {self.gradia_parcel_code} ({self.total_carats}ct, {self.total_pieces}pcs, {self.receipt})"
+        return f"parcel {self.customer_parcel_code} ({self.total_carats}ct, {self.total_pieces}pcs, {self.receipt})"
 
     class Meta:
         abstract = True
+
+    def get_receipt_with_html_link(self):
+        return self.receipt.get_receipt_with_html_link()
+
+    get_receipt_with_html_link.short_description = "receipt"
+    get_receipt_with_html_link.admin_order_field = "receipt"
+
+    def get_parcel_with_html_link(self):
+        link = reverse(self.admin_url, args=[self.id])
+        return format_html(f'<a href="{link}">{self}</a>')
+
+    get_parcel_with_html_link.short_description = "parcel"
+    get_parcel_with_html_link.admin_order_field = "id"
 
 
 class Parcel(AbstractParcel):
     split_from = models.ForeignKey(Split, on_delete=models.PROTECT, blank=True, null=True)
     gradia_parcel_code = models.CharField(max_length=15)
-    customer_parcel_code = models.CharField(max_length=15)
+
+    def __str__(self):
+        return f"parcel {self.gradia_parcel_code} ({self.total_carats}ct, {self.total_pieces}pcs, {self.receipt})"
 
     def current_location(self):
         most_recent = ParcelTransfer.most_recent_transfer(self)
@@ -90,19 +111,6 @@ class Parcel(AbstractParcel):
         return False
 
     finished_basic_grading.boolean = True
-
-    def get_receipt_with_html_link(self):
-        return self.receipt.get_receipt_with_html_link()
-
-    get_receipt_with_html_link.short_description = "receipt"
-    get_receipt_with_html_link.admin_order_field = "receipt"
-
-    def get_parcel_with_html_link(self):
-        link = reverse("admin:grading_parcel_change", args=[self.id])
-        return format_html(f'<a href="{link}">{self}</a>')
-
-    get_parcel_with_html_link.short_description = "parcel"
-    get_parcel_with_html_link.admin_order_field = "id"
 
     def most_recent_transfer(self):
         parcel = ParcelTransfer.most_recent_transfer(self)

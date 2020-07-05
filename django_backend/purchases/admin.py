@@ -1,8 +1,8 @@
-from datetime import datetime
-
 from django import forms
 from django.contrib import admin
-from django.http import HttpResponse
+
+from grading.admin import ParcelAdmin as GradingParcelAdmin
+from grading.admin import ParcelInline as GradingParcelInline
 
 from .models import AuthorizedPersonnel, Parcel, Receipt, Seller
 
@@ -20,22 +20,14 @@ class SellerAdmin(admin.ModelAdmin):
     inlines = [AuthorizedPersonnelInline]
 
 
-class CreateReceipt(Receipt):
-    class Meta:
-        proxy = True
-        verbose_name = "Step 1. Create receipt for stone intake"
-
-
-class ParcelInline(admin.TabularInline):
+class ParcelInline(GradingParcelInline):
     model = Parcel
-    fields = ["code", "total_carats", "total_pieces", "reference_price_per_carat"]
-
-    extra = 1
+    fields = list(filter(lambda f: f != "gradia_parcel_code", GradingParcelInline.fields.copy()))
 
 
-@admin.register(CreateReceipt)
+@admin.register(Receipt)
 class CreateReceiptAdmin(admin.ModelAdmin):
-    model = CreateReceipt
+    model = Receipt
 
     readonly_fields = ["intake_by", "intake_date", "release_by", "release_date"]
 
@@ -48,22 +40,16 @@ class CreateReceiptAdmin(admin.ModelAdmin):
         return False
 
     def has_view_permission(self, request, obj=None):
-        return False
+        return True
 
     def save_model(self, request, obj, form, change):
         obj.intake_by = request.user
         obj.save()
 
 
-class ParcelRejection(Parcel):
-    class Meta:
-        proxy = True
-        verbose_name = "Step 2. View parcel info and record rejection"
-
-
 class ParcelRejectionForm(forms.ModelForm):
     class Meta:
-        model = ParcelRejection
+        model = Parcel
         fields = ["rejected_carats", "rejected_pieces", "total_price_paid"]
 
     def clean(self):
@@ -76,73 +62,10 @@ class ParcelRejectionForm(forms.ModelForm):
         return self.cleaned_data
 
 
-@admin.register(ParcelRejection)
-class ParcelRejectionAdmin(admin.ModelAdmin):
-    model = ParcelRejection
+@admin.register(Parcel)
+class ParcelRejectionAdmin(GradingParcelAdmin):
+    model = Parcel
     form = ParcelRejectionForm
 
-    readonly_fields = ["code", "total_carats", "total_pieces", "reference_price_per_carat"]
-    fields = readonly_fields + ["rejected_carats", "rejected_pieces", "total_price_paid"]
-
-    search_fields = ["code", "receipt__code", "receipt__entity__name"]
-    list_display = ["__str__", "closed_out"]
-
-    def has_add_permission(self, request):
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        if obj and not obj.closed_out():
-            return True
-        return False
-
-
-class CloseOutReceipt(Receipt):
-    class Meta:
-        proxy = True
-        verbose_name = "Step 3. View receipts and close out receipt on stone release"
-
-
-@admin.register(CloseOutReceipt)
-class CloseOutReceiptAdmin(admin.ModelAdmin):
-    model = CloseOutReceipt
-
-    list_filter = ["release_date", "intake_date"]
-    list_display = ["__str__", "closed_out", "intake_date", "release_date"]
-    search_fields = ["code", "entity__name"]
-
-    readonly_fields = ["code", "entity", "intake_by", "intake_date", "release_by", "release_date"]
-
-    change_form_template = "grading/admin_item_change_form_with_button.html"
-
-    def change_view(self, request, object_id, form_url="", extra_context=None):
-        extra_context = extra_context or {}
-        extra_context["has_close_out_permission"] = self.has_change_permission(
-            request, Receipt.objects.get(id=object_id)
-        )
-        return super().change_view(request, object_id, form_url, extra_context=extra_context)
-
-    def response_change(self, request, obj):
-        if "_close_out" in request.POST:
-            if obj.closed_out():
-                return HttpResponse("Error: This receipt has already been closed out")
-            for parcel in obj.parcel_set.all():
-                if not parcel.closed_out():
-                    return HttpResponse(f"Error: Parcel {parcel} has not been closed out yet")
-            obj.release_by = request.user
-            obj.release_date = datetime.now()
-            obj.save()
-        return super().response_change(request, obj)
-
-    def has_add_permission(self, request, obj=None):
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        if obj and not obj.closed_out():
-            return True
-        return False
+    readonly_fields = ["customer_parcel_code", "receipt", "total_carats", "total_pieces"]
+    fields = GradingParcelAdmin.readonly_fields + ["rejected_carats", "rejected_pieces", "total_price_paid"]

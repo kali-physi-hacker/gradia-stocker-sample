@@ -19,17 +19,18 @@ class Receipt(AbstractReceipt):
     release_by = models.ForeignKey(
         User, on_delete=models.PROTECT, related_name="signed_off_on_stone_purchase_release", null=True, blank=True
     )
+    admin_url = "admin:purchases_receipt_change"
 
 
 class Parcel(AbstractParcel):
     receipt = models.ForeignKey(Receipt, on_delete=models.PROTECT)
-    code = models.CharField(max_length=15)
 
     rejected_carats = models.DecimalField(max_digits=5, decimal_places=3, null=True, blank=True)
     rejected_pieces = models.IntegerField(null=True, blank=True)
 
-    reference_price_per_carat = models.PositiveIntegerField()
     total_price_paid = models.IntegerField(null=True, blank=True)
+
+    admin_url = "admin:purchases_parcel_change"
 
     def closed_out(self):
         return (self.rejected_pieces is not None) and (self.total_price_paid is not None)

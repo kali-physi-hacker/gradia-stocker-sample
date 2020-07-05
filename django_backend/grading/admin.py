@@ -35,6 +35,7 @@ class ParcelInline(admin.TabularInline):
         "customer_parcel_code",
         "total_carats",
         "total_pieces",
+        "reference_price_per_carat",
     ]
     readonly_fields = ["get_parcel_with_html_link"]
 

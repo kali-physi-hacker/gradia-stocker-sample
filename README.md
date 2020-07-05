@@ -8,6 +8,17 @@
 
 
 ### todo:
+- start transfer should have search and select like user select
+    - cant tell if have confirmed stones or not
+- splits- why does the more descriptive error not show up
+- stones should have location and action to return to vault
+- vaultmasters can also split even if they dont own the thing
+- data entry needs to be able to split even if they dont own the thing
+- make sure splits add up
+- filter by user thing
+- move receipts to customers
+
+
 - backend to confirm stones
 - backend to return stones to vault
 - better error page for split (eg: not confirmed transfer yet, you are not the owner so you can't split)

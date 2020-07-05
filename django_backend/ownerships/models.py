@@ -40,7 +40,7 @@ class AbstractItemTransfer(models.Model):
         last_transfer = cls.most_recent_transfer(item)
         if last_transfer.to_user != from_user:
             raise PermissionDenied(
-                f"you are not the current owner, only the user signed in as {from_user} can make this transfer"
+                f"you are not the current owner, only the user signed in as {last_transfer.to_user} can do this"
             )
         if last_transfer.to_user == to_user:
             raise PermissionDenied("you are creating a transfer from yourself to yourself")
