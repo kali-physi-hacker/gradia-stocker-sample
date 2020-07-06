@@ -101,29 +101,20 @@ class ParcelOwnerFilter(admin.SimpleListFilter):
     default_value = "me"
 
     def lookups(self, request, model_admin):
-        return (("me", "Owned by me"), ("vault", "Owned by the vault"), ("all", "All"))
-
-    def choices(self, changelist):
-        # override choices so that we don't have initial 'All'
-        value = self.value() or self.default_value
-        for lookup, title in self.lookup_choices:
-            yield {
-                "selected": value == str(lookup),
-                "query_string": changelist.get_query_string({self.parameter_name: lookup}),
-                "display": title,
-            }
+        return (("me", "With me"), ("vault", "With the vault"), ("goldway", "With Goldway"))
 
     def queryset(self, request, queryset):
-        if self.value() is None or self.value() == "me":
-            parcel = ParcelTransfer.get_current_holding(request.user)
-            parcel_id = parcel.id if parcel else -1
-            return queryset.filter(id=parcel_id)
-        if self.value == "vault":
-            parcels = ParcelTransfer.objects.filter(to_user__username="vault", fresh=True)
-            parcel_ids = (p.id for p in parcels)
+        username_filter = self.value()
+        if self.value() == "me":
+            username_filter = request.user.username
+
+        if username_filter:
+            fresh_transfers = ParcelTransfer.objects.filter(to_user__username=username_filter, fresh=True)
+            parcel_ids = (p.item.id for p in fresh_transfers)
             return queryset.filter(id__in=parcel_ids)
-        if self.value == "__all__":
-            return queryset
+
+        ## self.value() == "__all__" or None
+        return queryset
 
 
 def make_parcel_actions(user):
