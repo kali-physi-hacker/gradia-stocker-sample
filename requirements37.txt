@@ -9,6 +9,8 @@ pluggy==0.13.1
 py==1.8.1
 pyparsing==2.4.7
 pytest==5.4.2
+pytest-django==3.9.0
+pytest-pythonpath==0.7.3
 pytz==2020.1
 selenium==3.141.0
 six==1.14.0
