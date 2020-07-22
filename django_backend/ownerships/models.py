@@ -3,6 +3,7 @@ from datetime import datetime
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db import models
+from django.utils.timezone import utc
 
 VAULT_USERNAMES = ["anthony", "admin", "gary"]
 
@@ -83,7 +84,7 @@ class AbstractItemTransfer(models.Model):
     def confirm_received(cls, item):
         last_transfer = cls.most_recent_transfer(item)
         cls.can_confirm_received(item, last_transfer.to_user)
-        last_transfer.confirmed_date = datetime.now()
+        last_transfer.confirmed_date = datetime.utcnow().replace(tzinfo=utc)
         last_transfer.save()
 
     def __str__(self):
