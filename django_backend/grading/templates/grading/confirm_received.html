@@ -6,5 +6,5 @@ Hi {{ username }},
       <p>You are about to confirm that you have received and *checked*:</p>
       <p>{{ item.get_parcel_with_html_link }}</p>
       <p>and that it is now in the possession of <b>{{ item.current_location | first }}.</p>
-      <input type="submit" value="Proceed">
+      <input type="submit" value="Proceed" name="proceed">
 </form>
