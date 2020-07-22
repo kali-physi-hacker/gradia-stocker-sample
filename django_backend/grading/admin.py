@@ -14,6 +14,8 @@ from .models import Parcel, Receipt, Split, Stone
 
 class StoneInline(admin.TabularInline):
     model = Stone
+
+    readonly_fields = ["data_entry_user"]
     form = StoneForm
 
     def has_delete_permission(self, request, obj=None):
@@ -73,6 +75,7 @@ class SplitAdmin(admin.ModelAdmin):
                 )
             if isinstance(instance, Stone):
                 instance.split_from = split
+                instance.data_entry_user = request.user
                 instance.save()
                 StoneTransfer.objects.create(
                     item=instance,
