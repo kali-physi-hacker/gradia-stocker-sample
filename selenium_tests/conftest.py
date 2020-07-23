@@ -15,6 +15,7 @@ import pytest
 from customers.models import Entity
 from grading.models import Parcel, Receipt
 from ownerships.models import ParcelTransfer
+from urls import add_urls_helper_functions, goto
 
 
 def assert_body_contains_text(browser, search_string):
@@ -49,21 +50,32 @@ def slowly_click(browser, elem, elem_should_disappear=True):
     time.sleep(0.3)
 
 
+def click_add(browser):
+    add_link = browser.find_element_by_xpath("//a[contains(translate(., 'AD', 'ad'), 'add')]")
+    # when clicking inline add new row, elem stays
+    browser.slowly_click(add_link, elem_should_disappear=False)
+
+
+def search_in_admin_list_view(browser, search_string):
+    search_bar = browser.find_element_by_name("q")
+    search_bar.send_keys(search_string)
+
+    search_button = browser.find_element_by_css_selector('input[value="Search"]')
+    browser.slowly_click(search_button)
+
+
 # TODO: make this use some extended browser class instead
 def setup_browser_helper_functions(browser):
+    add_urls_helper_functions(browser)
+
     browser.get_body_text = lambda: browser.find_element_by_css_selector("body").text
     browser.login = partial(login, browser)
     browser.wait_till_gone = partial(wait_till_gone, browser)
     browser.slowly_click = partial(slowly_click, browser)
+    browser.click_add = partial(click_add, browser)
+    browser.search_in_admin_list_view = partial(search_in_admin_list_view, browser)
     # TODO : this is going to suck if search_string has " or '
     browser.assert_body_contains_text = partial(assert_body_contains_text, browser)
-
-
-def goto(browser, server_address, url):
-    if url[:4] == "http":
-        browser.get(url)
-    else:
-        browser.get(server_address + url)
 
 
 @pytest.fixture
@@ -92,35 +104,48 @@ def erp(django_user_model):
     # for the erp to work, there are some users and group permissions that we need
     django_user_model.objects.create_user("vault")
 
-    #For grader
+    # create permission groups
     grader_group = Group.objects.create(name="grader")
-    permission_grader = []
-    permission = Permission.objects.get(
-        codename="view_parcel", content_type=ContentType.objects.get(app_label="grading", model="parcel")
+    grader_group.permissions.add(
+        Permission.objects.get(
+            codename="view_parcel", content_type=ContentType.objects.get(app_label="grading", model="parcel")
+        ),
+        Permission.objects.get(
+            codename="add_parcel", content_type=ContentType.objects.get(app_label="grading", model="parcel")
+        ),
     )
-    permission_grader.append(permission)
-    permission = Permission.objects.get(
-        codename="add_parcel", content_type=ContentType.objects.get(app_label="grading", model="parcel")
-    )
-    permission_grader.append(permission)
-    for x in permission_grader:
-        grader_group.permissions.add(x)
-    
-    #For receptionist
-    receptionist_group = Group.objects.create(name="receptionist")
-    permission_receptionist = []
-    permission = Permission.objects.get(
-        codename="view_entity", content_type=ContentType.objects.get(app_label="customers", model="entity")
-    )
-    permission_receptionist.append(permission)
-    permission = Permission.objects.get(
-        codename="add_entity", content_type=ContentType.objects.get(app_label="customers", model="entity")
-    )
-    permission_receptionist.append(permission)
-    for x in permission_receptionist:
-        receptionist_group.permissions.add(x)
 
-    pass
+    receptionist_group = Group.objects.create(name="receptionist")
+    receptionist_group.permissions.add(
+        Permission.objects.get(
+            codename="view_entity", content_type=ContentType.objects.get(app_label="customers", model="entity")
+        ),
+        Permission.objects.get(
+            codename="add_entity", content_type=ContentType.objects.get(app_label="customers", model="entity")
+        ),
+        Permission.objects.get(
+            codename="view_receipt", content_type=ContentType.objects.get(app_label="grading", model="receipt")
+        ),
+        Permission.objects.get(
+            codename="add_receipt", content_type=ContentType.objects.get(app_label="grading", model="receipt")
+        ),
+        Permission.objects.get(
+            codename="view_parcel", content_type=ContentType.objects.get(app_label="grading", model="parcel")
+        ),
+        Permission.objects.get(
+            codename="add_parcel", content_type=ContentType.objects.get(app_label="grading", model="parcel")
+        ),
+    )
+    receptionist_group.permissions.add(
+        Permission.objects.get(
+            codename="view_receipt", content_type=ContentType.objects.get(app_label="grading", model="receipt")
+        )
+    )
+    receptionist_group.permissions.add(
+        Permission.objects.get(
+            codename="add_receipt", content_type=ContentType.objects.get(app_label="grading", model="receipt")
+        )
+    )
 
 
 UserData = namedtuple("User", ["username", "password"])
@@ -150,6 +175,7 @@ def grader(django_user_model):
     user.raw_password = user_data.password
     return user
 
+
 @pytest.fixture
 def receptionist(django_user_model):
     user_data = UserData(username="receptionist@receptionist.com", password="receptionistpassword")
@@ -162,17 +188,14 @@ def receptionist(django_user_model):
     user.raw_password = user_data.password
     return user
 
-#Should I move this in a seperate file?
-@pytest.fixture
-def create_customer():
-    def _create(company_name,company_address,company_phone,company_email):
-        return Entity.objects.create(name=company_name, address=company_address, phone=company_phone, email=company_email)
-    
-    return _create
 
 @pytest.fixture
-def receipt(django_user_model, create_customer, admin_user):
-    created_receipt = Receipt.objects.create(entity=create_customer('Van Klaren','vk','1','vk@vk.com'), code="VK-0001", intake_by=admin_user)
+def receipt(django_user_model, admin_user):
+    created_receipt = Receipt.objects.create(
+        entity=Entity.objects.create(name="Van Klaren", address="addressy", phone="12345678", email="vk@vk.com"),
+        code="VK-0001",
+        intake_by=admin_user,
+    )
     parcel = Parcel.objects.create(
         receipt=created_receipt,
         gradia_parcel_code="parcel1",

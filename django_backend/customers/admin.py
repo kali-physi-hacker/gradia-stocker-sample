@@ -16,3 +16,4 @@ class EntityAdmin(admin.ModelAdmin):
     model = Entity
 
     inlines = [AuthorizedPersonnelInline]
+    search_fields = ["name"]
