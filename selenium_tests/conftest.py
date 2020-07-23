@@ -92,11 +92,33 @@ def erp(django_user_model):
     # for the erp to work, there are some users and group permissions that we need
     django_user_model.objects.create_user("vault")
 
+    #For grader
     grader_group = Group.objects.create(name="grader")
+    permission_grader = []
     permission = Permission.objects.get(
         codename="view_parcel", content_type=ContentType.objects.get(app_label="grading", model="parcel")
     )
-    grader_group.permissions.add(permission)
+    permission_grader.append(permission)
+    permission = Permission.objects.get(
+        codename="add_parcel", content_type=ContentType.objects.get(app_label="grading", model="parcel")
+    )
+    permission_grader.append(permission)
+    for x in permission_grader:
+        grader_group.permissions.add(x)
+    
+    #For receptionist
+    receptionist_group = Group.objects.create(name="receptionist")
+    permission_receptionist = []
+    permission = Permission.objects.get(
+        codename="view_entity", content_type=ContentType.objects.get(app_label="customers", model="entity")
+    )
+    permission_receptionist.append(permission)
+    permission = Permission.objects.get(
+        codename="add_entity", content_type=ContentType.objects.get(app_label="customers", model="entity")
+    )
+    permission_receptionist.append(permission)
+    for x in permission_receptionist:
+        receptionist_group.permissions.add(x)
 
     pass
 
@@ -128,15 +150,29 @@ def grader(django_user_model):
     user.raw_password = user_data.password
     return user
 
+@pytest.fixture
+def receptionist(django_user_model):
+    user_data = UserData(username="receptionist@receptionist.com", password="receptionistpassword")
+    user = django_user_model.objects.create_user(
+        user_data.username, email=user_data.username, password=user_data.password, is_staff=True
+    )
+    receptionist_group = Group.objects.get(name="receptionist")
+    user.groups.add(receptionist_group)
+
+    user.raw_password = user_data.password
+    return user
+
+#Should I move this in a seperate file?
+@pytest.fixture
+def create_customer():
+    def _create(company_name,company_address,company_phone,company_email):
+        return Entity.objects.create(name=company_name, address=company_address, phone=company_phone, email=company_email)
+    
+    return _create
 
 @pytest.fixture
-def customer():
-    return Entity.objects.create(name="Van Klaren", address="hk", phone=1, email="vk@vk.com")
-
-
-@pytest.fixture
-def receipt(django_user_model, customer, admin_user):
-    created_receipt = Receipt.objects.create(entity=customer, code="VK-0001", intake_by=admin_user)
+def receipt(django_user_model, create_customer, admin_user):
+    created_receipt = Receipt.objects.create(entity=create_customer('Van Klaren','vk','1','vk@vk.com'), code="VK-0001", intake_by=admin_user)
     parcel = Parcel.objects.create(
         receipt=created_receipt,
         gradia_parcel_code="parcel1",
