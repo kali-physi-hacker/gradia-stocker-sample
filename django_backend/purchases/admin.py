@@ -7,6 +7,12 @@ from grading.admin import ParcelInline as GradingParcelInline
 from .models import AuthorizedPersonnel, Parcel, Receipt, Seller
 
 
+def filter_out_gradia_stuff(list_of_strings):
+    gradia_stuff = ["gradia_parcel_code", "finished_basic_grading", "current_location"]
+
+    return list(filter(lambda f: f not in gradia_stuff, list_of_strings.copy()))
+
+
 class AuthorizedPersonnelInline(admin.StackedInline):
     model = AuthorizedPersonnel
 
@@ -22,7 +28,7 @@ class SellerAdmin(admin.ModelAdmin):
 
 class ParcelInline(GradingParcelInline):
     model = Parcel
-    fields = list(filter(lambda f: f != "gradia_parcel_code", GradingParcelInline.fields.copy()))
+    fields = filter_out_gradia_stuff(GradingParcelInline.fields)
 
 
 @admin.register(Receipt)
@@ -30,6 +36,8 @@ class CreateReceiptAdmin(admin.ModelAdmin):
     model = Receipt
 
     readonly_fields = ["intake_by", "intake_date", "release_by", "release_date"]
+
+    search_fields = ["code"]
 
     inlines = [ParcelInline]
 
@@ -68,4 +76,15 @@ class ParcelRejectionAdmin(GradingParcelAdmin):
     form = ParcelRejectionForm
 
     readonly_fields = ["customer_parcel_code", "receipt", "total_carats", "total_pieces"]
-    fields = GradingParcelAdmin.readonly_fields + ["rejected_carats", "rejected_pieces", "total_price_paid"]
+    fields = filter_out_gradia_stuff(GradingParcelAdmin.readonly_fields) + [
+        "rejected_carats",
+        "rejected_pieces",
+        "total_price_paid",
+    ]
+
+    search_fields = filter_out_gradia_stuff(GradingParcelAdmin.search_fields)
+    list_filter = []
+    list_display_links = []
+
+    def get_list_display(self, request):
+        return ["customer_parcel_code", "get_receipt_with_html_link", "total_carats", "total_pieces"]

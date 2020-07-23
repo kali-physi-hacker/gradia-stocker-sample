@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from ownerships.models import ParcelTransfer
 
 
-def test_grader_can_confirm_received_stones(browser, erp, grader, receipt):
+def test_grader_can_confirm_received_stones(browser, grader, receipt):
     # Tanly is a grader
     # the vault has given her a parcel to grade
     parcel = receipt.parcel_set.first()

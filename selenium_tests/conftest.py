@@ -56,6 +56,11 @@ def click_add(browser):
     browser.slowly_click(add_link, elem_should_disappear=False)
 
 
+def click_save(browser):
+    save_elem = browser.find_element_by_name("_save")
+    browser.slowly_click(save_elem, elem_should_disappear=True)
+
+
 def search_in_admin_list_view(browser, search_string):
     search_bar = browser.find_element_by_name("q")
     search_bar.send_keys(search_string)
@@ -73,6 +78,7 @@ def setup_browser_helper_functions(browser):
     browser.wait_till_gone = partial(wait_till_gone, browser)
     browser.slowly_click = partial(slowly_click, browser)
     browser.click_add = partial(click_add, browser)
+    browser.click_save = partial(click_save, browser)
     browser.search_in_admin_list_view = partial(search_in_admin_list_view, browser)
     # TODO : this is going to suck if search_string has " or '
     browser.assert_body_contains_text = partial(assert_body_contains_text, browser)
@@ -136,15 +142,27 @@ def erp(django_user_model):
             codename="add_parcel", content_type=ContentType.objects.get(app_label="grading", model="parcel")
         ),
     )
-    receptionist_group.permissions.add(
+
+    buyer_group = Group.objects.create(name="buyer")
+    buyer_group.permissions.add(
         Permission.objects.get(
-            codename="view_receipt", content_type=ContentType.objects.get(app_label="grading", model="receipt")
-        )
-    )
-    receptionist_group.permissions.add(
+            codename="view_seller", content_type=ContentType.objects.get(app_label="purchases", model="seller")
+        ),
         Permission.objects.get(
-            codename="add_receipt", content_type=ContentType.objects.get(app_label="grading", model="receipt")
-        )
+            codename="add_seller", content_type=ContentType.objects.get(app_label="purchases", model="seller")
+        ),
+        Permission.objects.get(
+            codename="view_receipt", content_type=ContentType.objects.get(app_label="purchases", model="receipt")
+        ),
+        Permission.objects.get(
+            codename="add_receipt", content_type=ContentType.objects.get(app_label="purchases", model="receipt")
+        ),
+        Permission.objects.get(
+            codename="view_parcel", content_type=ContentType.objects.get(app_label="purchases", model="parcel")
+        ),
+        Permission.objects.get(
+            codename="add_parcel", content_type=ContentType.objects.get(app_label="purchases", model="parcel")
+        ),
     )
 
 
@@ -164,7 +182,7 @@ def user(django_user_model):
 
 
 @pytest.fixture
-def grader(django_user_model):
+def grader(django_user_model, erp):
     user_data = UserData(username="grader@grader.com", password="graderpassword")
     user = django_user_model.objects.create_user(
         user_data.username, email=user_data.username, password=user_data.password, is_staff=True
@@ -177,13 +195,26 @@ def grader(django_user_model):
 
 
 @pytest.fixture
-def receptionist(django_user_model):
+def receptionist(django_user_model, erp):
     user_data = UserData(username="receptionist@receptionist.com", password="receptionistpassword")
     user = django_user_model.objects.create_user(
         user_data.username, email=user_data.username, password=user_data.password, is_staff=True
     )
     receptionist_group = Group.objects.get(name="receptionist")
     user.groups.add(receptionist_group)
+
+    user.raw_password = user_data.password
+    return user
+
+
+@pytest.fixture
+def buyer(django_user_model, erp):
+    user_data = UserData(username="buyer@buyer.com", password="buyerpassword")
+    user = django_user_model.objects.create_user(
+        user_data.username, email=user_data.username, password=user_data.password, is_staff=True
+    )
+    buyer_group = Group.objects.get(name="buyer")
+    user.groups.add(buyer_group)
 
     user.raw_password = user_data.password
     return user
