@@ -161,8 +161,6 @@ class ParcelAdmin(admin.ModelAdmin):
     list_filter = [ParcelOwnerFilter]
     list_display_links = ["gradia_parcel_code"]
 
-    change_form_template = "grading/admin_item_change_form_with_button.html"
-
     def get_list_display(self, request):
         return [
             "gradia_parcel_code",
@@ -174,24 +172,6 @@ class ParcelAdmin(admin.ModelAdmin):
             "current_location",
             make_parcel_actions(request.user),
         ]
-
-    def change_view(self, request, object_id, form_url="", extra_context=None):
-        extra_context = extra_context or {}
-        parcel = Parcel.objects.get(id=object_id)
-        current_owner, confirmed = parcel.current_location()
-        if request.user == current_owner and confirmed:
-            extra_context["can_return_to_vault"] = True
-        return super().change_view(request, object_id, form_url, extra_context=extra_context)
-
-    def response_change(self, request, obj):
-        if "_return_to_vault" in request.POST:
-            try:
-                ParcelTransfer.initiate_transfer(
-                    obj, from_user=request.user, to_user=User.objects.get(username="vault")
-                )
-            except Exception as e:
-                return HttpResponse(f"Error: {e}")
-        return super().response_change(request, obj)
 
     def has_view_permission(self, request, obj=None):
         return True
