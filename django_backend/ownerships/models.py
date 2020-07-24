@@ -27,6 +27,18 @@ class AbstractItemTransfer(models.Model):
             return None
 
     @classmethod
+    def get_current_location(cls, item):
+        most_recent = cls.most_recent_transfer(item)
+        location = [most_recent.to_user]
+        if not most_recent.fresh:
+            location.append("expired")
+        if most_recent.in_transit():
+            location.append("unconfirmed")
+        if len(location) == 1:
+            location.append("confirmed")
+        return location
+
+    @classmethod
     def get_current_holding(cls, user):
         try:
             latest_holding = cls.objects.filter(to_user=user).latest("initiated_date")
@@ -38,8 +50,9 @@ class AbstractItemTransfer(models.Model):
 
     @classmethod
     def can_create_transfer(cls, item, from_user, to_user):
+        split = User.objects.get(username="split")
         last_transfer = cls.most_recent_transfer(item)
-        if last_transfer.to_user != from_user:
+        if last_transfer.to_user != from_user and to_user != split:
             raise PermissionDenied(
                 f"you are not the current owner, only the user signed in as {last_transfer.to_user} can do this"
             )

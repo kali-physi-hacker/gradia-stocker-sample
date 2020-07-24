@@ -4,7 +4,7 @@ from django.urls import reverse
 from django.utils.html import format_html
 
 from customers.models import Entity
-from ownerships.models import ParcelTransfer
+from ownerships.models import ParcelTransfer, StoneTransfer
 
 
 class Split(models.Model):
@@ -99,16 +99,7 @@ class Parcel(AbstractParcel):
         return f"parcel {self.gradia_parcel_code} ({self.total_carats}ct, {self.total_pieces}pcs, {self.receipt})"
 
     def current_location(self):
-        most_recent = ParcelTransfer.most_recent_transfer(self)
-        location = [most_recent.to_user]
-        if not most_recent.fresh:
-            location.append("expired")
-        if most_recent.in_transit():
-            location.append("unconfirmed")
-        if len(location) == 1:
-            location.append("confirmed")
-
-        return location
+        return ParcelTransfer.get_current_location(self)
 
     def finished_basic_grading(self):
         if Stone.objects.filter(split_from__parcel=self).count() == self.total_pieces:
@@ -154,3 +145,6 @@ class Stone(models.Model):
 
     def __str__(self):
         return f"{self.stone_id} ({self.carats}ct {self.color} {self.clarity})"
+
+    def current_location(self):
+        return StoneTransfer.get_current_location(self)

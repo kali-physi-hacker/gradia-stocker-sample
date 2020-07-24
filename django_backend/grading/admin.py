@@ -61,6 +61,8 @@ class SplitAdmin(admin.ModelAdmin):
     def save_formset(self, request, form, formset, change):
         instances = formset.save(commit=False)
         parcel = Parcel.objects.get(pk=request.POST["original_parcel"])
+        # original parcel has already been sent to split
+        parcel_owner = ParcelTransfer.most_recent_transfer(parcel).from_user
         split = Split.objects.get(original_parcel=parcel)
         for instance in instances:
             if isinstance(instance, Parcel):
@@ -70,7 +72,7 @@ class SplitAdmin(admin.ModelAdmin):
                 ParcelTransfer.objects.create(
                     item=instance,
                     from_user=User.objects.get(username="split"),
-                    to_user=request.user,
+                    to_user=parcel_owner,
                     confirmed_date=datetime.utcnow().replace(tzinfo=utc),
                 )
             if isinstance(instance, Stone):
@@ -80,15 +82,16 @@ class SplitAdmin(admin.ModelAdmin):
                 StoneTransfer.objects.create(
                     item=instance,
                     from_user=User.objects.get(username="split"),
-                    to_user=request.user,
+                    to_user=parcel_owner,
                     confirmed_date=datetime.utcnow().replace(tzinfo=utc),
                 )
 
     def save_model(self, request, obj, form, change):
         obj.split_by = request.user
         obj.save()
+        current_holder = obj.original_parcel.current_location()[0]
         ParcelTransfer.initiate_transfer(
-            obj.original_parcel, from_user=request.user, to_user=User.objects.get(username="split")
+            obj.original_parcel, from_user=current_holder, to_user=User.objects.get(username="split")
         )
 
     def has_delete_permission(self, request, obj=None):
@@ -255,6 +258,18 @@ class StoneAdmin(admin.ModelAdmin):
         "grader_3_inclusion",
         "rejection_remarks",
     ]
+
+    def get_list_display(self, request):
+        return [
+            "stone_id",
+            "current_location",
+            "carats",
+            "color",
+            "clarity",
+            "fluo",
+            "culet",
+            # make_parcel_actions(request.user),
+        ]
 
     def has_change_permission(self, request, obj=None):
         return False
