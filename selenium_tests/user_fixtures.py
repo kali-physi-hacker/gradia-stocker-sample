@@ -1,0 +1,156 @@
+from collections import namedtuple
+
+from django.contrib.auth.models import Group, Permission
+from django.contrib.contenttypes.models import ContentType
+
+import pytest
+
+
+@pytest.fixture
+def erp(django_user_model):
+    # for the erp to work, there are some users and group permissions that we need
+    django_user_model.objects.create_user("vault")
+    django_user_model.objects.create_user("split")
+
+    # create permission groups
+    grader_group = Group.objects.create(name="grader")
+    grader_group.permissions.add(
+        Permission.objects.get(
+            codename="view_parcel", content_type=ContentType.objects.get(app_label="grading", model="parcel")
+        ),
+        Permission.objects.get(
+            codename="add_parcel", content_type=ContentType.objects.get(app_label="grading", model="parcel")
+        ),
+    )
+
+    receptionist_group = Group.objects.create(name="receptionist")
+    receptionist_group.permissions.add(
+        Permission.objects.get(
+            codename="view_entity", content_type=ContentType.objects.get(app_label="customers", model="entity")
+        ),
+        Permission.objects.get(
+            codename="add_entity", content_type=ContentType.objects.get(app_label="customers", model="entity")
+        ),
+        Permission.objects.get(
+            codename="view_receipt", content_type=ContentType.objects.get(app_label="grading", model="receipt")
+        ),
+        Permission.objects.get(
+            codename="add_receipt", content_type=ContentType.objects.get(app_label="grading", model="receipt")
+        ),
+        Permission.objects.get(
+            codename="view_parcel", content_type=ContentType.objects.get(app_label="grading", model="parcel")
+        ),
+        Permission.objects.get(
+            codename="add_parcel", content_type=ContentType.objects.get(app_label="grading", model="parcel")
+        ),
+    )
+
+    buyer_group = Group.objects.create(name="buyer")
+    buyer_group.permissions.add(
+        Permission.objects.get(
+            codename="view_seller", content_type=ContentType.objects.get(app_label="purchases", model="seller")
+        ),
+        Permission.objects.get(
+            codename="add_seller", content_type=ContentType.objects.get(app_label="purchases", model="seller")
+        ),
+        Permission.objects.get(
+            codename="view_receipt", content_type=ContentType.objects.get(app_label="purchases", model="receipt")
+        ),
+        Permission.objects.get(
+            codename="add_receipt", content_type=ContentType.objects.get(app_label="purchases", model="receipt")
+        ),
+        Permission.objects.get(
+            codename="view_parcel", content_type=ContentType.objects.get(app_label="purchases", model="parcel")
+        ),
+        Permission.objects.get(
+            codename="add_parcel", content_type=ContentType.objects.get(app_label="purchases", model="parcel")
+        ),
+        Permission.objects.get(
+            codename="change_parcel", content_type=ContentType.objects.get(app_label="purchases", model="parcel")
+        ),
+    )
+    data_entry_group = Group.objects.create(name="data_entry")
+    data_entry_group.permissions.add(
+        Permission.objects.get(
+            codename="view_split", content_type=ContentType.objects.get(app_label="grading", model="split")
+        ),
+        Permission.objects.get(
+            codename="add_split", content_type=ContentType.objects.get(app_label="grading", model="split")
+        ),
+        Permission.objects.get(
+            codename="view_parcel", content_type=ContentType.objects.get(app_label="grading", model="parcel")
+        ),
+        Permission.objects.get(
+            codename="view_stone", content_type=ContentType.objects.get(app_label="grading", model="stone")
+        ),
+        Permission.objects.get(
+            codename="add_stone", content_type=ContentType.objects.get(app_label="grading", model="stone")
+        ),
+    )
+
+
+UserData = namedtuple("User", ["username", "password"])
+
+
+@pytest.fixture
+def user(django_user_model):
+    # the way that our pytest-django live-server is setup, the db is
+    # automatically flushed in between tests
+    user_data = UserData(username="alice@alice.com", password="alicepassword")
+    created_user = django_user_model.objects.create_user(
+        user_data.username, email=user_data.username, password=user_data.password
+    )
+    created_user.raw_password = user_data.password
+    return created_user
+
+
+@pytest.fixture
+def grader(django_user_model, erp):
+    user_data = UserData(username="grader@grader.com", password="graderpassword")
+    user = django_user_model.objects.create_user(
+        user_data.username, email=user_data.username, password=user_data.password, is_staff=True
+    )
+    grader_group = Group.objects.get(name="grader")
+    user.groups.add(grader_group)
+
+    user.raw_password = user_data.password
+    return user
+
+
+@pytest.fixture
+def receptionist(django_user_model, erp):
+    user_data = UserData(username="receptionist@receptionist.com", password="receptionistpassword")
+    user = django_user_model.objects.create_user(
+        user_data.username, email=user_data.username, password=user_data.password, is_staff=True
+    )
+    receptionist_group = Group.objects.get(name="receptionist")
+    user.groups.add(receptionist_group)
+
+    user.raw_password = user_data.password
+    return user
+
+
+@pytest.fixture
+def buyer(django_user_model, erp):
+    user_data = UserData(username="buyer@buyer.com", password="buyerpassword")
+    user = django_user_model.objects.create_user(
+        user_data.username, email=user_data.username, password=user_data.password, is_staff=True
+    )
+    buyer_group = Group.objects.get(name="buyer")
+    user.groups.add(buyer_group)
+
+    user.raw_password = user_data.password
+    return user
+
+
+@pytest.fixture
+def data_entry_clerk(django_user_model, erp):
+    user_data = UserData(username="dataentry@dataentry.com", password="dataentrypassword")
+    user = django_user_model.objects.create_user(
+        user_data.username, email=user_data.username, password=user_data.password, is_staff=True
+    )
+    data_entry_group = Group.objects.get(name="data_entry")
+    user.groups.add(data_entry_group)
+
+    user.raw_password = user_data.password
+    return user
