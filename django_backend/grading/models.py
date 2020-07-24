@@ -31,6 +31,7 @@ class AbstractReceipt(models.Model):
     )
 
     admin_url = "admin:grading_receipt_change"
+    close_url = "grading:close_receipt"
 
     def __str__(self):
         return "receipt " + self.code
@@ -46,6 +47,13 @@ class AbstractReceipt(models.Model):
     def get_receipt_with_html_link(self):
         link = reverse(self.admin_url, args=[self.id])
         return format_html(f'<a href="{link}">{self}</a>')
+
+    def get_action_html_link(self):
+        # in the future might have to check user permissions here
+        if not self.closed_out():
+            link = reverse(self.close_url, args=[self.id])
+            return format_html(f'<a href="{link}">Close Out</a>')
+        return "-"
 
     get_receipt_with_html_link.short_description = "receipt"
     get_receipt_with_html_link.admin_order_field = "receipt"

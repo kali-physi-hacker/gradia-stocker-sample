@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from django.utils.timezone import utc
 from django.views import View
 
 from ownerships.models import ParcelTransfer
@@ -71,6 +72,6 @@ class CloseReceiptView(View):
     def post(self, request, pk, *args, **kwargs):
         receipt = Receipt.objects.get(pk=pk)
         receipt.release_by = request.user
-        receipt.release_date = datetime.now()
+        receipt.release_date = datetime.utcnow().replace(tzinfo=utc)
         receipt.save()
         return HttpResponseRedirect(reverse("admin:grading_receipt_change", args=[receipt.id]))

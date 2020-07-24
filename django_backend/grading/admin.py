@@ -2,9 +2,9 @@ from datetime import datetime
 
 from django.contrib import admin
 from django.contrib.auth.models import User
-from django.http import HttpResponse
 from django.urls import reverse
 from django.utils.html import format_html
+from django.utils.timezone import utc
 
 from ownerships.models import VAULT_USERNAMES, ParcelTransfer, StoneTransfer
 
@@ -71,7 +71,7 @@ class SplitAdmin(admin.ModelAdmin):
                     item=instance,
                     from_user=User.objects.get(username="split"),
                     to_user=request.user,
-                    confirmed_date=datetime.now(),
+                    confirmed_date=datetime.utcnow().replace(tzinfo=utc),
                 )
             if isinstance(instance, Stone):
                 instance.split_from = split
@@ -81,7 +81,7 @@ class SplitAdmin(admin.ModelAdmin):
                     item=instance,
                     from_user=User.objects.get(username="split"),
                     to_user=request.user,
-                    confirmed_date=datetime.now(),
+                    confirmed_date=datetime.utcnow().replace(tzinfo=utc),
                 )
 
     def save_model(self, request, obj, form, change):
@@ -186,16 +186,6 @@ class ParcelAdmin(admin.ModelAdmin):
         return False
 
 
-def make_receipt_actions(user):
-    def actions(parcel):
-        # in the future might have to check user permissions here
-        if not parcel.closed_out():
-            return format_html(f"<a href='{reverse('grading:close_receipt', args=[parcel.id])}'>Close Out</a>")
-        return "-"
-
-    return actions
-
-
 @admin.register(Receipt)
 class ReceiptAdmin(admin.ModelAdmin):
     model = Receipt
@@ -210,7 +200,7 @@ class ReceiptAdmin(admin.ModelAdmin):
     inlines = [ParcelInline]
 
     def get_list_display(self, request):
-        return ["__str__", "intake_date", "release_date", "closed_out", make_receipt_actions(request.user)]
+        return ["__str__", "intake_date", "release_date", "closed_out", self.model.get_action_html_link]
 
     def has_add_permission(self, request, obj=None):
         return True
@@ -231,8 +221,8 @@ class ReceiptAdmin(admin.ModelAdmin):
     def save_formset(self, request, form, formset, change):
         instances = formset.save(commit=False)
         for instance in instances:
+            instance.save()
             if isinstance(instance, Parcel):
-                instance.save()
                 ParcelTransfer.objects.create(
                     item=instance, from_user=request.user, to_user=User.objects.get(username="vault")
                 )

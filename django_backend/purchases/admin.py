@@ -3,12 +3,19 @@ from django.contrib import admin
 
 from grading.admin import ParcelAdmin as GradingParcelAdmin
 from grading.admin import ParcelInline as GradingParcelInline
+from grading.admin import ReceiptAdmin as GradingReceiptAdmin
 
 from .models import AuthorizedPersonnel, Parcel, Receipt, Seller
 
 
 def filter_out_gradia_stuff(list_of_strings):
-    gradia_stuff = ["gradia_parcel_code", "finished_basic_grading", "current_location"]
+    gradia_stuff = [
+        "gradia_parcel_code",
+        "finished_basic_grading",
+        "current_location",
+        "split_from",
+        "most_recent_transfer",
+    ]
 
     return list(filter(lambda f: f not in gradia_stuff, list_of_strings.copy()))
 
@@ -32,27 +39,10 @@ class ParcelInline(GradingParcelInline):
 
 
 @admin.register(Receipt)
-class CreateReceiptAdmin(admin.ModelAdmin):
+class ReceiptAdmin(GradingReceiptAdmin):
     model = Receipt
 
-    readonly_fields = ["intake_by", "intake_date", "release_by", "release_date"]
-
-    search_fields = ["code"]
-
     inlines = [ParcelInline]
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        return False
-
-    def has_view_permission(self, request, obj=None):
-        return True
-
-    def save_model(self, request, obj, form, change):
-        obj.intake_by = request.user
-        obj.save()
 
 
 class ParcelRejectionForm(forms.ModelForm):
@@ -88,3 +78,6 @@ class ParcelRejectionAdmin(GradingParcelAdmin):
 
     def get_list_display(self, request):
         return ["customer_parcel_code", "get_receipt_with_html_link", "total_carats", "total_pieces"]
+
+    def has_change_permission(self, request, obj=None):
+        return True

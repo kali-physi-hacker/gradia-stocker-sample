@@ -1,7 +1,7 @@
 Hi {{ username }},
 
 
-<form action="{% url 'grading:close_receipt' receipt.id %}" method="post">
+<form action="{% url 'purchases:close_receipt' receipt.id %}" method="post">
       {% csrf_token %}
       <p>You are about to close out the receipt:</p>
       <p>{{ receipt.get_receipt_with_html_link }}</p>

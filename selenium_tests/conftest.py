@@ -163,6 +163,9 @@ def erp(django_user_model):
         Permission.objects.get(
             codename="add_parcel", content_type=ContentType.objects.get(app_label="purchases", model="parcel")
         ),
+        Permission.objects.get(
+            codename="change_parcel", content_type=ContentType.objects.get(app_label="purchases", model="parcel")
+        ),
     )
 
 

@@ -20,6 +20,7 @@ class Receipt(AbstractReceipt):
         User, on_delete=models.PROTECT, related_name="signed_off_on_stone_purchase_release", null=True, blank=True
     )
     admin_url = "admin:purchases_receipt_change"
+    close_url = "purchases:close_receipt"
 
 
 class Parcel(AbstractParcel):
