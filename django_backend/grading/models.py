@@ -16,9 +16,6 @@ class Split(models.Model):
     def __str__(self):
         return f"Split of {self.original_parcel}"
 
-    class Meta:
-        verbose_name = "Split parcel into smaller parcels or individual stone"
-
 
 class AbstractReceipt(models.Model):
     entity = models.ForeignKey(Entity, on_delete=models.PROTECT)
@@ -124,9 +121,6 @@ class Parcel(AbstractParcel):
         parcel = ParcelTransfer.most_recent_transfer(self)
         return f"{parcel.from_user} -> {parcel.to_user} (on {parcel.initiated_date:%D})"
 
-    class Meta:
-        verbose_name = "Parcel- Check Inventory"
-
 
 class Stone(models.Model):
     data_entry_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="entered_data_for_stone")
@@ -157,9 +151,6 @@ class Stone(models.Model):
     rejection_remarks = models.TextField(blank=True)
 
     split_from = models.ForeignKey(Split, on_delete=models.PROTECT, blank=True, null=True)
-
-    class Meta:
-        verbose_name = "Stone- Check Inventory"
 
     def __str__(self):
         return f"{self.stone_id} ({self.carats}ct {self.color} {self.clarity})"

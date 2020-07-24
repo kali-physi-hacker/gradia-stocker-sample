@@ -29,7 +29,7 @@ def purchases_receipt(django_user_model, admin_user):
     return created_receipt
 
 
-def test_buyer_can_take_in_a_bag_of_stones(browser, buyer):
+def test_buyer_can_setup_new_sellers_and_take_in_a_bag_of_stones(browser, buyer):
     # gary the buyer has found a new seller to trade with
     # he goes to add that seller's info
     browser.login(buyer.username, buyer.raw_password)
