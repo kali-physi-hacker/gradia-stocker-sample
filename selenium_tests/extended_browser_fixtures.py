@@ -56,6 +56,7 @@ def click_save(browser):
 
 def search_in_admin_list_view(browser, search_string):
     search_bar = browser.find_element_by_name("q")
+    search_bar.clear()
     search_bar.send_keys(search_string)
 
     search_button = browser.find_element_by_css_selector('input[value="Search"]')

@@ -83,8 +83,8 @@ def test_receptionist_can_receive_stones_and_create_a_receipt(browser, reception
     browser.assert_body_contains_text("1 entity")
     browser.find_element_by_link_text("Van Klaren")
 
-    # TODO: click into customer and check that Winnine the employee is
-    # authorized for Van Klaren
+    # TODO: click into customer and check that Winnie the employee is
+    # an authorized person for Van Klaren
 
     # Having checked that, Roxy opens a physical receipt for the customer
     # After the customer has left, Roxy goes to put the receipt data into ERP

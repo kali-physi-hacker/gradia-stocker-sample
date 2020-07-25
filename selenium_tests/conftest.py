@@ -33,7 +33,7 @@ def browser(live_server, settings):
 
 
 @pytest.fixture
-def receipt(django_user_model, admin_user):
+def receipt(django_user_model, erp, admin_user):
     created_receipt = Receipt.objects.create(
         entity=Entity.objects.create(name="Van Klaren", address="addressy", phone="12345678", email="vk@vk.com"),
         code="VK-0001",

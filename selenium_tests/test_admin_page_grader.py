@@ -17,9 +17,6 @@ def test_grader_can_confirm_received_stones(browser, grader, receipt):
     parcel_link = browser.find_element_by_partial_link_text("Parcel")
     browser.slowly_click(parcel_link)
 
-    # stash this url to come back to it later
-    parcel_page_url = browser.current_url
-
     # and sees that there is a parcel when she filters by current owner
     owner_filter = browser.find_element_by_link_text("With me")
     browser.slowly_click(owner_filter)
@@ -37,7 +34,7 @@ def test_grader_can_confirm_received_stones(browser, grader, receipt):
     browser.slowly_click(proceed_button)
 
     # now the parcel shows up as with Tanly, and as confirmed
-    browser.goto(parcel_page_url)
+    browser.go_to_parcel_page()
     owner_filter = browser.find_element_by_link_text("With me")
     browser.slowly_click(owner_filter)
     browser.find_element_by_partial_link_text(parcel.gradia_parcel_code)

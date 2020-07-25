@@ -93,20 +93,8 @@ UserData = namedtuple("User", ["username", "password"])
 
 
 @pytest.fixture
-def user(django_user_model):
-    # the way that our pytest-django live-server is setup, the db is
-    # automatically flushed in between tests
-    user_data = UserData(username="alice@alice.com", password="alicepassword")
-    created_user = django_user_model.objects.create_user(
-        user_data.username, email=user_data.username, password=user_data.password
-    )
-    created_user.raw_password = user_data.password
-    return created_user
-
-
-@pytest.fixture
 def grader(django_user_model, erp):
-    user_data = UserData(username="grader@grader.com", password="graderpassword")
+    user_data = UserData(username="grader", password="graderpassword")
     user = django_user_model.objects.create_user(
         user_data.username, email=user_data.username, password=user_data.password, is_staff=True
     )
@@ -119,7 +107,7 @@ def grader(django_user_model, erp):
 
 @pytest.fixture
 def receptionist(django_user_model, erp):
-    user_data = UserData(username="receptionist@receptionist.com", password="receptionistpassword")
+    user_data = UserData(username="receptionist", password="receptionistpassword")
     user = django_user_model.objects.create_user(
         user_data.username, email=user_data.username, password=user_data.password, is_staff=True
     )
@@ -132,7 +120,7 @@ def receptionist(django_user_model, erp):
 
 @pytest.fixture
 def buyer(django_user_model, erp):
-    user_data = UserData(username="buyer@buyer.com", password="buyerpassword")
+    user_data = UserData(username="buyer", password="buyerpassword")
     user = django_user_model.objects.create_user(
         user_data.username, email=user_data.username, password=user_data.password, is_staff=True
     )
@@ -145,7 +133,7 @@ def buyer(django_user_model, erp):
 
 @pytest.fixture
 def data_entry_clerk(django_user_model, erp):
-    user_data = UserData(username="dataentry@dataentry.com", password="dataentrypassword")
+    user_data = UserData(username="dataentry", password="dataentrypassword")
     user = django_user_model.objects.create_user(
         user_data.username, email=user_data.username, password=user_data.password, is_staff=True
     )
