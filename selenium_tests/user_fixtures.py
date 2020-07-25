@@ -87,6 +87,21 @@ def erp(django_user_model):
             codename="add_stone", content_type=ContentType.objects.get(app_label="grading", model="stone")
         ),
     )
+    vault_manager_group = Group.objects.create(name="vault_manager")
+    vault_manager_group.permissions.add(
+        Permission.objects.get(
+            codename="view_split", content_type=ContentType.objects.get(app_label="grading", model="split")
+        ),
+        Permission.objects.get(
+            codename="add_split", content_type=ContentType.objects.get(app_label="grading", model="split")
+        ),
+        Permission.objects.get(
+            codename="view_parcel", content_type=ContentType.objects.get(app_label="grading", model="parcel")
+        ),
+        Permission.objects.get(
+            codename="add_parcel", content_type=ContentType.objects.get(app_label="grading", model="parcel")
+        ),
+    )
 
 
 UserData = namedtuple("User", ["username", "password"])
@@ -139,6 +154,19 @@ def data_entry_clerk(django_user_model, erp):
     )
     data_entry_group = Group.objects.get(name="data_entry")
     user.groups.add(data_entry_group)
+
+    user.raw_password = user_data.password
+    return user
+
+
+@pytest.fixture
+def vault_manager(django_user_model, erp):
+    user_data = UserData(username="vaultmanager", password="vaultmanagerpassword")
+    user = django_user_model.objects.create_user(
+        user_data.username, email=user_data.username, password=user_data.password, is_staff=True
+    )
+    vault_manager_group = Group.objects.get(name="vault_manager")
+    user.groups.add(vault_manager_group)
 
     user.raw_password = user_data.password
     return user
