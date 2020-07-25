@@ -2,11 +2,9 @@ from datetime import datetime
 
 from django.contrib import admin
 from django.contrib.auth.models import User
-from django.urls import reverse
-from django.utils.html import format_html
 from django.utils.timezone import utc
 
-from ownerships.models import VAULT_USERNAMES, ParcelTransfer, StoneTransfer
+from ownerships.models import ParcelTransfer, StoneTransfer
 
 from .forms import StoneForm
 from .models import Parcel, Receipt, Split, Stone
@@ -125,22 +123,7 @@ class ParcelOwnerFilter(admin.SimpleListFilter):
 
 def make_parcel_actions(user):
     def actions(parcel):
-        transfer = ParcelTransfer.most_recent_transfer(parcel)
-        if transfer.fresh:
-            if transfer.to_user == user:
-                if transfer.in_transit():
-                    return format_html(
-                        f"<a href='{reverse('grading:confirm_received', args=[parcel.id])}'>Confirm Received</a>"
-                    )
-                else:
-                    return format_html(
-                        f"<a href='{reverse('grading:return_to_vault', args=[parcel.id])}'>Return to Vault</a>"
-                    )
-            if transfer.in_transit() and transfer.to_user.username == "vault" and user.username in VAULT_USERNAMES:
-                return format_html(
-                    f"<a href='{reverse('grading:confirm_received', args=[parcel.id])}'>Confirm Stones for Vault</a>"
-                )
-        return "-"
+        return parcel.get_action_html_link_for_user(user)
 
     return actions
 

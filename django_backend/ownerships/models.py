@@ -5,8 +5,6 @@ from django.core.exceptions import PermissionDenied
 from django.db import models
 from django.utils.timezone import utc
 
-VAULT_USERNAMES = ["anthony", "admin", "gary"]
-
 
 class AbstractItemTransfer(models.Model):
     from_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="gave_parcels")
@@ -83,7 +81,10 @@ class AbstractItemTransfer(models.Model):
     def can_confirm_received(cls, item, user):
         owner, status = item.current_location()
         if owner != user:
-            if not (owner.username == "vault" and user.username in VAULT_USERNAMES):
+            if owner.username == "vault" and user.groups.filter(name="vault_manager").exists():
+                # okay if it is to vault and user is a vault manager
+                pass
+            else:
                 raise PermissionDenied(
                     f"you are not in possession of the parcel- it is currently with {owner}, "
                     "so you cannot confirm you have received it"

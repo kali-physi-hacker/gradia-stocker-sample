@@ -45,6 +45,9 @@ class AbstractReceipt(models.Model):
         link = reverse(self.admin_url, args=[self.id])
         return format_html(f'<a href="{link}">{self}</a>')
 
+    get_receipt_with_html_link.short_description = "receipt"
+    get_receipt_with_html_link.admin_order_field = "receipt"
+
     def get_action_html_link(self):
         # in the future might have to check user permissions here
         if not self.closed_out():
@@ -52,13 +55,12 @@ class AbstractReceipt(models.Model):
             return format_html(f'<a href="{link}">Close Out</a>')
         return "-"
 
-    get_receipt_with_html_link.short_description = "receipt"
-    get_receipt_with_html_link.admin_order_field = "receipt"
+    get_action_html_link.short_description = "action"
 
 
 class Receipt(AbstractReceipt):
     class Meta:
-        verbose_name = "Customer Receipt"
+        verbose_name = "customer receipt"
 
 
 class AbstractParcel(models.Model):
@@ -111,6 +113,31 @@ class Parcel(AbstractParcel):
     def most_recent_transfer(self):
         parcel = ParcelTransfer.most_recent_transfer(self)
         return f"{parcel.from_user} -> {parcel.to_user} (on {parcel.initiated_date:%D})"
+
+    def get_action_html_link_for_user(self, user):
+        # in the future might have to check user permissions here
+        transfer = ParcelTransfer.most_recent_transfer(self)
+        if transfer.fresh:
+            if transfer.to_user == user:
+                if transfer.in_transit():
+                    return format_html(
+                        f"<a href='{reverse('grading:confirm_received', args=[self.id])}'>Confirm Received</a>"
+                    )
+                else:
+                    return format_html(
+                        f"<a href='{reverse('grading:return_to_vault', args=[self.id])}'>Return to Vault</a>"
+                    )
+            if (
+                transfer.in_transit()
+                and transfer.to_user.username == "vault"
+                and user.groups.filter(name="vault_manager").exists()
+            ):
+                return format_html(
+                    f"<a href='{reverse('grading:confirm_received', args=[self.id])}'>Confirm Stones for Vault</a>"
+                )
+        return "-"
+
+    get_action_html_link_for_user.short_description = "action"
 
 
 class Stone(models.Model):
