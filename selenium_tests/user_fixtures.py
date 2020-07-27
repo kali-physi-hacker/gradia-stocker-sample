@@ -6,8 +6,7 @@ from django.contrib.contenttypes.models import ContentType
 import pytest
 
 
-@pytest.fixture
-def erp(django_user_model):
+def erp_setup(django_user_model):
     # for the erp to work, there are some users and group permissions that we need
     django_user_model.objects.create_user("vault")
     django_user_model.objects.create_user("split")
@@ -102,6 +101,13 @@ def erp(django_user_model):
             codename="add_parcel", content_type=ContentType.objects.get(app_label="grading", model="parcel")
         ),
     )
+
+
+@pytest.fixture
+def erp(django_user_model):
+    # have this separate non-fixture function
+    # so that we can call it to setup
+    erp_setup(django_user_model)
 
 
 UserData = namedtuple("User", ["username", "password"])
