@@ -7,9 +7,13 @@
     </style>
   </head>
   <body>
-    <p>You are not allowed to do this. The reason is:</p>
+    <p>You are not allowed to do this.</p>
     <p>
-      {{ exception }}
+      {% if exception %}
+        {{ exception }}
+      {% else %}
+        Check if you have been given the correct permissions to perform this action.
+      {% endif %}
     </p>
   </body>
 </html>

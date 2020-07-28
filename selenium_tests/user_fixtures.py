@@ -100,6 +100,14 @@ def erp_setup(django_user_model):
         Permission.objects.get(
             codename="add_parcel", content_type=ContentType.objects.get(app_label="grading", model="parcel")
         ),
+        Permission.objects.get(
+            codename="view_parceltransfer",
+            content_type=ContentType.objects.get(app_label="ownerships", model="parceltransfer"),
+        ),
+        Permission.objects.get(
+            codename="add_parceltransfer",
+            content_type=ContentType.objects.get(app_label="ownerships", model="parceltransfer"),
+        ),
     )
 
 
