@@ -49,6 +49,12 @@ def click_add(browser):
     browser.slowly_click(add_link, elem_should_disappear=False)
 
 
+def click_go(browser):
+    add_link = browser.find_element_by_css_selector('button[title="Run the selected action"]')
+    # when clicking inline add new row, elem stays
+    browser.slowly_click(add_link, elem_should_disappear=True)
+
+
 def click_save(browser):
     save_elem = browser.find_element_by_name("_save")
     browser.slowly_click(save_elem, elem_should_disappear=True)
@@ -72,6 +78,7 @@ def setup_browser_helper_functions(browser):
     browser.wait_till_gone = partial(wait_till_gone, browser)
     browser.slowly_click = partial(slowly_click, browser)
     browser.click_add = partial(click_add, browser)
+    browser.click_go = partial(click_go, browser)
     browser.click_save = partial(click_save, browser)
     browser.search_in_admin_list_view = partial(search_in_admin_list_view, browser)
     # TODO : this is going to suck if search_string has " or '

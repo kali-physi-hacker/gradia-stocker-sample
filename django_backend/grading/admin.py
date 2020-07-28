@@ -99,10 +99,11 @@ class SplitAdmin(admin.ModelAdmin):
         return False
 
 
-class ParcelOwnerFilter(admin.SimpleListFilter):
+class ItemOwnerFilter(admin.SimpleListFilter):
     title = "current owner"
     parameter_name = "owner"
     default_value = "me"
+    transfer_model = None
 
     def lookups(self, request, model_admin):
         return (("me", "With me"), ("vault", "With the vault"), ("goldway", "With Goldway"))
@@ -113,12 +114,20 @@ class ParcelOwnerFilter(admin.SimpleListFilter):
             username_filter = request.user.username
 
         if username_filter:
-            fresh_transfers = ParcelTransfer.objects.filter(to_user__username=username_filter, fresh=True)
+            fresh_transfers = self.transfer_model.objects.filter(to_user__username=username_filter, fresh=True)
             parcel_ids = (p.item.id for p in fresh_transfers)
             return queryset.filter(id__in=parcel_ids)
 
         ## self.value() == "__all__" or None
         return queryset
+
+
+class ParcelOwnerFilter(ItemOwnerFilter):
+    transfer_model = ParcelTransfer
+
+
+class StoneOwnerFilter(ItemOwnerFilter):
+    transfer_model = StoneTransfer
 
 
 def make_parcel_actions(user):
@@ -241,6 +250,7 @@ class StoneAdmin(admin.ModelAdmin):
         "grader_3_inclusion",
         "rejection_remarks",
     ]
+    list_filter = [StoneOwnerFilter]
 
     def get_list_display(self, request):
         return [
@@ -253,6 +263,24 @@ class StoneAdmin(admin.ModelAdmin):
             "culet",
             # make_parcel_actions(request.user),
         ]
+
+    actions = ["transfer_to_goldway"]
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        if not request.user.groups.filter(name="vault_manager").exists():
+            del actions["transfer_to_goldway"]
+        return actions
+
+    def transfer_to_goldway(self, request, queryset):
+        for stone in queryset.all():
+            StoneTransfer.initiate_transfer(
+                item=stone,
+                from_user=User.objects.get(username="vault"),
+                to_user=User.objects.get(username="goldway"),
+            )
+
+    transfer_to_goldway.short_description = "Transfer to Goldway"
 
     def has_change_permission(self, request, obj=None):
         return False

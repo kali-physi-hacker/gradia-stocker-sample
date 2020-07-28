@@ -5,8 +5,8 @@ from selenium import webdriver
 import pytest
 from customers.models import Entity
 from extended_browser_fixtures import setup_browser_helper_functions
-from grading.models import Parcel, Receipt
-from ownerships.models import ParcelTransfer
+from grading.models import Parcel, Receipt, Stone
+from ownerships.models import ParcelTransfer, StoneTransfer
 from urls import goto
 from user_fixtures import *  # NOQA
 
@@ -19,7 +19,7 @@ def browser(live_server, settings):
     settings.DEBUG = True
     try:
         chrome_options = webdriver.ChromeOptions()
-        # chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--headless")
         chrome_options.add_argument("--disable-gpu")
         driver = webdriver.Chrome(options=chrome_options)
         driver.implicitly_wait(5)  # seconds
@@ -55,3 +55,49 @@ def receipt(django_user_model, erp, admin_user):
     ParcelTransfer.confirm_received(parcel)
     created_receipt.parcel_set.add(parcel)
     return created_receipt
+
+
+@pytest.fixture
+def stones(django_user_model, erp, data_entry_clerk, grader, receptionist):
+    stone_list = [
+        Stone.objects.create(
+            data_entry_user=data_entry_clerk,
+            grader_1=grader,
+            sequence_number=4,
+            stone_id="stoneid1",
+            carats=4,
+            color="D",
+            clarity="VS4",
+            fluo="a",
+            culet="b",
+        ),
+        Stone.objects.create(
+            data_entry_user=data_entry_clerk,
+            grader_1=grader,
+            sequence_number=2,
+            stone_id="stoneid2",
+            carats=2,
+            color="D",
+            clarity="VS2",
+            fluo="a",
+            culet="b",
+        ),
+        Stone.objects.create(
+            data_entry_user=data_entry_clerk,
+            grader_1=grader,
+            sequence_number=3,
+            stone_id="stoneid3",
+            carats=3,
+            color="D",
+            clarity="VS3",
+            fluo="a",
+            culet="b",
+        ),
+    ]
+    # vault confirms it has received this parcel
+    for s in stone_list:
+        StoneTransfer.objects.create(
+            item=s, from_user=receptionist, to_user=django_user_model.objects.get(username="vault")
+        )
+        StoneTransfer.confirm_received(s)
+    return stone_list

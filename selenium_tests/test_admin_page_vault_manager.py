@@ -115,3 +115,35 @@ def test_vault_manager_can_transfer_vault_parcels_to_others(browser, receipt, va
     browser.go_to_parcel_page()
     browser.assert_body_contains_text("1 parcel")
     browser.assert_body_contains_text(f"{grader}, unconfirmed")
+
+
+def test_vault_manager_can_initiate_transfer_to_goldway(browser, stones, vault_manager):
+    # Anthony the vault manager wants to transfer 2 stones to goldway
+
+    browser.login(vault_manager.username, vault_manager.raw_password)
+
+    browser.go_to_stone_page()
+    # he sees that there are 3 stones in the vault
+    owner_filter = browser.find_element_by_link_text("With the vault")
+    browser.slowly_click(owner_filter)
+    browser.assert_body_contains_text("3 stones")
+
+    # he ticks the checkbox for the first stone
+    browser.find_element_by_css_selector(f'input[value="{stones[0].id}"]').click()
+    # he ticks the checkbox for the second stone
+    browser.find_element_by_css_selector(f'input[value="{stones[1].id}"]').click()
+
+    # he selects "send to goldway" from the action dropdown menu
+    action_dropdown = Select(browser.find_element_by_name("action"))
+    action_dropdown.select_by_visible_text("Transfer to Goldway")
+
+    browser.click_go()
+
+    # and only one stone is still in the vault
+    browser.assert_body_contains_text("1 stone")
+
+    # now two stones show up as in transit to Goldway
+    browser.go_to_stone_page()
+    owner_filter = browser.find_element_by_link_text("With Goldway")
+    browser.slowly_click(owner_filter)
+    browser.assert_body_contains_text("2 stones")
