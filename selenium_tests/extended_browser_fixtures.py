@@ -36,11 +36,11 @@ def wait_till_gone(browser, elem):
 
 
 def slowly_click(browser, elem, elem_should_disappear=True):
-    time.sleep(0.5)
+    # can go lower for headless, but need more leeway when not running headless
+    time.sleep(0.4)
     elem.click()
     if elem_should_disappear:
         browser.wait_till_gone(elem)
-    time.sleep(0.3)
 
 
 def click_add(browser):
