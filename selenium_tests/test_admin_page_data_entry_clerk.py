@@ -34,6 +34,9 @@ def test_data_entry_can_split_parcel_to_stones(browser, data_entry_clerk, grader
         browser.find_element_by_name(f"stone_set-{ii}-fluo").send_keys("a")
         browser.find_element_by_name(f"stone_set-{ii}-culet").send_keys("x")
 
+    # the add link disappears because 50 stones is the limit
+    assert not add_link.is_displayed()
+
     # she saves
     browser.click_save()
 
