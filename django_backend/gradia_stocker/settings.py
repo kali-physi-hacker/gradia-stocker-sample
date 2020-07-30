@@ -136,3 +136,7 @@ EMAIL_HOST_PASSWORD = "SG.0tjzodZ_R66QIa816-ug0g.RcQOmm-OfP3i_i2akccWxgHBbQtVFXB
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = "info@gradia.net"
+
+
+# need to allow more form field when we input 50 stones
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 2000
