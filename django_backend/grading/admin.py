@@ -23,7 +23,7 @@ class StoneInline(admin.TabularInline):
         return False
 
     extra = 0
-    max_number = 50
+    max_num = 50
 
 
 class ParcelInline(admin.TabularInline):
@@ -40,7 +40,7 @@ class ParcelInline(admin.TabularInline):
     readonly_fields = ["get_parcel_with_html_link"]
 
     extra = 0
-    max_number = 10
+    max_num = 10
 
     def has_delete_permission(self, request, obj=None):
         return False
