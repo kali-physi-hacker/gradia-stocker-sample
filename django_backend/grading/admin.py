@@ -264,7 +264,7 @@ class StoneAdmin(admin.ModelAdmin):
             # make_parcel_actions(request.user),
         ]
 
-    actions = ["transfer_to_goldway"]
+    actions = ["transfer_to_goldway" , "transfer_to_vault"]
 
     def get_actions(self, request):
         actions = super().get_actions(request)
@@ -279,8 +279,17 @@ class StoneAdmin(admin.ModelAdmin):
                 from_user=User.objects.get(username="vault"),
                 to_user=User.objects.get(username="goldway"),
             )
+    
+    def transfer_to_vault(self, request, queryset):
+        for stone in queryset.all():
+            StoneTransfer.initiate_transfer(
+                item=stone,
+                from_user=User.objects.get(username=request.user.username),
+                to_user=User.objects.get(username="vault"),
+            )
 
     transfer_to_goldway.short_description = "Transfer to Goldway"
+    transfer_to_vault.short_description = "Transfer to Vault"
 
     def has_change_permission(self, request, obj=None):
         return False
