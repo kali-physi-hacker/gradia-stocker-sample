@@ -1,9 +1,8 @@
 from django.contrib.auth.models import User
+
 from selenium.webdriver.support.ui import Select
 
-from ownerships.models import ParcelTransfer
-
-import pytest
+from ownerships.models import ParcelTransfer, StoneTransfer
 
 
 def test_grader_can_confirm_received_stones(browser, grader, receipt):
@@ -79,24 +78,32 @@ def test_grader_can_return_parcel_to_vault(browser, grader, receipt):
     owner_filter = browser.find_element_by_link_text("With me")
     browser.slowly_click(owner_filter)
     browser.assert_body_contains_text("0 parcels")
-    
-@pytest.mark.withgrader
-def test_grader_can_return_stones_to_vault(browser, stones_owned_by_grader, grader):
-    # Tanly is a greader, she wants to transfer back the stone to the vault
 
+
+def test_grader_can_return_stones_that_belong_to_her_to_vault(browser, stones, grader):
+    vault = User.objects.get(username="vault")
+    for stone in stones:
+        # Tanly the grader has some stones given to her by the vault
+        StoneTransfer.initiate_transfer(item=stone, from_user=vault, to_user=grader)
+        # these stones have already been confirmed as received by Tanly
+        StoneTransfer.confirm_received(stone)
+
+    # She decides she wants to transfer the stones back to the vault
+
+    # she logs in
     browser.login(grader.username, grader.raw_password)
-
     browser.go_to_stone_page()
-    # she now has 3 stones with her
+    # she sees she has 3 stones with her
     owner_filter = browser.find_element_by_link_text("With me")
     browser.slowly_click(owner_filter)
+    browser.assert_body_contains_text("3 stones")
 
     # she ticks the checkbox for the first stone
-    browser.find_element_by_css_selector(f'input[value="{stones_owned_by_grader[0].id}"]').click()
+    browser.find_element_by_css_selector(f'input[value="{stones[0].id}"]').click()
     # she ticks the checkbox for the second stone
-    browser.find_element_by_css_selector(f'input[value="{stones_owned_by_grader[1].id}"]').click()
+    browser.find_element_by_css_selector(f'input[value="{stones[1].id}"]').click()
 
-    # he selects "send to vault" from the action dropdown menu
+    # she selects "send to vault" from the action dropdown menu
     action_dropdown = Select(browser.find_element_by_name("action"))
     action_dropdown.select_by_visible_text("Transfer to Vault")
 
@@ -109,19 +116,19 @@ def test_grader_can_return_stones_to_vault(browser, stones_owned_by_grader, grad
     browser.go_to_stone_page()
     owner_filter = browser.find_element_by_link_text("With the vault")
     browser.slowly_click(owner_filter)
+
     browser.assert_body_contains_text("2 stones")
 
 
-@pytest.mark.withvault
-def test_grader_cannot_return_stones_to_vault(browser, stones, grader):
-    # Tanly is a greader, she wants to transfer back the stone to the vault
-
+def test_grader_cannot_return_stones_that_do_not_belong_to_her(browser, stones, grader):
+    # Tanly is a grader, she wants to transfer back the stone to the vault
     browser.login(grader.username, grader.raw_password)
 
     browser.go_to_stone_page()
-    # she now has no stones with her, but she sees 3 stones with the vault
+    # she has no stones with her, but there are 3 stones with the vault
     owner_filter = browser.find_element_by_link_text("With the vault")
     browser.slowly_click(owner_filter)
+    browser.assert_body_contains_text("3 stones")
 
     # she ticks the checkbox for the first stone
     browser.find_element_by_css_selector(f'input[value="{stones[0].id}"]').click()
