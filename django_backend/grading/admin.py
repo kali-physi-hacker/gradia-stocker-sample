@@ -106,20 +106,33 @@ class ItemOwnerFilter(admin.SimpleListFilter):
     transfer_model = None
 
     def lookups(self, request, model_admin):
-        return (("me", "With me"), ("vault", "With the vault"), ("goldway", "With Goldway"))
+        return (
+            ("me", "With me"),
+            ("vault", "With the vault"),
+            ("goldway", "With Goldway"),
+            ("include", "Including splits and exited"),
+        )
 
     def queryset(self, request, queryset):
         username_filter = self.value()
-        if self.value() == "me":
+
+        if username_filter == "include":
+            return queryset
+
+        if username_filter == "me":
             username_filter = request.user.username
 
         if username_filter:
             fresh_transfers = self.transfer_model.objects.filter(to_user__username=username_filter, fresh=True)
-            parcel_ids = (p.item.id for p in fresh_transfers)
-            return queryset.filter(id__in=parcel_ids)
-
-        ## self.value() == "__all__" or None
-        return queryset
+        else:
+            # the __all__ case where self.value() == None
+            fresh_transfers = (
+                self.transfer_model.objects.filter(fresh=True)
+                .exclude(to_user__username="split")
+                .exclude(to_user__username="exit")
+            )
+        parcel_ids = (p.item.id for p in fresh_transfers)
+        return queryset.filter(id__in=parcel_ids)
 
 
 class ParcelOwnerFilter(ItemOwnerFilter):

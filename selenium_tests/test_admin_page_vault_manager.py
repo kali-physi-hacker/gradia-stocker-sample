@@ -78,10 +78,20 @@ def test_vault_manager_can_split_parcels_to_smaller_parcels(browser, receipt, va
     # he saves
     browser.click_save()
 
-    # now the original parcel shows up as split
+    # the original parcel only shows up as split when we filter by all
+    # inclusive results
     browser.go_to_parcel_page()
+    owner_filter = browser.find_element_by_link_text("Including splits and exited")
+    browser.slowly_click(owner_filter)
     browser.search_in_admin_list_view(parcel.gradia_parcel_code)
     browser.assert_body_contains_text("split, unconfirmed")
+
+    original_parcel_link = browser.find_element_by_link_text(parcel.gradia_parcel_code)
+    # but the original parcel does not show up by default
+    owner_filter = browser.find_element_by_link_text("All")
+    browser.slowly_click(owner_filter)
+    browser.wait_till_gone(original_parcel_link)
+
     # and there are two new subparcels owned by vault
     browser.search_in_admin_list_view("VK20200723-1A")
     browser.assert_body_contains_text("vault, confirmed")

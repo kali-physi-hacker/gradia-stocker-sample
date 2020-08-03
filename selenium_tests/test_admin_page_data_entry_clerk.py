@@ -40,10 +40,20 @@ def test_data_entry_can_split_parcel_to_stones(browser, data_entry_clerk, grader
     # she saves
     browser.click_save()
 
-    # now the parcel shows up as having been split
+    # now the parcel does not show up by default
     browser.go_to_parcel_page()
+    browser.assert_body_contains_text(f"0 parcels")
+
+    # but shows up as having been split
+    browser.slowly_click(browser.find_element_by_link_text("Including splits and exited"))
+    browser.assert_body_contains_text(f"1 parcel")
     browser.assert_body_contains_text(f"split, unconfirmed")
+    # it also shows that the parcel has been split into 50 stones
+    browser.assert_body_contains_text(f"50 stones")
+
     # and we can see stones in the vault
     browser.go_to_stone_page()
     browser.assert_body_contains_text(f"vault, confirmed")
     browser.assert_body_contains_text(f"50 stones")
+    # the stones show up as having been split from the correct parcel
+    assert len(browser.find_elements_by_link_text(str(parcel))) == 50

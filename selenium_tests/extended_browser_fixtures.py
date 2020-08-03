@@ -15,7 +15,6 @@ def assert_body_contains_text(browser, search_string):
     try:
         browser.find_element_by_xpath(f'//*[text()[contains(., "{search_string}")]]')
     except NoSuchElementException:
-        print(browser.get_body_text())
         pytest.fail(f"unable to find {search_string} in browser body:\n\n{browser.get_body_text()}")
 
 
