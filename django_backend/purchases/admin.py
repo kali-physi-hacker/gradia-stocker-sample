@@ -14,6 +14,7 @@ def filter_out_gradia_stuff(list_of_strings):
         "finished_basic_grading",
         "current_location",
         "split_from",
+        "split_into",
         "most_recent_transfer",
     ]
 

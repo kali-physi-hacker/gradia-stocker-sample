@@ -156,6 +156,7 @@ class ParcelAdmin(admin.ModelAdmin):
 
     readonly_fields = [
         "split_from",
+        "split_into",
         "gradia_parcel_code",
         "customer_parcel_code",
         "receipt",
@@ -171,6 +172,8 @@ class ParcelAdmin(admin.ModelAdmin):
 
     def get_list_display(self, request):
         return [
+            "split_from",
+            "split_into",
             "gradia_parcel_code",
             "customer_parcel_code",
             "get_receipt_with_html_link",
@@ -236,6 +239,10 @@ class ReceiptAdmin(admin.ModelAdmin):
                 )
 
 
+def parcel(stone):
+    return stone.split_from.original_parcel.get_parcel_with_html_link()
+
+
 @admin.register(Stone)
 class StoneAdmin(admin.ModelAdmin):
     model = Stone
@@ -266,16 +273,7 @@ class StoneAdmin(admin.ModelAdmin):
     list_filter = [StoneOwnerFilter]
 
     def get_list_display(self, request):
-        return [
-            "stone_id",
-            "current_location",
-            "carats",
-            "color",
-            "clarity",
-            "fluo",
-            "culet",
-            # make_parcel_actions(request.user),
-        ]
+        return ["stone_id", "current_location", "carats", "color", "clarity", "fluo", "culet", parcel]
 
     actions = ["transfer_to_goldway" , "transfer_to_vault"]
 

@@ -5,7 +5,7 @@ from selenium import webdriver
 import pytest
 from customers.models import Entity
 from extended_browser_fixtures import setup_browser_helper_functions
-from grading.models import Parcel, Receipt, Stone
+from grading.models import Parcel, Receipt, Split, Stone
 from ownerships.models import ParcelTransfer, StoneTransfer
 from urls import goto
 from user_fixtures import *  # NOQA
@@ -19,7 +19,7 @@ def browser(live_server, settings):
     settings.DEBUG = True
     try:
         chrome_options = webdriver.ChromeOptions()
-        #chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--headless")
         chrome_options.add_argument("--disable-gpu")
         driver = webdriver.Chrome(options=chrome_options)
         driver.implicitly_wait(5)  # seconds
@@ -58,9 +58,12 @@ def receipt(django_user_model, erp, admin_user):
 
 
 @pytest.fixture
-def stones(django_user_model, erp, data_entry_clerk, grader, receptionist):
+def stones(django_user_model, receipt, data_entry_clerk, grader, receptionist):
+    parcel = receipt.parcel_set.first()
+    split = Split.objects.create(original_parcel=parcel, split_by=data_entry_clerk)
     stone_list = [
         Stone.objects.create(
+            split_from=split,
             data_entry_user=data_entry_clerk,
             grader_1=grader,
             sequence_number=4,
@@ -72,6 +75,7 @@ def stones(django_user_model, erp, data_entry_clerk, grader, receptionist):
             culet="b",
         ),
         Stone.objects.create(
+            split_from=split,
             data_entry_user=data_entry_clerk,
             grader_1=grader,
             sequence_number=2,
@@ -83,6 +87,7 @@ def stones(django_user_model, erp, data_entry_clerk, grader, receptionist):
             culet="b",
         ),
         Stone.objects.create(
+            split_from=split,
             data_entry_user=data_entry_clerk,
             grader_1=grader,
             sequence_number=3,
@@ -101,6 +106,7 @@ def stones(django_user_model, erp, data_entry_clerk, grader, receptionist):
         )
         StoneTransfer.confirm_received(s)
     return stone_list
+
 
 @pytest.fixture
 def stones_owned_by_grader(django_user_model, erp, data_entry_clerk, grader, receptionist):

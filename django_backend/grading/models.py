@@ -16,6 +16,18 @@ class Split(models.Model):
     def __str__(self):
         return f"Split of {self.original_parcel}"
 
+    def split_into_summary(self):
+        summary = ""
+        parcels = Parcel.objects.filter(split_from=self).count()
+        if parcels:
+            summary += f"{parcels} parcels"
+        stones = Stone.objects.filter(split_from=self).count()
+        if stones:
+            summary += f"{stones} stones"
+        if summary == "":
+            raise
+        return summary
+
 
 class AbstractReceipt(models.Model):
     entity = models.ForeignKey(Entity, on_delete=models.PROTECT)
@@ -138,6 +150,13 @@ class Parcel(AbstractParcel):
         return "-"
 
     get_action_html_link_for_user.short_description = "action"
+
+    def split_into(self):
+        try:
+            split = Split.objects.get(original_parcel=self)
+        except self.DoesNotExist:
+            return "not split"
+        return split.split_into_summary()
 
 
 class Stone(models.Model):
