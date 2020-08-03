@@ -109,9 +109,12 @@ def stones(django_user_model, receipt, data_entry_clerk, grader, receptionist):
 
 
 @pytest.fixture
-def stones_owned_by_grader(django_user_model, erp, data_entry_clerk, grader, receptionist):
+def stones_owned_by_grader(django_user_model, receipt, data_entry_clerk, grader, receptionist):
+    parcel = receipt.parcel_set.first()
+    split = Split.objects.create(original_parcel=parcel, split_by=data_entry_clerk)
     stone_list = [
         Stone.objects.create(
+            split_from=split,
             data_entry_user=data_entry_clerk,
             grader_1=grader,
             sequence_number=4,
@@ -123,6 +126,7 @@ def stones_owned_by_grader(django_user_model, erp, data_entry_clerk, grader, rec
             culet="b",
         ),
         Stone.objects.create(
+            split_from=split,
             data_entry_user=data_entry_clerk,
             grader_1=grader,
             sequence_number=2,
@@ -134,6 +138,7 @@ def stones_owned_by_grader(django_user_model, erp, data_entry_clerk, grader, rec
             culet="b",
         ),
         Stone.objects.create(
+            split_from=split,
             data_entry_user=data_entry_clerk,
             grader_1=grader,
             sequence_number=3,

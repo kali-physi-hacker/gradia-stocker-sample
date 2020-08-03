@@ -119,7 +119,7 @@ def test_grader_cannot_return_stones_to_vault(browser, stones, grader):
     browser.login(grader.username, grader.raw_password)
 
     browser.go_to_stone_page()
-    # she now has 3 stones with her
+    # she now has no stones with her, but she sees 3 stones with the vault
     owner_filter = browser.find_element_by_link_text("With the vault")
     browser.slowly_click(owner_filter)
 
@@ -134,5 +134,5 @@ def test_grader_cannot_return_stones_to_vault(browser, stones, grader):
 
     browser.click_go()
 
-    # and only one stone is still in the vault
+    # She realized that she cannot return stones that does not owned by her.
     browser.assert_body_contains_text("You are not allowed to do this.")
