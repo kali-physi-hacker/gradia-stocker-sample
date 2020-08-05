@@ -19,7 +19,7 @@ def browser(live_server, settings):
     settings.DEBUG = True
     try:
         chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument("--headless")
+        #chrome_options.add_argument("--headless")
         chrome_options.add_argument("--disable-gpu")
         driver = webdriver.Chrome(options=chrome_options)
         driver.implicitly_wait(5)  # seconds
@@ -73,6 +73,9 @@ def stones(django_user_model, receipt, data_entry_clerk, grader, receptionist):
             clarity="VS4",
             fluo="a",
             culet="b",
+            table_pct="10.1",
+            pavilion_depth_pct="10.1",
+            total_depth_pct="10.1",
         ),
         Stone.objects.create(
             split_from=split,
@@ -85,6 +88,9 @@ def stones(django_user_model, receipt, data_entry_clerk, grader, receptionist):
             clarity="VS2",
             fluo="a",
             culet="b",
+            table_pct="10.1",
+            pavilion_depth_pct="10.1",
+            total_depth_pct="10.1",
         ),
         Stone.objects.create(
             split_from=split,
@@ -97,6 +103,9 @@ def stones(django_user_model, receipt, data_entry_clerk, grader, receptionist):
             clarity="VS3",
             fluo="a",
             culet="b",
+            table_pct="10.1",
+            pavilion_depth_pct="10.1",
+            total_depth_pct="10.1",
         ),
     ]
     for s in stone_list:

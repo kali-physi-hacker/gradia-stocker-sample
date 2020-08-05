@@ -33,6 +33,10 @@ def test_data_entry_can_split_parcel_to_stones(browser, data_entry_clerk, grader
         browser.find_element_by_name(f"stone_set-{ii}-clarity").send_keys("VS2")
         browser.find_element_by_name(f"stone_set-{ii}-fluo").send_keys("a")
         browser.find_element_by_name(f"stone_set-{ii}-culet").send_keys("x")
+        browser.find_element_by_name(f"stone_set-{ii}-table_pct").send_keys("10.1")
+        browser.find_element_by_name(f"stone_set-{ii}-pavilion_depth_pct").send_keys("10.1")
+        browser.find_element_by_name(f"stone_set-{ii}-total_depth_pct").send_keys("10.1")
+
 
     # the add link disappears because 50 stones is the limit
     assert not add_link.is_displayed()
