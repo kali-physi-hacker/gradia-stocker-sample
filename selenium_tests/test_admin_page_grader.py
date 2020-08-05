@@ -81,6 +81,9 @@ def test_grader_can_return_parcel_to_vault(browser, grader, receipt):
 
 
 def test_grader_can_return_stones_that_belong_to_her_to_vault(browser, stones, grader):
+    for stone in stones:
+        StoneTransfer.confirm_received(stone)
+
     vault = User.objects.get(username="vault")
     for stone in stones:
         # Tanly the grader has some stones given to her by the vault
@@ -146,6 +149,9 @@ def test_grader_cannot_return_stones_that_do_not_belong_to_her(browser, stones, 
 
 
 def test_grader_can_confirm_received_stones(browser, stones, grader):
+    for stone in stones:
+            StoneTransfer.confirm_received(stone)
+
     vault = User.objects.get(username="vault")
     for stone in stones:
         # The vault transfer some stones to Tanly the Grader
