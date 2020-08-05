@@ -144,6 +144,7 @@ def test_grader_cannot_return_stones_that_do_not_belong_to_her(browser, stones, 
     # She realized that she cannot return stones that does not owned by her.
     browser.assert_body_contains_text("You are not allowed to do this.")
 
+
 def test_grader_can_confirm_received_stones(browser, stones, grader):
     vault = User.objects.get(username="vault")
     for stone in stones:

@@ -128,6 +128,11 @@ def test_vault_manager_can_transfer_vault_parcels_to_others(browser, receipt, va
 
 
 def test_vault_manager_can_initiate_transfer_to_goldway(browser, stones, vault_manager):
+    
+    # Anthony confirm recieved the stones first
+    for stone in stones:
+        StoneTransfer.confirm_received(stone)
+
     # Anthony the vault manager wants to transfer 2 stones to goldway
 
     browser.login(vault_manager.username, vault_manager.raw_password)
