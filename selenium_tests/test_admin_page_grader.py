@@ -5,7 +5,7 @@ from selenium.webdriver.support.ui import Select
 from ownerships.models import ParcelTransfer, StoneTransfer
 
 
-def test_grader_can_confirm_received_stones(browser, grader, receipt):
+def test_grader_can_confirm_received_parcels(browser, grader, receipt):
     # Tanly is a grader
     # the vault has given her a parcel to grade
     parcel = receipt.parcel_set.first()
@@ -143,3 +143,39 @@ def test_grader_cannot_return_stones_that_do_not_belong_to_her(browser, stones, 
 
     # She realized that she cannot return stones that does not owned by her.
     browser.assert_body_contains_text("You are not allowed to do this.")
+
+def test_grader_can_confirm_received_stones(browser, stones, grader):
+    vault = User.objects.get(username="vault")
+    for stone in stones:
+        # The vault transfer some stones to Tanly the Grader
+        StoneTransfer.initiate_transfer(item=stone, from_user=vault, to_user=grader)
+
+    browser.login(grader.username, grader.raw_password)
+    browser.go_to_stone_page()
+
+    # She is checking the stones that is currently with her
+    owner_filter = browser.find_element_by_link_text("With me")
+    browser.slowly_click(owner_filter)
+
+    # she sees that she has 3 unconfirmed stones with her
+    browser.assert_body_contains_text(f"{grader.username}, unconfirmed")
+
+    # she ticks the checkbox for the first stone
+    browser.find_element_by_css_selector(f'input[value="{stones[0].id}"]').click()
+    # she ticks the checkbox for the second stone
+    browser.find_element_by_css_selector(f'input[value="{stones[1].id}"]').click()
+
+    # she selects "Confirm Recieved" from the action dropdown menu
+    action_dropdown = Select(browser.find_element_by_name("action"))
+    action_dropdown.select_by_visible_text("Confirm Recieved Stones")
+
+    browser.click_go()
+
+    # she now sees that the stones is confirmed by her
+    browser.assert_body_contains_text(f"{grader.username}, confirmed")
+
+
+
+
+
+    

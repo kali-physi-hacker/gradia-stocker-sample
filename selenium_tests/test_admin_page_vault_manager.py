@@ -4,7 +4,7 @@ from selenium.webdriver.support.ui import Select
 
 from customers.models import Entity
 from grading.models import Parcel, Receipt
-from ownerships.models import ParcelTransfer
+from ownerships.models import ParcelTransfer, StoneTransfer
 
 
 def test_vault_manager_can_confirm_parcels_transferred_to_the_vault(browser, admin_user, vault_manager):
@@ -157,3 +157,29 @@ def test_vault_manager_can_initiate_transfer_to_goldway(browser, stones, vault_m
     owner_filter = browser.find_element_by_link_text("With Goldway")
     browser.slowly_click(owner_filter)
     browser.assert_body_contains_text("2 stones")
+
+
+def test_vault_manager_can_confirm_received_stones(browser, stones, vault_manager):
+    browser.login(vault_manager.username, vault_manager.raw_password)
+
+    # Anthony the vault manager is checking his stone page
+    browser.go_to_stone_page()
+
+    # he sees some new unconfimed stones sent to him
+    owner_filter = browser.find_element_by_link_text("With the vault")
+    browser.slowly_click(owner_filter)
+    browser.assert_body_contains_text(f"vault, unconfirmed")
+
+    # he ticks the checkbox for the first stone
+    browser.find_element_by_css_selector(f'input[value="{stones[0].id}"]').click()
+    # he ticks the checkbox for the second stone
+    browser.find_element_by_css_selector(f'input[value="{stones[1].id}"]').click()
+
+    # he selects "Confirm Recieved Stones" from the action dropdown menu
+    action_dropdown = Select(browser.find_element_by_name("action"))
+    action_dropdown.select_by_visible_text("Confirm Recieved Stones")
+
+    browser.click_go()
+
+    # he now sees that the stones is confirmed by her
+    browser.assert_body_contains_text(f"vault, confirmed")
