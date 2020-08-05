@@ -27,4 +27,7 @@ class StoneForm(forms.ModelForm):
             "grader_2_inclusion": text_area,
             "grader_3_inclusion": text_area,
             "rejection_remarks": text_area,
+            "table_pct": number_input,
+            "pavilion_depth_pct": number_input,
+            "total_depth_pct": number_input,
         }

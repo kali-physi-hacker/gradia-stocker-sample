@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
 from django.utils.html import format_html
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 from customers.models import Entity
 from ownerships.models import ParcelTransfer, StoneTransfer
@@ -186,6 +187,9 @@ class Stone(models.Model):
     grader_2_inclusion = models.TextField(blank=True)
     grader_3_inclusion = models.TextField(blank=True)
     rejection_remarks = models.TextField(blank=True)
+    table_pct = models.DecimalField(validators=[MaxValueValidator(100), MinValueValidator(0)], decimal_places=2, max_digits=4)
+    pavilion_depth_pct = models.DecimalField(validators=[MaxValueValidator(100), MinValueValidator(0)], decimal_places=2, max_digits=4)
+    total_depth_pct = models.DecimalField(validators=[MaxValueValidator(100), MinValueValidator(0)], decimal_places=2, max_digits=4)
 
     split_from = models.ForeignKey(Split, on_delete=models.PROTECT, blank=True, null=True)
 
