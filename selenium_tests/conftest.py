@@ -104,5 +104,4 @@ def stones(django_user_model, receipt, data_entry_clerk, grader, receptionist):
         StoneTransfer.objects.create(
             item=s, from_user=receptionist, to_user=django_user_model.objects.get(username="vault")
         )
-        StoneTransfer.confirm_received(s)
     return stone_list
