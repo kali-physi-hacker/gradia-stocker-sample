@@ -11,6 +11,7 @@ def erp_setup(django_user_model):
     django_user_model.objects.create_user("vault")
     django_user_model.objects.create_user("split")
     django_user_model.objects.create_user("goldway")
+    django_user_model.objects.create_user("GIA")
 
     # create permission groups
     grader_group = Group.objects.create(name="grader")

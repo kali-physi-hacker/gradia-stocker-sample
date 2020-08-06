@@ -6,6 +6,8 @@ from customers.models import Entity
 from grading.models import Parcel, Receipt
 from ownerships.models import ParcelTransfer, StoneTransfer
 
+import pytest
+
 
 def test_vault_manager_can_confirm_parcels_transferred_to_the_vault(browser, admin_user, vault_manager):
     created_receipt = Receipt.objects.create(
@@ -188,3 +190,40 @@ def test_vault_manager_can_confirm_received_stones(browser, stones, vault_manage
 
     # he now sees that the stones is confirmed by her
     browser.assert_body_contains_text(f"vault, confirmed")
+
+@pytest.mark.smoke
+def test_vault_manager_can_initiate_transfer_to_GIA(browser, stones, vault_manager):
+    
+    # Anthony confirm recieved the stones first
+    for stone in stones:
+        StoneTransfer.confirm_received(stone)
+
+    # Anthony the vault manager wants to transfer 2 stones to GIA
+
+    browser.login(vault_manager.username, vault_manager.raw_password)
+
+    browser.go_to_stone_page()
+    # he sees that there are 3 stones in the vault
+    owner_filter = browser.find_element_by_link_text("With the vault")
+    browser.slowly_click(owner_filter)
+    browser.assert_body_contains_text("3 stones")
+
+    # he ticks the checkbox for the first stone
+    browser.find_element_by_css_selector(f'input[value="{stones[0].id}"]').click()
+    # he ticks the checkbox for the second stone
+    browser.find_element_by_css_selector(f'input[value="{stones[1].id}"]').click()
+
+    # he selects "send to GIA" from the action dropdown menu
+    action_dropdown = Select(browser.find_element_by_name("action"))
+    action_dropdown.select_by_visible_text("Transfer to GIA")
+
+    browser.click_go()
+
+    # and only one stone is still in the vault
+    browser.assert_body_contains_text("1 stone")
+
+    # now two stones show up as in transit to GIA
+    browser.go_to_stone_page()
+    owner_filter = browser.find_element_by_link_text("With GIA")
+    browser.slowly_click(owner_filter)
+    browser.assert_body_contains_text("2 stones")
