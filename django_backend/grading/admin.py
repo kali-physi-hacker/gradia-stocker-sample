@@ -110,6 +110,7 @@ class ItemOwnerFilter(admin.SimpleListFilter):
             ("me", "With me"),
             ("vault", "With the vault"),
             ("goldway", "With Goldway"),
+            ("GIA", "With GIA"),
             ("include", "Including splits and exited"),
         )
 
@@ -275,12 +276,12 @@ class StoneAdmin(admin.ModelAdmin):
     def get_list_display(self, request):
         return ["stone_id", "current_location", "carats", "color", "clarity", "fluo", "culet", parcel]
 
-    actions = ["transfer_to_goldway", "transfer_to_vault", "confirm_recieved_stones"]
+    actions = ["transfer_to_goldway", "transfer_to_GIA", "transfer_to_vault", "confirm_recieved_stones"]
 
     def get_actions(self, request):
         actions = super().get_actions(request)
         if not request.user.groups.filter(name="vault_manager").exists():
-            del actions["transfer_to_goldway"]
+            del actions["transfer_to_goldway", "transfer_to_GIA"]
         return actions
 
     def transfer_to_goldway(self, request, queryset):
@@ -292,6 +293,16 @@ class StoneAdmin(admin.ModelAdmin):
             )
 
     transfer_to_goldway.short_description = "Transfer to Goldway"
+
+    def transfer_to_GIA(self, request, queryset):
+        for stone in queryset.all():
+            StoneTransfer.initiate_transfer(
+                item=stone,
+                from_user=User.objects.get(username="vault"),
+                to_user=User.objects.get(username="GIA"),
+            )
+
+    transfer_to_GIA.short_description = "Transfer to GIA"
 
     def transfer_to_vault(self, request, queryset):
         for stone in queryset.all():
