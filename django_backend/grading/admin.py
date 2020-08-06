@@ -270,6 +270,9 @@ class StoneAdmin(admin.ModelAdmin):
         "grader_2_inclusion",
         "grader_3_inclusion",
         "rejection_remarks",
+        "table_pct",
+        "pavilion_depth_pct",
+        "total_depth_pct",
     ]
     list_filter = [StoneOwnerFilter]
 
