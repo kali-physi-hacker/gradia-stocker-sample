@@ -281,7 +281,8 @@ class StoneAdmin(admin.ModelAdmin):
     def get_actions(self, request):
         actions = super().get_actions(request)
         if not request.user.groups.filter(name="vault_manager").exists():
-            del actions["transfer_to_goldway", "transfer_to_GIA"]
+            del actions["transfer_to_goldway"]
+            del actions["transfer_to_GIA"]
         return actions
 
     def transfer_to_goldway(self, request, queryset):

@@ -6,8 +6,6 @@ from customers.models import Entity
 from grading.models import Parcel, Receipt
 from ownerships.models import ParcelTransfer, StoneTransfer
 
-import pytest
-
 
 def test_vault_manager_can_confirm_parcels_transferred_to_the_vault(browser, admin_user, vault_manager):
     created_receipt = Receipt.objects.create(
@@ -191,7 +189,7 @@ def test_vault_manager_can_confirm_received_stones(browser, stones, vault_manage
     # he now sees that the stones is confirmed by her
     browser.assert_body_contains_text(f"vault, confirmed")
 
-@pytest.mark.smoke
+
 def test_vault_manager_can_initiate_transfer_to_GIA(browser, stones, vault_manager):
     
     # Anthony confirm recieved the stones first
