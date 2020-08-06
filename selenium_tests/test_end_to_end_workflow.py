@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from selenium.webdriver.support.ui import Select
 
 from customers.models import Entity
-from grading.models import Parcel, Receipt
+from grading.models import Parcel, Receipt, Stone
 from ownerships.models import ParcelTransfer, StoneTransfer
 from purchases.models import Parcel, Receipt, Seller
 
@@ -158,20 +158,34 @@ def test_end_to_end_workflow(browser, customer_page_mixin, receptionist, vault_m
     parcel_dropdown.select_by_visible_text("parcel VK20200723-1A (1.000ct, 1pcs, receipt VK20200723)")
     add_link = browser.find_element_by_link_text("Add another Stone")
 
-    for ii in range(2):
-        add_link.click()
-        grader_dropdown = Select(browser.find_element_by_name(f"stone_set-{ii}-grader_1"))
-        grader_dropdown.select_by_visible_text(str(grader))
-        browser.find_element_by_name(f"stone_set-{ii}-sequence_number").send_keys("23")
-        browser.find_element_by_name(f"stone_set-{ii}-stone_id").send_keys("G12345")
-        browser.find_element_by_name(f"stone_set-{ii}-carats").send_keys("2")
-        browser.find_element_by_name(f"stone_set-{ii}-color").send_keys("D")
-        browser.find_element_by_name(f"stone_set-{ii}-clarity").send_keys("VS2")
-        browser.find_element_by_name(f"stone_set-{ii}-fluo").send_keys("a")
-        browser.find_element_by_name(f"stone_set-{ii}-culet").send_keys("x")
-        browser.find_element_by_name(f"stone_set-{ii}-table_pct").send_keys("10.1")
-        browser.find_element_by_name(f"stone_set-{ii}-pavilion_depth_pct").send_keys("10.1")
-        browser.find_element_by_name(f"stone_set-{ii}-total_depth_pct").send_keys("10.1")
+    add_link.click()
+    grader_dropdown = Select(browser.find_element_by_name(f"stone_set-0-grader_1"))
+    grader_dropdown.select_by_visible_text(str(grader))
+    browser.find_element_by_name(f"stone_set-0-sequence_number").send_keys("23")
+    browser.find_element_by_name(f"stone_set-0-stone_id").send_keys("G12345")
+    browser.find_element_by_name(f"stone_set-0-carats").send_keys("2")
+    browser.find_element_by_name(f"stone_set-0-color").send_keys("D")
+    browser.find_element_by_name(f"stone_set-0-clarity").send_keys("VS2")
+    browser.find_element_by_name(f"stone_set-0-fluo").send_keys("a")
+    browser.find_element_by_name(f"stone_set-0-culet").send_keys("x")
+    browser.find_element_by_name(f"stone_set-0-table_pct").send_keys("10.1")
+    browser.find_element_by_name(f"stone_set-0-pavilion_depth_pct").send_keys("10.1")
+    browser.find_element_by_name(f"stone_set-0-total_depth_pct").send_keys("10.1")
+    
+    add_link.click()
+    grader_dropdown = Select(browser.find_element_by_name(f"stone_set-1-grader_1"))
+    grader_dropdown.select_by_visible_text(str(grader))
+    browser.find_element_by_name(f"stone_set-1-sequence_number").send_keys("23")
+    browser.find_element_by_name(f"stone_set-1-stone_id").send_keys("G12346")
+    browser.find_element_by_name(f"stone_set-1-carats").send_keys("2")
+    browser.find_element_by_name(f"stone_set-1-color").send_keys("D")
+    browser.find_element_by_name(f"stone_set-1-clarity").send_keys("VS2")
+    browser.find_element_by_name(f"stone_set-1-fluo").send_keys("a")
+    browser.find_element_by_name(f"stone_set-1-culet").send_keys("x")
+    browser.find_element_by_name(f"stone_set-1-table_pct").send_keys("10.1")
+    browser.find_element_by_name(f"stone_set-1-pavilion_depth_pct").send_keys("10.1")
+    browser.find_element_by_name(f"stone_set-1-total_depth_pct").send_keys("10.1")  
+    
     browser.click_save()
 
     browser.logout()
@@ -189,9 +203,13 @@ def test_end_to_end_workflow(browser, customer_page_mixin, receptionist, vault_m
     browser.slowly_click(owner_filter)
     browser.assert_body_contains_text("2 stones")
 
-    # he ticks the checkbox for the first and second stone
-    browser.find_element_by_xpath("//tbody/tr[@class='row1']//input").click()
-    browser.find_element_by_xpath("//tbody/tr[@class='row2']//input").click()
+    # he ticks the checkbox for the first stone
+    stone = Stone.objects.get(stone_id='G12345')
+    browser.find_element_by_css_selector(f'input[value="{stone.id}"]').click()
+    
+    # he ticks the checkbox for the second stone
+    stone2 = Stone.objects.get(stone_id='G12346')
+    browser.find_element_by_css_selector(f'input[value="{stone2.id}"]').click()
 
     # he selects "send to goldway" from the action dropdown menu
     action_dropdown = Select(browser.find_element_by_name("action"))
@@ -199,4 +217,6 @@ def test_end_to_end_workflow(browser, customer_page_mixin, receptionist, vault_m
     browser.click_go()
 
     browser.logout()
+
+
 
