@@ -189,13 +189,14 @@ def test_end_to_end_workflow(browser, customer_page_mixin, receptionist, vault_m
     browser.slowly_click(owner_filter)
     browser.assert_body_contains_text("2 stones")
 
-    # he ticks the checkbox for the first stone
-    browser.find_element_by_css_selector(f'input[value="1"]').click()
-    # he ticks the checkbox for the second stone
-    browser.find_element_by_css_selector(f'input[value="2"]').click()
+    # he ticks the checkbox for the first and second stone
+    browser.find_element_by_xpath("//tbody/tr[@class='row1']//input").click()
+    browser.find_element_by_xpath("//tbody/tr[@class='row2']//input").click()
 
     # he selects "send to goldway" from the action dropdown menu
     action_dropdown = Select(browser.find_element_by_name("action"))
     action_dropdown.select_by_visible_text("Transfer to Goldway")
-
     browser.click_go()
+
+    browser.logout()
+
