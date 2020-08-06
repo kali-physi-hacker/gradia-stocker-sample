@@ -26,6 +26,10 @@ def login(browser, username, password):
     password_field.send_keys(Keys.RETURN)
     browser.wait_till_gone(password_field)
 
+def logout(browser):
+    confirm_logout = browser.find_element_by_link_text("LOG OUT")
+    browser.slowly_click(confirm_logout)
+
 
 def wait_till_gone(browser, elem):
     try:
@@ -74,6 +78,7 @@ def setup_browser_helper_functions(browser):
 
     browser.get_body_text = lambda: browser.find_element_by_css_selector("body").text
     browser.login = partial(login, browser)
+    browser.logout = partial(logout, browser)
     browser.wait_till_gone = partial(wait_till_gone, browser)
     browser.slowly_click = partial(slowly_click, browser)
     browser.click_add = partial(click_add, browser)
