@@ -195,23 +195,19 @@ def test_end_to_end_workflow(browser, customer_page_mixin, receptionist, vault_m
      ## 7. vault sends 2 stones to goldway                             ##
     ####################################################################
 
-    browser.login(vault_manager.username, vault_manager.raw_password)
 
+    browser.login(vault_manager.username, vault_manager.raw_password)
     browser.go_to_stone_page()
-    # he sees that there are 3 stones in the vault
+
     owner_filter = browser.find_element_by_link_text("With the vault")
     browser.slowly_click(owner_filter)
     browser.assert_body_contains_text("2 stones")
 
-    # he ticks the checkbox for the first stone
     stone = Stone.objects.get(stone_id='G12345')
     browser.find_element_by_css_selector(f'input[value="{stone.id}"]').click()
-    
-    # he ticks the checkbox for the second stone
     stone2 = Stone.objects.get(stone_id='G12346')
     browser.find_element_by_css_selector(f'input[value="{stone2.id}"]').click()
 
-    # he selects "send to goldway" from the action dropdown menu
     action_dropdown = Select(browser.find_element_by_name("action"))
     action_dropdown.select_by_visible_text("Transfer to Goldway")
     browser.click_go()
@@ -219,4 +215,25 @@ def test_end_to_end_workflow(browser, customer_page_mixin, receptionist, vault_m
     browser.logout()
 
 
+      ####################################################################
+     ## 8. someone confirms goldway has received stones                ##
+    ####################################################################
 
+
+      ####################################################################
+     ## 9. goldway is ready to send us back stuff                      ##
+    ####################################################################
+
+      ####################################################################
+     ## 10. when it comes back vault can confirm it                    ##
+    ####################################################################
+
+
+      ####################################################################
+     ## 11. ditto for GIA                                              ##
+    ####################################################################
+
+
+      ####################################################################
+     ## 12. vault transfers stones to receptionist                     ##
+    ####################################################################
