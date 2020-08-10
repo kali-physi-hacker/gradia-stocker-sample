@@ -280,7 +280,7 @@ class StoneAdmin(admin.ModelAdmin):
     def get_list_display(self, request):
         return ["stone_id", "current_location", "carats", "color", "clarity", "fluo", "culet", parcel]
 
-    actions = ["transfer_to_goldway", "transfer_to_GIA", "transfer_to_vault", "confirm_recieved_stones"]
+    actions = ["transfer_to_goldway", "transfer_to_GIA", "transfer_to_vault", "confirm_received_stones"]
 
     def get_actions(self, request):
         actions = super().get_actions(request)
@@ -319,13 +319,13 @@ class StoneAdmin(admin.ModelAdmin):
 
     transfer_to_vault.short_description = "Transfer to Vault"
 
-    def confirm_recieved_stones(self, request, queryset):
+    def confirm_received_stones(self, request, queryset):
         for stone in queryset.all():
             StoneTransfer.confirm_received(
                 item=stone,
             )
 
-    confirm_recieved_stones.short_description = "Confirm Recieved Stones"
+    confirm_received_stones.short_description = "Confirm Recieved Stones"
 
     def has_change_permission(self, request, obj=None):
         return False

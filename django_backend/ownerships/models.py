@@ -10,6 +10,7 @@ class AbstractItemTransfer(models.Model):
     from_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="gave_parcels")
     initiated_date = models.DateTimeField(auto_now_add=True)
     to_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="received_parcels")
+    #created_by = models.ForeignKey(User, on_delete=models.PROTECT)
     confirmed_date = models.DateTimeField(blank=True, null=True)
     fresh = models.BooleanField(default=True)
     remarks = models.TextField(blank=True)

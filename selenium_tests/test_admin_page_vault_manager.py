@@ -129,7 +129,7 @@ def test_vault_manager_can_transfer_vault_parcels_to_others(browser, receipt, va
 
 def test_vault_manager_can_initiate_transfer_to_goldway(browser, stones, vault_manager):
     
-    # Anthony confirm recieved the stones first
+    # Anthony confirm received the stones first
     for stone in stones:
         StoneTransfer.confirm_received(stone)
 
@@ -180,9 +180,9 @@ def test_vault_manager_can_confirm_received_stones(browser, stones, vault_manage
     # he ticks the checkbox for the second stone
     browser.find_element_by_css_selector(f'input[value="{stones[1].id}"]').click()
 
-    # he selects "Confirm Recieved Stones" from the action dropdown menu
+    # he selects "Confirm Received Stones" from the action dropdown menu
     action_dropdown = Select(browser.find_element_by_name("action"))
-    action_dropdown.select_by_visible_text("Confirm Recieved Stones")
+    action_dropdown.select_by_visible_text("Confirm Received Stones")
 
     browser.click_go()
 
@@ -192,7 +192,7 @@ def test_vault_manager_can_confirm_received_stones(browser, stones, vault_manage
 
 def test_vault_manager_can_initiate_transfer_to_GIA(browser, stones, vault_manager):
     
-    # Anthony confirm recieved the stones first
+    # Anthony confirm received the stones first
     for stone in stones:
         StoneTransfer.confirm_received(stone)
 
