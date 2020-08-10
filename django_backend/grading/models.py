@@ -190,6 +190,7 @@ class Stone(models.Model):
     table_pct = models.DecimalField(validators=[MaxValueValidator(100), MinValueValidator(0)], decimal_places=2, max_digits=4)
     pavilion_depth_pct = models.DecimalField(validators=[MaxValueValidator(100), MinValueValidator(0)], decimal_places=2, max_digits=4)
     total_depth_pct = models.DecimalField(validators=[MaxValueValidator(100), MinValueValidator(0)], decimal_places=2, max_digits=4)
+    general_comments = models.TextField(blank=True)
 
     split_from = models.ForeignKey(Split, on_delete=models.PROTECT, blank=True, null=True)
 

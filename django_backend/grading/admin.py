@@ -273,6 +273,7 @@ class StoneAdmin(admin.ModelAdmin):
         "table_pct",
         "pavilion_depth_pct",
         "total_depth_pct",
+        "general_comments"
     ]
     list_filter = [StoneOwnerFilter]
 

@@ -30,4 +30,5 @@ class StoneForm(forms.ModelForm):
             "table_pct": number_input,
             "pavilion_depth_pct": number_input,
             "total_depth_pct": number_input,
+            "general_comments": text_area,
         }
