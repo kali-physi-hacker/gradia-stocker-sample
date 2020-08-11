@@ -17,7 +17,7 @@ class ReturnToVaultView(View):
         parcel = Parcel.objects.get(pk=pk)
         try:
             ParcelTransfer.can_create_transfer(
-                item=parcel, from_user=request.user, to_user=User.objects.get(username="vault")
+                item=parcel, from_user=request.user, to_user=User.objects.get(username="vault"),
             )
         except Exception as e:
             return HttpResponse(e)
@@ -35,7 +35,7 @@ class ReturnToVaultView(View):
         except Exception as e:
             return HttpResponse(e)
         ParcelTransfer.initiate_transfer(
-            item=parcel, from_user=request.user, to_user=User.objects.get(username="vault")
+            item=parcel, from_user=request.user, to_user=User.objects.get(username="vault"), created_by=request.user
         )
         return HttpResponseRedirect(reverse("admin:grading_parcel_change", args=[parcel.id]))
 

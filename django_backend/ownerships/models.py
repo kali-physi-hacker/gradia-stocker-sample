@@ -10,7 +10,7 @@ class AbstractItemTransfer(models.Model):
     from_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="gave_parcels")
     initiated_date = models.DateTimeField(auto_now_add=True)
     to_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="received_parcels")
-    #created_by = models.ForeignKey(User, on_delete=models.PROTECT)
+    created_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name="created_parcels")
     confirmed_date = models.DateTimeField(blank=True, null=True)
     fresh = models.BooleanField(default=True)
     remarks = models.TextField(blank=True)
@@ -68,12 +68,12 @@ class AbstractItemTransfer(models.Model):
             )
 
     @classmethod
-    def initiate_transfer(cls, item, from_user, to_user, remarks=""):
+    def initiate_transfer(cls, item, from_user, to_user, created_by, remarks=""):
         last_transfer = cls.most_recent_transfer(item)
 
         cls.can_create_transfer(item, from_user, to_user)
 
-        created = cls.objects.create(item=last_transfer.item, from_user=from_user, to_user=to_user, remarks=remarks)
+        created = cls.objects.create(item=last_transfer.item, from_user=from_user, to_user=to_user, remarks=remarks, created_by=created_by)
         last_transfer.fresh = False
         last_transfer.save()
         return created

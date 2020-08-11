@@ -70,6 +70,7 @@ class SplitAdmin(admin.ModelAdmin):
                 ParcelTransfer.objects.create(
                     item=instance,
                     from_user=User.objects.get(username="split"),
+                    created_by= request.user,
                     to_user=parcel_owner,
                     confirmed_date=datetime.utcnow().replace(tzinfo=utc),
                 )
@@ -80,6 +81,7 @@ class SplitAdmin(admin.ModelAdmin):
                 StoneTransfer.objects.create(
                     item=instance,
                     from_user=User.objects.get(username="split"),
+                    created_by= request.user,
                     to_user=parcel_owner,
                     confirmed_date=datetime.utcnow().replace(tzinfo=utc),
                 )
@@ -89,7 +91,7 @@ class SplitAdmin(admin.ModelAdmin):
         obj.save()
         current_holder = obj.original_parcel.current_location()[0]
         ParcelTransfer.initiate_transfer(
-            obj.original_parcel, from_user=current_holder, to_user=User.objects.get(username="split")
+            obj.original_parcel, from_user=current_holder, to_user=User.objects.get(username="split"), created_by= request.user,
         )
 
     def has_delete_permission(self, request, obj=None):
@@ -236,7 +238,7 @@ class ReceiptAdmin(admin.ModelAdmin):
             instance.save()
             if isinstance(instance, Parcel):
                 ParcelTransfer.objects.create(
-                    item=instance, from_user=request.user, to_user=User.objects.get(username="vault")
+                    item=instance, from_user=request.user, to_user=User.objects.get(username="vault"), created_by= request.user,
                 )
 
 
@@ -295,6 +297,7 @@ class StoneAdmin(admin.ModelAdmin):
                 item=stone,
                 from_user=User.objects.get(username="vault"),
                 to_user=User.objects.get(username="goldway"),
+                created_by= request.user,
             )
 
     transfer_to_goldway.short_description = "Transfer to Goldway"
@@ -305,6 +308,7 @@ class StoneAdmin(admin.ModelAdmin):
                 item=stone,
                 from_user=User.objects.get(username="vault"),
                 to_user=User.objects.get(username="GIA"),
+                created_by= request.user,
             )
 
     transfer_to_GIA.short_description = "Transfer to GIA"
@@ -315,6 +319,7 @@ class StoneAdmin(admin.ModelAdmin):
                 item=stone,
                 from_user=User.objects.get(username=request.user.username),
                 to_user=User.objects.get(username="vault"),
+                created_by= request.user,
             )
 
     transfer_to_vault.short_description = "Transfer to Vault"
@@ -325,7 +330,7 @@ class StoneAdmin(admin.ModelAdmin):
                 item=stone,
             )
 
-    confirm_received_stones.short_description = "Confirm Recieved Stones"
+    confirm_received_stones.short_description = "Confirm Received Stones"
 
     def has_change_permission(self, request, obj=None):
         return False
