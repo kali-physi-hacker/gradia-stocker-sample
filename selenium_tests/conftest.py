@@ -49,7 +49,7 @@ def receipt(django_user_model, erp, admin_user):
     )
     # the parcel is received by admin user and put into the vault
     ParcelTransfer.objects.create(
-        item=parcel, from_user=admin_user, to_user=django_user_model.objects.get(username="vault")
+        item=parcel, from_user=admin_user, to_user=django_user_model.objects.get(username="vault"), created_by=admin_user
     )
     # vault confirms it has received this parcel
     ParcelTransfer.confirm_received(parcel)
@@ -110,6 +110,6 @@ def stones(django_user_model, receipt, data_entry_clerk, grader, receptionist):
     ]
     for s in stone_list:
         StoneTransfer.objects.create(
-            item=s, from_user=receptionist, to_user=django_user_model.objects.get(username="vault")
+            item=s, from_user=receptionist, to_user=django_user_model.objects.get(username="vault"), created_by=receptionist,
         )
     return stone_list

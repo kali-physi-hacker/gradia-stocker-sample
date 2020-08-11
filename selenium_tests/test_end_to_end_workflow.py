@@ -93,7 +93,7 @@ def test_end_to_end_workflow(browser, customer_page_mixin, receptionist, vault_m
     browser.logout()
 
      #################################################################
-     ## 3. Grader confirmed recieved parcel                        ##
+     ## 3. Grader confirmed received parcel                        ##
     #################################################################
 
     browser.login(grader.username, grader.raw_password)

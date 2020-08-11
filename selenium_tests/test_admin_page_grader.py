@@ -10,7 +10,7 @@ def test_grader_can_confirm_received_parcels(browser, grader, receipt):
     # the vault has given her a parcel to grade
     parcel = receipt.parcel_set.first()
     vault = User.objects.get(username="vault")
-    ParcelTransfer.initiate_transfer(parcel, vault, grader)
+    ParcelTransfer.initiate_transfer(parcel, vault, grader, grader)
 
     # she logs in to the admin portal
     browser.login(grader.username, grader.raw_password)
@@ -50,7 +50,7 @@ def test_grader_can_return_parcel_to_vault(browser, grader, receipt):
     # she has a parcel from the vault
     parcel = receipt.parcel_set.first()
     vault = User.objects.get(username="vault")
-    ParcelTransfer.initiate_transfer(parcel, vault, grader)
+    ParcelTransfer.initiate_transfer(parcel, vault, grader, grader)
     ParcelTransfer.confirm_received(parcel)
 
     # she logs in to the admin portal
@@ -87,7 +87,7 @@ def test_grader_can_return_stones_that_belong_to_her_to_vault(browser, stones, g
     vault = User.objects.get(username="vault")
     for stone in stones:
         # Tanly the grader has some stones given to her by the vault
-        StoneTransfer.initiate_transfer(item=stone, from_user=vault, to_user=grader)
+        StoneTransfer.initiate_transfer(item=stone, from_user=vault, to_user=grader, created_by=vault)
         # these stones have already been confirmed as received by Tanly
         StoneTransfer.confirm_received(stone)
 
@@ -155,7 +155,7 @@ def test_grader_can_confirm_received_stones(browser, stones, grader):
     vault = User.objects.get(username="vault")
     for stone in stones:
         # The vault transfer some stones to Tanly the Grader
-        StoneTransfer.initiate_transfer(item=stone, from_user=vault, to_user=grader)
+        StoneTransfer.initiate_transfer(item=stone, from_user=vault, to_user=grader, created_by=vault)
 
     browser.login(grader.username, grader.raw_password)
     browser.go_to_stone_page()
@@ -172,9 +172,9 @@ def test_grader_can_confirm_received_stones(browser, stones, grader):
     # she ticks the checkbox for the second stone
     browser.find_element_by_css_selector(f'input[value="{stones[1].id}"]').click()
 
-    # she selects "Confirm Recieved" from the action dropdown menu
+    # she selects "Confirm Received" from the action dropdown menu
     action_dropdown = Select(browser.find_element_by_name("action"))
-    action_dropdown.select_by_visible_text("Confirm Recieved Stones")
+    action_dropdown.select_by_visible_text("Confirm Received Stones")
 
     browser.click_go()
 

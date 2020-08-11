@@ -22,7 +22,7 @@ def test_vault_manager_can_confirm_parcels_transferred_to_the_vault(browser, adm
         reference_price_per_carat=1,
     )
     # the parcel is received by admin user and put into the vault
-    ParcelTransfer.objects.create(item=parcel, from_user=admin_user, to_user=User.objects.get(username="vault"))
+    ParcelTransfer.objects.create(item=parcel, from_user=admin_user, to_user=User.objects.get(username="vault"), created_by=admin_user,)
 
     # as vaultmanager, Anthony can confirm that vault has received this parcel
     browser.login(vault_manager.username, vault_manager.raw_password)
