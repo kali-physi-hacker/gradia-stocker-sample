@@ -26,7 +26,7 @@ class ParcelTransferTest(TestCase):
             reference_price_per_carat=1,
         )
         self.transfer = ParcelTransfer.objects.create(
-            item=self.parcel, fresh=True, from_user=self.user, to_user=self.user
+            item=self.parcel, fresh=True, from_user=self.user, to_user=self.user, created_by=self.user
         )
 
     def test_registered_in_admin(self):
@@ -34,8 +34,12 @@ class ParcelTransferTest(TestCase):
 
     def test_cannot_create_multiple_fresh_parcel_transfers(self):
         # can create many non-fresh parcels
-        ParcelTransfer.objects.create(item=self.parcel, fresh=False, from_user=self.user, to_user=self.user)
-        ParcelTransfer.objects.create(item=self.parcel, fresh=False, from_user=self.user, to_user=self.user)
+        ParcelTransfer.objects.create(
+            item=self.parcel, fresh=False, from_user=self.user, to_user=self.user, created_by=self.user
+        )
+        ParcelTransfer.objects.create(
+            item=self.parcel, fresh=False, from_user=self.user, to_user=self.user, created_by=self.user
+        )
         # but cannot create fresh parcel
         with self.assertRaises(IntegrityError):
             ParcelTransfer.objects.create(item=self.parcel, fresh=True, from_user=self.user, to_user=self.user)

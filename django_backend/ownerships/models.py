@@ -76,13 +76,12 @@ class AbstractItemTransfer(models.Model):
         last_transfer = cls.most_recent_transfer(item)
 
         cls.can_create_transfer(item, from_user, to_user)
-        created = cls.objects.create(
-            item=last_transfer.item, from_user=from_user, to_user=to_user, remarks=remarks, created_by=created_by
-        )
         last_transfer.fresh = False
         last_transfer.save()
 
-        created = cls.objects.create(item=last_transfer.item, from_user=from_user, to_user=to_user, remarks=remarks)
+        created = cls.objects.create(
+            item=last_transfer.item, from_user=from_user, to_user=to_user, remarks=remarks, created_by=created_by
+        )
         return created
 
     @classmethod
@@ -128,6 +127,7 @@ class StoneTransfer(AbstractItemTransfer):
     item = models.ForeignKey("grading.Stone", on_delete=models.PROTECT)
     from_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="gave_stones")
     to_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="received_stones")
+    created_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name="created_stones")
 
     class Meta:
         constraints = [

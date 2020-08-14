@@ -2,7 +2,6 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
 from django.utils.html import format_html
-from django.core.validators import MaxValueValidator, MinValueValidator
 
 from customers.models import Entity
 from ownerships.models import ParcelTransfer, StoneTransfer
@@ -153,6 +152,7 @@ class Parcel(AbstractParcel):
     get_action_html_link_for_user.short_description = "action"
 
     def split_into(self):
+        # there is also a parcel.split, because split is one-to-one with parcel
         try:
             split = Split.objects.get(original_parcel=self)
         except self.DoesNotExist:
@@ -177,9 +177,6 @@ class Stone(models.Model):
     fluo = models.CharField(max_length=4)
     culet = models.CharField(max_length=2)
     inclusions = models.TextField(blank=True)
-    #grader_1_inclusion = models.TextField(blank=True)
-    #grader_2_inclusion = models.TextField(blank=True)
-    #grader_3_inclusion = models.TextField(blank=True)
     rejection_remarks = models.TextField(blank=True)
     grader_1_color = models.CharField(max_length=1, blank=True)
     grader_2_color = models.CharField(max_length=1, blank=True)
@@ -187,9 +184,6 @@ class Stone(models.Model):
     grader_1_clarity = models.CharField(max_length=4, blank=True)
     grader_2_clarity = models.CharField(max_length=4, blank=True)
     grader_3_clarity = models.CharField(max_length=4, blank=True)
-    table_pct = models.DecimalField(validators=[MaxValueValidator(100), MinValueValidator(0)], decimal_places=2, max_digits=4)
-    pavilion_depth_pct = models.DecimalField(validators=[MaxValueValidator(100), MinValueValidator(0)], decimal_places=2, max_digits=4)
-    total_depth_pct = models.DecimalField(validators=[MaxValueValidator(100), MinValueValidator(0)], decimal_places=2, max_digits=4)
     general_comments = models.TextField(blank=True)
 
     split_from = models.ForeignKey(Split, on_delete=models.PROTECT, blank=True, null=True)
