@@ -3,12 +3,13 @@ from datetime import datetime
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db import models
+from django.db.models import Q
 from django.utils.timezone import utc
 
 
 class AbstractItemTransfer(models.Model):
-    from_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="gave_parcels")
     initiated_date = models.DateTimeField(auto_now_add=True)
+    from_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="gave_parcels")
     to_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="received_parcels")
     created_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name="created_parcels")
     confirmed_date = models.DateTimeField(blank=True, null=True)
@@ -17,6 +18,9 @@ class AbstractItemTransfer(models.Model):
 
     def in_transit(self):
         return self.confirmed_date is None
+
+    class Meta:
+        abstract = True
 
     @classmethod
     def most_recent_transfer(cls, item):
@@ -72,10 +76,13 @@ class AbstractItemTransfer(models.Model):
         last_transfer = cls.most_recent_transfer(item)
 
         cls.can_create_transfer(item, from_user, to_user)
-
-        created = cls.objects.create(item=last_transfer.item, from_user=from_user, to_user=to_user, remarks=remarks, created_by=created_by)
+        created = cls.objects.create(
+            item=last_transfer.item, from_user=from_user, to_user=to_user, remarks=remarks, created_by=created_by
+        )
         last_transfer.fresh = False
         last_transfer.save()
+
+        created = cls.objects.create(item=last_transfer.item, from_user=from_user, to_user=to_user, remarks=remarks)
         return created
 
     @classmethod
@@ -109,6 +116,22 @@ class AbstractItemTransfer(models.Model):
 class ParcelTransfer(AbstractItemTransfer):
     item = models.ForeignKey("grading.Parcel", on_delete=models.PROTECT)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["item"], condition=Q(fresh=True), name="only_one_fresh_transfer_per_parcel"
+            )
+        ]
+
 
 class StoneTransfer(AbstractItemTransfer):
     item = models.ForeignKey("grading.Stone", on_delete=models.PROTECT)
+    from_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="gave_stones")
+    to_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="received_stones")
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["item"], condition=Q(fresh=True), name="only_one_fresh_transfer_per_stone"
+            )
+        ]
