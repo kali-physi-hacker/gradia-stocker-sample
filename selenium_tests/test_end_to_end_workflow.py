@@ -1,23 +1,13 @@
-from django.contrib.auth.models import User
-
 from selenium.webdriver.support.ui import Select
 
-from customers.models import Entity
-from grading.models import Parcel, Receipt, Stone
-from ownerships.models import ParcelTransfer, StoneTransfer
-from purchases.models import Parcel, Receipt, Seller
-
+from grading.models import Stone
 from test_admin_page_receptionist import customer_page_mixin
 
-from functools import partial
 
-import pytest
-
-    
 def test_end_to_end_workflow(browser, customer_page_mixin, receptionist, vault_manager, grader, data_entry_clerk):
-    
-      #################################################################
-     ##1. client gives us stones, we open a receipt with one parcel ##
+
+    #################################################################
+    # 1. client gives us stones, we open a receipt with one parcel ##
     #################################################################
 
     browser.login(receptionist.username, receptionist.raw_password)
@@ -40,11 +30,9 @@ def test_end_to_end_workflow(browser, customer_page_mixin, receptionist, vault_m
     browser.click_save()
     browser.logout()
 
-
-      #################################################################
-     ## 2. vault gives parcel to grader                             ##
     #################################################################
-
+    ## 2. vault gives parcel to grader                             ##
+    #################################################################
 
     browser.login(vault_manager.username, vault_manager.raw_password)
     browser.go_to_parcel_page()
@@ -60,8 +48,7 @@ def test_end_to_end_workflow(browser, customer_page_mixin, receptionist, vault_m
     browser.go_to_parcel_page()
     vault_filter = browser.find_element_by_link_text("With the vault")
     browser.assert_body_contains_text(f"vault, confirmed")
-    
-    
+
     browser.go_to_split_page()
     browser.click_add()
     parcel_dropdown = Select(browser.find_element_by_id("id_original_parcel"))
@@ -82,7 +69,6 @@ def test_end_to_end_workflow(browser, customer_page_mixin, receptionist, vault_m
     browser.find_element_by_name("parcel_set-1-reference_price_per_carat").send_keys("500")
     browser.click_save()
 
-
     browser.go_to_transfer_page()
     browser.click_add()
     parcel_dropdown = Select(browser.find_element_by_id("id_item"))
@@ -92,8 +78,8 @@ def test_end_to_end_workflow(browser, customer_page_mixin, receptionist, vault_m
     browser.click_save()
     browser.logout()
 
-     #################################################################
-     ## 3. Grader confirmed received parcel                        ##
+    #################################################################
+    ## 3. Grader confirmed received parcel                        ##
     #################################################################
 
     browser.login(grader.username, grader.raw_password)
@@ -108,8 +94,8 @@ def test_end_to_end_workflow(browser, customer_page_mixin, receptionist, vault_m
     proceed_button = browser.find_element_by_name("proceed")
     browser.slowly_click(proceed_button)
 
-     #####################################################################
-     ## 4. grader finishes grading  parcel and returns parcel to vault ##                      ##
+    ####################################################################
+    ## 4. grader finishes grading  parcel and returns parcel to vault ##
     ####################################################################
 
     browser.go_to_parcel_page()
@@ -123,10 +109,9 @@ def test_end_to_end_workflow(browser, customer_page_mixin, receptionist, vault_m
     browser.slowly_click(proceed_button)
     browser.logout()
 
-      ####################################################################
-     ## 5. vault confirms received parcel                              ##
     ####################################################################
-
+    ## 5. vault confirms received parcel                              ##
+    ####################################################################
 
     browser.login(vault_manager.username, vault_manager.raw_password)
     browser.go_to_parcel_page()
@@ -144,11 +129,9 @@ def test_end_to_end_workflow(browser, customer_page_mixin, receptionist, vault_m
     browser.assert_body_contains_text(f"vault, confirmed")
     browser.logout()
 
-
-      ####################################################################
-     ## 6. data entry splits parcel into 2 stones                      ##
     ####################################################################
-
+    ## 6. data entry splits parcel into 2 stones                      ##
+    ####################################################################
 
     browser.login(data_entry_clerk.username, data_entry_clerk.raw_password)
     parcel_link = browser.find_element_by_link_text("Splits")
@@ -168,10 +151,7 @@ def test_end_to_end_workflow(browser, customer_page_mixin, receptionist, vault_m
     browser.find_element_by_name(f"stone_set-0-clarity").send_keys("VS2")
     browser.find_element_by_name(f"stone_set-0-fluo").send_keys("a")
     browser.find_element_by_name(f"stone_set-0-culet").send_keys("x")
-    browser.find_element_by_name(f"stone_set-0-table_pct").send_keys("10.1")
-    browser.find_element_by_name(f"stone_set-0-pavilion_depth_pct").send_keys("10.1")
-    browser.find_element_by_name(f"stone_set-0-total_depth_pct").send_keys("10.1")
-    
+
     add_link.click()
     grader_dropdown = Select(browser.find_element_by_name(f"stone_set-1-grader_1"))
     grader_dropdown.select_by_visible_text(str(grader))
@@ -182,19 +162,14 @@ def test_end_to_end_workflow(browser, customer_page_mixin, receptionist, vault_m
     browser.find_element_by_name(f"stone_set-1-clarity").send_keys("VS2")
     browser.find_element_by_name(f"stone_set-1-fluo").send_keys("a")
     browser.find_element_by_name(f"stone_set-1-culet").send_keys("x")
-    browser.find_element_by_name(f"stone_set-1-table_pct").send_keys("10.1")
-    browser.find_element_by_name(f"stone_set-1-pavilion_depth_pct").send_keys("10.1")
-    browser.find_element_by_name(f"stone_set-1-total_depth_pct").send_keys("10.1")  
-    
+
     browser.click_save()
 
     browser.logout()
 
-
-      ####################################################################
-     ## 7. vault sends 2 stones to goldway                             ##
     ####################################################################
-
+    ## 7. vault sends 2 stones to goldway                             ##
+    ####################################################################
 
     browser.login(vault_manager.username, vault_manager.raw_password)
     browser.go_to_stone_page()
@@ -203,9 +178,9 @@ def test_end_to_end_workflow(browser, customer_page_mixin, receptionist, vault_m
     browser.slowly_click(owner_filter)
     browser.assert_body_contains_text("2 stones")
 
-    stone = Stone.objects.get(stone_id='G12345')
+    stone = Stone.objects.get(stone_id="G12345")
     browser.find_element_by_css_selector(f'input[value="{stone.id}"]').click()
-    stone2 = Stone.objects.get(stone_id='G12346')
+    stone2 = Stone.objects.get(stone_id="G12346")
     browser.find_element_by_css_selector(f'input[value="{stone2.id}"]').click()
 
     action_dropdown = Select(browser.find_element_by_name("action"))
@@ -214,26 +189,22 @@ def test_end_to_end_workflow(browser, customer_page_mixin, receptionist, vault_m
 
     browser.logout()
 
-
-      ####################################################################
-     ## 8. someone confirms goldway has received stones                ##
+    ####################################################################
+    ## 8. someone confirms goldway has received stones                ##
     ####################################################################
 
-
-      ####################################################################
-     ## 9. goldway is ready to send us back stuff                      ##
+    ####################################################################
+    ## 9. goldway is ready to send us back stuff                      ##
     ####################################################################
 
-      ####################################################################
-     ## 10. when it comes back vault can confirm it                    ##
+    ####################################################################
+    ## 10. when it comes back vault can confirm it                    ##
     ####################################################################
 
-
-      ####################################################################
-     ## 11. ditto for GIA                                              ##
+    ####################################################################
+    ## 11. ditto for GIA                                              ##
     ####################################################################
 
-
-      ####################################################################
-     ## 12. vault transfers stones to receptionist                     ##
+    ####################################################################
+    ## 12. vault transfers stones to receptionist                     ##
     ####################################################################

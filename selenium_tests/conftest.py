@@ -49,7 +49,10 @@ def receipt(django_user_model, erp, admin_user):
     )
     # the parcel is received by admin user and put into the vault
     ParcelTransfer.objects.create(
-        item=parcel, from_user=admin_user, to_user=django_user_model.objects.get(username="vault"), created_by=admin_user
+        item=parcel,
+        from_user=admin_user,
+        to_user=django_user_model.objects.get(username="vault"),
+        created_by=admin_user,
     )
     # vault confirms it has received this parcel
     ParcelTransfer.confirm_received(parcel)
@@ -73,9 +76,6 @@ def stones(django_user_model, receipt, data_entry_clerk, grader, receptionist):
             clarity="VS4",
             fluo="a",
             culet="b",
-            table_pct="10.1",
-            pavilion_depth_pct="10.1",
-            total_depth_pct="10.1",
         ),
         Stone.objects.create(
             split_from=split,
@@ -88,9 +88,6 @@ def stones(django_user_model, receipt, data_entry_clerk, grader, receptionist):
             clarity="VS2",
             fluo="a",
             culet="b",
-            table_pct="10.1",
-            pavilion_depth_pct="10.1",
-            total_depth_pct="10.1",
         ),
         Stone.objects.create(
             split_from=split,
@@ -103,13 +100,13 @@ def stones(django_user_model, receipt, data_entry_clerk, grader, receptionist):
             clarity="VS3",
             fluo="a",
             culet="b",
-            table_pct="10.1",
-            pavilion_depth_pct="10.1",
-            total_depth_pct="10.1",
         ),
     ]
     for s in stone_list:
         StoneTransfer.objects.create(
-            item=s, from_user=receptionist, to_user=django_user_model.objects.get(username="vault"), created_by=receptionist,
+            item=s,
+            from_user=receptionist,
+            to_user=django_user_model.objects.get(username="vault"),
+            created_by=receptionist,
         )
     return stone_list
