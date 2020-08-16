@@ -160,6 +160,24 @@ class Parcel(AbstractParcel):
         return split.split_into_summary()
 
 
+class GoldwayVerification(models.Model):
+    purchase_order = models.CharField(max_length=10, blank=True)
+    invoice_number = models.CharField(max_length=10, blank=True)
+    started = models.DateTimeField(auto_now_add=True)
+
+    def summary(self):
+        return f"{self.stone_set.count()} stones"
+
+
+class GiaVerification(models.Model):
+    receipt_number = models.CharField(max_length=10, blank=True)
+    invoice_number = models.CharField(max_length=10, blank=True)
+    started = models.DateTimeField(auto_now_add=True)
+
+    def summary(self):
+        return f"{self.stone_set.count()} stones"
+
+
 class Stone(models.Model):
     data_entry_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="entered_data_for_stone")
     grader_1 = models.ForeignKey(User, on_delete=models.PROTECT, related_name="grader_1_for_stone")
@@ -187,6 +205,8 @@ class Stone(models.Model):
     general_comments = models.TextField(blank=True)
 
     split_from = models.ForeignKey(Split, on_delete=models.PROTECT, blank=True, null=True)
+    goldway_verification = models.ForeignKey(GoldwayVerification, on_delete=models.PROTECT, blank=True, null=True)
+    gia_verification = models.ForeignKey(GiaVerification, on_delete=models.PROTECT, blank=True, null=True)
 
     def __str__(self):
         return f"{self.stone_id} ({self.carats}ct {self.color} {self.clarity})"

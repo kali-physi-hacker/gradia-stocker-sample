@@ -7,7 +7,7 @@ from django.utils.timezone import utc
 from ownerships.models import ParcelTransfer, StoneTransfer
 
 from .forms import StoneForm
-from .models import Parcel, Receipt, Split, Stone
+from .models import GiaVerification, GoldwayVerification, Parcel, Receipt, Split, Stone
 
 
 class StoneInline(admin.TabularInline):
@@ -70,7 +70,7 @@ class SplitAdmin(admin.ModelAdmin):
                 ParcelTransfer.objects.create(
                     item=instance,
                     from_user=User.objects.get(username="split"),
-                    created_by= request.user,
+                    created_by=request.user,
                     to_user=parcel_owner,
                     confirmed_date=datetime.utcnow().replace(tzinfo=utc),
                 )
@@ -81,7 +81,7 @@ class SplitAdmin(admin.ModelAdmin):
                 StoneTransfer.objects.create(
                     item=instance,
                     from_user=User.objects.get(username="split"),
-                    created_by= request.user,
+                    created_by=request.user,
                     to_user=parcel_owner,
                     confirmed_date=datetime.utcnow().replace(tzinfo=utc),
                 )
@@ -91,7 +91,10 @@ class SplitAdmin(admin.ModelAdmin):
         obj.save()
         current_holder = obj.original_parcel.current_location()[0]
         ParcelTransfer.initiate_transfer(
-            obj.original_parcel, from_user=current_holder, to_user=User.objects.get(username="split"), created_by= request.user,
+            obj.original_parcel,
+            from_user=current_holder,
+            to_user=User.objects.get(username="split"),
+            created_by=request.user,
         )
 
     def has_delete_permission(self, request, obj=None):
@@ -112,7 +115,7 @@ class ItemOwnerFilter(admin.SimpleListFilter):
             ("me", "With me"),
             ("vault", "With the vault"),
             ("goldway", "With Goldway"),
-            ("GIA", "With GIA"),
+            ("gia", "With GIA"),
             ("include", "Including splits and exited"),
         )
 
@@ -238,7 +241,10 @@ class ReceiptAdmin(admin.ModelAdmin):
             instance.save()
             if isinstance(instance, Parcel):
                 ParcelTransfer.objects.create(
-                    item=instance, from_user=request.user, to_user=User.objects.get(username="vault"), created_by= request.user,
+                    item=instance,
+                    from_user=request.user,
+                    to_user=User.objects.get(username="vault"),
+                    created_by=request.user,
                 )
 
 
@@ -268,14 +274,14 @@ class StoneAdmin(admin.ModelAdmin):
         "fluo",
         "culet",
         "inclusions",
-        #"grader_1_inclusion",
-        #"grader_2_inclusion",
-        #"grader_3_inclusion",
+        # "grader_1_inclusion",
+        # "grader_2_inclusion",
+        # "grader_3_inclusion",
         "rejection_remarks",
         "table_pct",
         "pavilion_depth_pct",
         "total_depth_pct",
-        "general_comments"
+        "general_comments",
     ]
     list_filter = [StoneOwnerFilter]
 
@@ -292,24 +298,32 @@ class StoneAdmin(admin.ModelAdmin):
         return actions
 
     def transfer_to_goldway(self, request, queryset):
+        vault = User.objects.get(username="vault")
+        goldway = User.objects.get(username="goldway")
+
         for stone in queryset.all():
-            StoneTransfer.initiate_transfer(
-                item=stone,
-                from_user=User.objects.get(username="vault"),
-                to_user=User.objects.get(username="goldway"),
-                created_by= request.user,
-            )
+            StoneTransfer.can_create_transfer(item=stone, from_user=vault, to_user=goldway)
+
+        verification = GoldwayVerification.objects.create()
+        for stone in queryset.all():
+            StoneTransfer.initiate_transfer(item=stone, from_user=vault, to_user=goldway, created_by=request.user)
+            stone.goldway_verification = verification
+            stone.save()
 
     transfer_to_goldway.short_description = "Transfer to Goldway"
 
     def transfer_to_GIA(self, request, queryset):
+        vault = User.objects.get(username="vault")
+        gia = User.objects.get(username="gia")
+
         for stone in queryset.all():
-            StoneTransfer.initiate_transfer(
-                item=stone,
-                from_user=User.objects.get(username="vault"),
-                to_user=User.objects.get(username="GIA"),
-                created_by= request.user,
-            )
+            StoneTransfer.can_create_transfer(item=stone, from_user=vault, to_user=gia)
+
+        verification = GiaVerification.objects.create()
+        for stone in queryset.all():
+            StoneTransfer.initiate_transfer(item=stone, from_user=vault, to_user=gia, created_by=request.user)
+            stone.gia_verification = verification
+            stone.save()
 
     transfer_to_GIA.short_description = "Transfer to GIA"
 
@@ -319,16 +333,14 @@ class StoneAdmin(admin.ModelAdmin):
                 item=stone,
                 from_user=User.objects.get(username=request.user.username),
                 to_user=User.objects.get(username="vault"),
-                created_by= request.user,
+                created_by=request.user,
             )
 
     transfer_to_vault.short_description = "Transfer to Vault"
 
     def confirm_received_stones(self, request, queryset):
         for stone in queryset.all():
-            StoneTransfer.confirm_received(
-                item=stone,
-            )
+            StoneTransfer.confirm_received(item=stone)
 
     confirm_received_stones.short_description = "Confirm Received Stones"
 
@@ -348,3 +360,15 @@ class StoneAdmin(admin.ModelAdmin):
         obj.data_entry_user = request.user
         obj.stone_id = "G124081208"
         obj.save()
+
+
+@admin.register(GoldwayVerification)
+class GoldwayVerificationAdmin(admin.ModelAdmin):
+    model = GoldwayVerification
+    list_display = ["purchase_order", "invoice_number", "started", "summary"]
+
+
+@admin.register(GiaVerification)
+class GiaVerificationAdmin(admin.ModelAdmin):
+    model = GiaVerification
+    list_display = ["receipt_number", "invoice_number", "started", "summary"]

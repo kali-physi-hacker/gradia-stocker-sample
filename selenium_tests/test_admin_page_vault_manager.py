@@ -22,7 +22,9 @@ def test_vault_manager_can_confirm_parcels_transferred_to_the_vault(browser, adm
         reference_price_per_carat=1,
     )
     # the parcel is received by admin user and put into the vault
-    ParcelTransfer.objects.create(item=parcel, from_user=admin_user, to_user=User.objects.get(username="vault"), created_by=admin_user,)
+    ParcelTransfer.objects.create(
+        item=parcel, from_user=admin_user, to_user=User.objects.get(username="vault"), created_by=admin_user
+    )
 
     # as vaultmanager, Anthony can confirm that vault has received this parcel
     browser.login(vault_manager.username, vault_manager.raw_password)
@@ -127,8 +129,34 @@ def test_vault_manager_can_transfer_vault_parcels_to_others(browser, receipt, va
     browser.assert_body_contains_text(f"{grader}, unconfirmed")
 
 
-def test_vault_manager_can_initiate_transfer_to_goldway(browser, stones, vault_manager):
-    
+def test_vault_manager_can_confirm_received_stones(browser, stones, vault_manager):
+    browser.login(vault_manager.username, vault_manager.raw_password)
+
+    # Anthony the vault manager is checking his stone page
+    browser.go_to_stone_page()
+
+    # he sees some new unconfimed stones sent to him
+    owner_filter = browser.find_element_by_link_text("With the vault")
+    browser.slowly_click(owner_filter)
+    browser.assert_body_contains_text(f"vault, unconfirmed")
+
+    # he ticks the checkbox for the first stone
+    browser.find_element_by_css_selector(f'input[value="{stones[0].id}"]').click()
+    # he ticks the checkbox for the second stone
+    browser.find_element_by_css_selector(f'input[value="{stones[1].id}"]').click()
+
+    # he selects "Confirm Received Stones" from the action dropdown menu
+    action_dropdown = Select(browser.find_element_by_name("action"))
+    action_dropdown.select_by_visible_text("Confirm Received Stones")
+
+    browser.click_go()
+
+    # he now sees that the stones is confirmed by her
+    browser.assert_body_contains_text(f"vault, confirmed")
+
+
+def test_vault_manager_can_initiate_transfer_of_stones_to_goldway(browser, stones, vault_manager):
+
     # Anthony confirm received the stones first
     for stone in stones:
         StoneTransfer.confirm_received(stone)
@@ -163,35 +191,15 @@ def test_vault_manager_can_initiate_transfer_to_goldway(browser, stones, vault_m
     browser.slowly_click(owner_filter)
     browser.assert_body_contains_text("2 stones")
 
-
-def test_vault_manager_can_confirm_received_stones(browser, stones, vault_manager):
-    browser.login(vault_manager.username, vault_manager.raw_password)
-
-    # Anthony the vault manager is checking his stone page
-    browser.go_to_stone_page()
-
-    # he sees some new unconfimed stones sent to him
-    owner_filter = browser.find_element_by_link_text("With the vault")
-    browser.slowly_click(owner_filter)
-    browser.assert_body_contains_text(f"vault, unconfirmed")
-
-    # he ticks the checkbox for the first stone
-    browser.find_element_by_css_selector(f'input[value="{stones[0].id}"]').click()
-    # he ticks the checkbox for the second stone
-    browser.find_element_by_css_selector(f'input[value="{stones[1].id}"]').click()
-
-    # he selects "Confirm Received Stones" from the action dropdown menu
-    action_dropdown = Select(browser.find_element_by_name("action"))
-    action_dropdown.select_by_visible_text("Confirm Received Stones")
-
-    browser.click_go()
-
-    # he now sees that the stones is confirmed by her
-    browser.assert_body_contains_text(f"vault, confirmed")
+    # also a goldway verification object has been created
+    browser.go_to_goldway_verification_page()
+    browser.assert_body_contains_text("1 goldway verification")
+    # that verification is for 2 stones
+    browser.assert_body_contains_text("2 stones")
 
 
-def test_vault_manager_can_initiate_transfer_to_GIA(browser, stones, vault_manager):
-    
+def test_vault_manager_can_initiate_stone_transfer_to_GIA(browser, stones, vault_manager):
+
     # Anthony confirm received the stones first
     for stone in stones:
         StoneTransfer.confirm_received(stone)
@@ -224,4 +232,10 @@ def test_vault_manager_can_initiate_transfer_to_GIA(browser, stones, vault_manag
     browser.go_to_stone_page()
     owner_filter = browser.find_element_by_link_text("With GIA")
     browser.slowly_click(owner_filter)
+    browser.assert_body_contains_text("2 stones")
+
+    # also a gia verification object has been created
+    browser.go_to_gia_verification_page()
+    browser.assert_body_contains_text("1 gia verification")
+    # that verification is for 2 stones
     browser.assert_body_contains_text("2 stones")

@@ -11,7 +11,7 @@ def erp_setup(django_user_model):
     django_user_model.objects.create_user("vault")
     django_user_model.objects.create_user("split")
     django_user_model.objects.create_user("goldway")
-    django_user_model.objects.create_user("GIA")
+    django_user_model.objects.create_user("gia")
 
     # create permission groups
     grader_group = Group.objects.create(name="grader")
@@ -101,6 +101,14 @@ def erp_setup(django_user_model):
         ),
         Permission.objects.get(
             codename="add_parcel", content_type=ContentType.objects.get(app_label="grading", model="parcel")
+        ),
+        Permission.objects.get(
+            codename="view_goldwayverification",
+            content_type=ContentType.objects.get(app_label="grading", model="goldwayverification"),
+        ),
+        Permission.objects.get(
+            codename="view_giaverification",
+            content_type=ContentType.objects.get(app_label="grading", model="giaverification"),
         ),
         Permission.objects.get(
             codename="view_parceltransfer",
