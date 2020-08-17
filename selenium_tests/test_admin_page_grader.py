@@ -87,7 +87,8 @@ def test_grader_can_return_stones_that_belong_to_her_to_vault(browser, stones, g
     vault = User.objects.get(username="vault")
     for stone in stones:
         # Tanly the grader has some stones given to her by the vault
-        StoneTransfer.initiate_transfer(item=stone, from_user=vault, to_user=grader, created_by=vault)
+        StoneTransfer.initiate_transfer(
+            item=stone, from_user=vault, to_user=grader, created_by=vault)
         # these stones have already been confirmed as received by Tanly
         StoneTransfer.confirm_received(stone)
 
@@ -102,9 +103,11 @@ def test_grader_can_return_stones_that_belong_to_her_to_vault(browser, stones, g
     browser.assert_body_contains_text("3 stones")
 
     # she ticks the checkbox for the first stone
-    browser.find_element_by_css_selector(f'input[value="{stones[0].id}"]').click()
+    browser.find_element_by_css_selector(
+        f'input[value="{stones[0].id}"]').click()
     # she ticks the checkbox for the second stone
-    browser.find_element_by_css_selector(f'input[value="{stones[1].id}"]').click()
+    browser.find_element_by_css_selector(
+        f'input[value="{stones[1].id}"]').click()
 
     # she selects "send to vault" from the action dropdown menu
     action_dropdown = Select(browser.find_element_by_name("action"))
@@ -134,9 +137,11 @@ def test_grader_cannot_return_stones_that_do_not_belong_to_her(browser, stones, 
     browser.assert_body_contains_text("3 stones")
 
     # she ticks the checkbox for the first stone
-    browser.find_element_by_css_selector(f'input[value="{stones[0].id}"]').click()
+    browser.find_element_by_css_selector(
+        f'input[value="{stones[0].id}"]').click()
     # she ticks the checkbox for the second stone
-    browser.find_element_by_css_selector(f'input[value="{stones[1].id}"]').click()
+    browser.find_element_by_css_selector(
+        f'input[value="{stones[1].id}"]').click()
 
     # he selects "send to vault" from the action dropdown menu
     action_dropdown = Select(browser.find_element_by_name("action"))
@@ -150,12 +155,13 @@ def test_grader_cannot_return_stones_that_do_not_belong_to_her(browser, stones, 
 
 def test_grader_can_confirm_received_stones(browser, stones, grader):
     for stone in stones:
-            StoneTransfer.confirm_received(stone)
+        StoneTransfer.confirm_received(stone)
 
     vault = User.objects.get(username="vault")
     for stone in stones:
         # The vault transfer some stones to Tanly the Grader
-        StoneTransfer.initiate_transfer(item=stone, from_user=vault, to_user=grader, created_by=vault)
+        StoneTransfer.initiate_transfer(
+            item=stone, from_user=vault, to_user=grader, created_by=vault)
 
     browser.login(grader.username, grader.raw_password)
     browser.go_to_stone_page()
@@ -168,9 +174,11 @@ def test_grader_can_confirm_received_stones(browser, stones, grader):
     browser.assert_body_contains_text(f"{grader.username}, unconfirmed")
 
     # she ticks the checkbox for the first stone
-    browser.find_element_by_css_selector(f'input[value="{stones[0].id}"]').click()
+    browser.find_element_by_css_selector(
+        f'input[value="{stones[0].id}"]').click()
     # she ticks the checkbox for the second stone
-    browser.find_element_by_css_selector(f'input[value="{stones[1].id}"]').click()
+    browser.find_element_by_css_selector(
+        f'input[value="{stones[1].id}"]').click()
 
     # she selects "Confirm Received" from the action dropdown menu
     action_dropdown = Select(browser.find_element_by_name("action"))
@@ -180,9 +188,3 @@ def test_grader_can_confirm_received_stones(browser, stones, grader):
 
     # she now sees that the stones is confirmed by her
     browser.assert_body_contains_text(f"{grader.username}, confirmed")
-
-
-
-
-
-    

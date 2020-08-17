@@ -129,7 +129,8 @@ class ItemOwnerFilter(admin.SimpleListFilter):
             username_filter = request.user.username
 
         if username_filter:
-            fresh_transfers = self.transfer_model.objects.filter(to_user__username=username_filter, fresh=True)
+            fresh_transfers = self.transfer_model.objects.filter(
+                to_user__username=username_filter, fresh=True)
         else:
             # the __all__ case where self.value() == None
             fresh_transfers = (
@@ -172,7 +173,8 @@ class ParcelAdmin(admin.ModelAdmin):
         "most_recent_transfer",
     ]
 
-    search_fields = ["gradia_parcel_code", "customer_parcel_code", "receipt__code", "receipt__entity__name"]
+    search_fields = ["gradia_parcel_code", "customer_parcel_code",
+                     "receipt__code", "receipt__entity__name"]
     list_filter = [ParcelOwnerFilter]
     list_display_links = ["gradia_parcel_code"]
 
@@ -211,7 +213,8 @@ class ReceiptAdmin(admin.ModelAdmin):
 
     search_fields = ["code", "entity__name"]
 
-    readonly_fields = ["intake_by", "intake_date", "release_by", "release_date"]
+    readonly_fields = ["intake_by", "intake_date",
+                       "release_by", "release_date"]
     # readonly_fields = ["code", "entity", "intake_by", "intake_date", "release_by", "release_date"]
 
     inlines = [ParcelInline]
@@ -262,7 +265,18 @@ class StoneAdmin(admin.ModelAdmin):
         "grader_2",
         "grader_3",
         "sequence_number",
+        "shape",
         "carats",
+        "measurement",
+        "table_pct",
+        "crown_angle",
+        "culet",
+        "gridle_thickness",
+        "pavilion_depth_pct",
+        "total_depth_pct",
+        "cut",
+        "polish",
+        "symmetry",
         "color",
         "grader_1_color",
         "grader_2_color",
@@ -272,15 +286,8 @@ class StoneAdmin(admin.ModelAdmin):
         "grader_2_clarity",
         "grader_3_clarity",
         "fluo",
-        "culet",
         "inclusions",
-        # "grader_1_inclusion",
-        # "grader_2_inclusion",
-        # "grader_3_inclusion",
         "rejection_remarks",
-        "table_pct",
-        "pavilion_depth_pct",
-        "total_depth_pct",
         "general_comments",
     ]
     list_filter = [StoneOwnerFilter]
@@ -288,7 +295,8 @@ class StoneAdmin(admin.ModelAdmin):
     def get_list_display(self, request):
         return ["stone_id", "current_location", "carats", "color", "clarity", "fluo", "culet", parcel]
 
-    actions = ["transfer_to_goldway", "transfer_to_GIA", "transfer_to_vault", "confirm_received_stones"]
+    actions = ["transfer_to_goldway", "transfer_to_GIA",
+               "transfer_to_vault", "confirm_received_stones"]
 
     def get_actions(self, request):
         actions = super().get_actions(request)
@@ -302,11 +310,13 @@ class StoneAdmin(admin.ModelAdmin):
         goldway = User.objects.get(username="goldway")
 
         for stone in queryset.all():
-            StoneTransfer.can_create_transfer(item=stone, from_user=vault, to_user=goldway)
+            StoneTransfer.can_create_transfer(
+                item=stone, from_user=vault, to_user=goldway)
 
         verification = GoldwayVerification.objects.create()
         for stone in queryset.all():
-            StoneTransfer.initiate_transfer(item=stone, from_user=vault, to_user=goldway, created_by=request.user)
+            StoneTransfer.initiate_transfer(
+                item=stone, from_user=vault, to_user=goldway, created_by=request.user)
             stone.goldway_verification = verification
             stone.save()
 
@@ -317,11 +327,13 @@ class StoneAdmin(admin.ModelAdmin):
         gia = User.objects.get(username="gia")
 
         for stone in queryset.all():
-            StoneTransfer.can_create_transfer(item=stone, from_user=vault, to_user=gia)
+            StoneTransfer.can_create_transfer(
+                item=stone, from_user=vault, to_user=gia)
 
         verification = GiaVerification.objects.create()
         for stone in queryset.all():
-            StoneTransfer.initiate_transfer(item=stone, from_user=vault, to_user=gia, created_by=request.user)
+            StoneTransfer.initiate_transfer(
+                item=stone, from_user=vault, to_user=gia, created_by=request.user)
             stone.gia_verification = verification
             stone.save()
 

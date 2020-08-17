@@ -2,13 +2,15 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
 from django.utils.html import format_html
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 from customers.models import Entity
 from ownerships.models import ParcelTransfer, StoneTransfer
 
 
 class Split(models.Model):
-    original_parcel = models.OneToOneField("Parcel", on_delete=models.PROTECT, primary_key=True)
+    original_parcel = models.OneToOneField(
+        "Parcel", on_delete=models.PROTECT, primary_key=True)
 
     split_by = models.ForeignKey(User, on_delete=models.PROTECT)
     split_date = models.DateTimeField(auto_now_add=True)
@@ -34,7 +36,8 @@ class AbstractReceipt(models.Model):
     code = models.CharField(max_length=15)
     intake_date = models.DateTimeField(auto_now_add=True)
     release_date = models.DateTimeField(null=True, blank=True)
-    intake_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name="signed_off_on_stone_intake")
+    intake_by = models.ForeignKey(
+        User, on_delete=models.PROTECT, related_name="signed_off_on_stone_intake")
     release_by = models.ForeignKey(
         User, on_delete=models.PROTECT, related_name="signed_off_on_stone_release", null=True, blank=True
     )
@@ -106,7 +109,8 @@ class AbstractParcel(models.Model):
 
 
 class Parcel(AbstractParcel):
-    split_from = models.ForeignKey(Split, on_delete=models.PROTECT, blank=True, null=True)
+    split_from = models.ForeignKey(
+        Split, on_delete=models.PROTECT, blank=True, null=True)
     gradia_parcel_code = models.CharField(max_length=15)
 
     def __str__(self):
@@ -179,8 +183,10 @@ class GiaVerification(models.Model):
 
 
 class Stone(models.Model):
-    data_entry_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="entered_data_for_stone")
-    grader_1 = models.ForeignKey(User, on_delete=models.PROTECT, related_name="grader_1_for_stone")
+    data_entry_user = models.ForeignKey(
+        User, on_delete=models.PROTECT, related_name="entered_data_for_stone")
+    grader_1 = models.ForeignKey(
+        User, on_delete=models.PROTECT, related_name="grader_1_for_stone")
     grader_2 = models.ForeignKey(
         User, on_delete=models.PROTECT, related_name="grader_2_for_stone", null=True, blank=True
     )
@@ -189,11 +195,25 @@ class Stone(models.Model):
     )
     sequence_number = models.IntegerField()
     stone_id = models.CharField(max_length=15)
+    shape = models.CharField(max_length=15, default='Round Brilliant')
     carats = models.DecimalField(max_digits=5, decimal_places=3)
+    measurement = models.CharField(max_length=20, blank=True)
+    table_pct = models.DecimalField(validators=[MaxValueValidator(
+        100), MinValueValidator(0)], decimal_places=2, max_digits=4, blank=True)
+    crown_angle = models.DecimalField(validators=[MaxValueValidator(
+        100), MinValueValidator(0)], decimal_places=2, max_digits=4, blank=True)
+    culet = models.CharField(max_length=2)
+    girdle_thickness = models.CharField(max_length=11, blank=True)
+    pavilion_depth_pct = models.DecimalField(validators=[MaxValueValidator(
+        100), MinValueValidator(0)], decimal_places=2, max_digits=4, blank=True)
+    total_depth_pct = models.DecimalField(validators=[MaxValueValidator(
+        100), MinValueValidator(0)], decimal_places=2, max_digits=4, blank=True)
+    cut = models.CharField(max_length=2)
+    polish = models.CharField(max_length=2)
+    symmetry = models.CharField(max_length=2)
     color = models.CharField(max_length=1)
     clarity = models.CharField(max_length=4)
     fluo = models.CharField(max_length=4)
-    culet = models.CharField(max_length=2)
     inclusions = models.TextField(blank=True)
     rejection_remarks = models.TextField(blank=True)
     grader_1_color = models.CharField(max_length=1, blank=True)
@@ -204,9 +224,12 @@ class Stone(models.Model):
     grader_3_clarity = models.CharField(max_length=4, blank=True)
     general_comments = models.TextField(blank=True)
 
-    split_from = models.ForeignKey(Split, on_delete=models.PROTECT, blank=True, null=True)
-    goldway_verification = models.ForeignKey(GoldwayVerification, on_delete=models.PROTECT, blank=True, null=True)
-    gia_verification = models.ForeignKey(GiaVerification, on_delete=models.PROTECT, blank=True, null=True)
+    split_from = models.ForeignKey(
+        Split, on_delete=models.PROTECT, blank=True, null=True)
+    goldway_verification = models.ForeignKey(
+        GoldwayVerification, on_delete=models.PROTECT, blank=True, null=True)
+    gia_verification = models.ForeignKey(
+        GiaVerification, on_delete=models.PROTECT, blank=True, null=True)
 
     def __str__(self):
         return f"{self.stone_id} ({self.carats}ct {self.color} {self.clarity})"
