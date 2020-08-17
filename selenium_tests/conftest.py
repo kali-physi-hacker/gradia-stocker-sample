@@ -35,7 +35,9 @@ def browser(live_server, settings):
 @pytest.fixture
 def receipt(django_user_model, erp, admin_user):
     created_receipt = Receipt.objects.create(
-        entity=Entity.objects.create(name="Van Klaren", address="addressy", phone="12345678", email="vk@vk.com"),
+        entity=Entity.objects.create(
+            name="Van Klaren", address="addressy", phone="12345678", email="vk@vk.com"
+        ),
         code="VK-0001",
         intake_by=admin_user,
     )
@@ -76,6 +78,13 @@ def stones(django_user_model, receipt, data_entry_clerk, grader, receptionist):
             clarity="VS4",
             fluo="a",
             culet="b",
+            symmetry="VG",
+            polish="EX",
+            cut="VG",
+            total_depth_pct="61.1",
+            pavilion_depth_pct="43",
+            table_pct="58",
+            crown_angle="33.5",
         ),
         Stone.objects.create(
             split_from=split,
@@ -88,6 +97,13 @@ def stones(django_user_model, receipt, data_entry_clerk, grader, receptionist):
             clarity="VS2",
             fluo="a",
             culet="b",
+            symmetry="VG",
+            polish="EX",
+            cut="VG",
+            total_depth_pct="61.1",
+            pavilion_depth_pct="43",
+            table_pct="58",
+            crown_angle="33.5",
         ),
         Stone.objects.create(
             split_from=split,
@@ -100,6 +116,13 @@ def stones(django_user_model, receipt, data_entry_clerk, grader, receptionist):
             clarity="VS3",
             fluo="a",
             culet="b",
+            symmetry="VG",
+            polish="EX",
+            cut="VG",
+            total_depth_pct="61.1",
+            pavilion_depth_pct="43",
+            table_pct="58",
+            crown_angle="33.5",
         ),
     ]
     for s in stone_list:
