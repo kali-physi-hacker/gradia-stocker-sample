@@ -296,7 +296,7 @@ class StoneAdmin(admin.ModelAdmin):
         return ["stone_id", "current_location", "carats", "color", "clarity", "fluo", "culet", parcel]
 
     actions = ["transfer_to_goldway", "transfer_to_GIA",
-               "transfer_to_vault", "confirm_received_stones"]
+               "transfer_to_vault", "confirm_received_stones", "download_ids"]
 
     def get_actions(self, request):
         actions = super().get_actions(request)
@@ -304,6 +304,22 @@ class StoneAdmin(admin.ModelAdmin):
             del actions["transfer_to_goldway"]
             del actions["transfer_to_GIA"]
         return actions
+
+    def download_ids(self,request,queryset):
+        from django.http import HttpResponse
+
+        filename = "Stone_id_"+str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S"))+".txt"
+        file = open(filename,"w+")
+        for stone in queryset.all():
+            file.write(stone.stone_id+',')
+        file.close()
+
+        f = open(filename, 'r')
+        response = HttpResponse(f, content_type='text/plain')
+        response['Content-Disposition'] = 'attachment; filename=%s.txt' % filename
+        return response
+
+    download_ids.short_description = "Download Diamond(s) External Nanotech IDs"
 
     def transfer_to_goldway(self, request, queryset):
         vault = User.objects.get(username="vault")
