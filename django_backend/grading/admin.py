@@ -13,7 +13,7 @@ from .models import GiaVerification, GoldwayVerification, Parcel, Receipt, Split
 class StoneInline(admin.TabularInline):
     model = Stone
 
-    readonly_fields = ["data_entry_user"]
+    readonly_fields = ["grader"]
     form = StoneForm
 
     def has_delete_permission(self, request, obj=None):
@@ -259,7 +259,7 @@ def parcel(stone):
 class StoneAdmin(admin.ModelAdmin):
     model = Stone
 
-    readonly_fields = ["data_entry_user", "stone_id"]
+    readonly_fields = ["grader", "gradia_id"]
     fields = readonly_fields + [
         "grader_1",
         "grader_2",
