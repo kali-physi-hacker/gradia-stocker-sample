@@ -9,9 +9,15 @@ from django.utils.timezone import utc
 
 class AbstractItemTransfer(models.Model):
     initiated_date = models.DateTimeField(auto_now_add=True)
-    from_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="gave_parcels")
-    to_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="received_parcels")
-    created_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name="created_parcels")
+    from_user = models.ForeignKey(
+        User, on_delete=models.PROTECT, related_name="gave_parcels"
+    )
+    to_user = models.ForeignKey(
+        User, on_delete=models.PROTECT, related_name="received_parcels"
+    )
+    created_by = models.ForeignKey(
+        User, on_delete=models.PROTECT, related_name="created_parcels"
+    )
     confirmed_date = models.DateTimeField(blank=True, null=True)
     fresh = models.BooleanField(default=True)
     remarks = models.TextField(blank=True)
@@ -60,7 +66,9 @@ class AbstractItemTransfer(models.Model):
                 f"you are not the current owner, only the user signed in as {last_transfer.to_user} can do this"
             )
         if last_transfer.to_user == to_user:
-            raise PermissionDenied("you are creating a transfer from yourself to yourself")
+            raise PermissionDenied(
+                "you are creating a transfer from yourself to yourself"
+            )
         if not last_transfer.fresh:
             raise PermissionDenied(
                 "even though the most recent transfer is to you, your ownership "
@@ -80,7 +88,11 @@ class AbstractItemTransfer(models.Model):
         last_transfer.save()
 
         created = cls.objects.create(
-            item=last_transfer.item, from_user=from_user, to_user=to_user, remarks=remarks, created_by=created_by
+            item=last_transfer.item,
+            from_user=from_user,
+            to_user=to_user,
+            remarks=remarks,
+            created_by=created_by,
         )
         return created
 
@@ -88,7 +100,10 @@ class AbstractItemTransfer(models.Model):
     def can_confirm_received(cls, item, user):
         owner, status = item.current_location()
         if owner != user:
-            if owner.username == "vault" and user.groups.filter(name="vault_manager").exists():
+            if (
+                owner.username == "vault"
+                and user.groups.filter(name="vault_manager").exists()
+            ):
                 # okay if it is to vault and user is a vault manager
                 pass
             else:
@@ -118,20 +133,30 @@ class ParcelTransfer(AbstractItemTransfer):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["item"], condition=Q(fresh=True), name="only_one_fresh_transfer_per_parcel"
+                fields=["item"],
+                condition=Q(fresh=True),
+                name="only_one_fresh_transfer_per_parcel",
             )
         ]
 
 
 class StoneTransfer(AbstractItemTransfer):
     item = models.ForeignKey("grading.Stone", on_delete=models.PROTECT)
-    from_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="gave_stones")
-    to_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="received_stones")
-    created_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name="created_stones")
+    from_user = models.ForeignKey(
+        User, on_delete=models.PROTECT, related_name="gave_stones"
+    )
+    to_user = models.ForeignKey(
+        User, on_delete=models.PROTECT, related_name="received_stones"
+    )
+    created_by = models.ForeignKey(
+        User, on_delete=models.PROTECT, related_name="created_stones"
+    )
 
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["item"], condition=Q(fresh=True), name="only_one_fresh_transfer_per_stone"
+                fields=["item"],
+                condition=Q(fresh=True),
+                name="only_one_fresh_transfer_per_stone",
             )
         ]
