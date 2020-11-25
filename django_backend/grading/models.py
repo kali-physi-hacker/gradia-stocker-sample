@@ -187,6 +187,8 @@ class GiaVerification(models.Model):
 
     def summary(self):
         return f"{self.stone_set.count()} stones"
+
+
 class ColorGrading:
     COLORLESS_D = "D"
     COLORLESS_E = "E"
@@ -352,85 +354,125 @@ class Culet:
         (EXTREMELY_LARGE, "Extremely Large"),
     )
 
+
 class Inclusion(models.Model):
     inclusion = models.CharField(choices=Inclusions.CHOICES, max_length=3, unique=True)
 
     def __str__(self):
         return self.inclusion
 
+
 class Stone(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     gradia_id = models.CharField(max_length=11, unique=True)
-    receipt	= models.IntegerField()
-    date_to_GW = models.DateTimeField(null=True, blank=True)	
-    GW_returned_date = 	models.DateTimeField(null=True, blank=True)
+    receipt = models.IntegerField()
+    date_to_GW = models.DateTimeField(null=True, blank=True)
+    GW_returned_date = models.DateTimeField(null=True, blank=True)
     goldway_AI_code = models.CharField(max_length=15, null=True, blank=True)
-    date_to_GIA = models.DateTimeField(null=True, blank=True)	
+    date_to_GIA = models.DateTimeField(null=True, blank=True)
     GIA_returned_date = models.DateTimeField(null=True, blank=True)
     GIA_batch_code = models.IntegerField(null=True, blank=True)
-    blockchain_ID_code =  models.CharField(max_length=15, null=True, blank=True)
+    blockchain_ID_code = models.CharField(max_length=15, null=True, blank=True)
     parcel = models.CharField(max_length=5)
     post_GW_rejection = models.TextField(null=True, blank=True)
     post_GIA_rejection = models.TextField(null=True, blank=True)
     sample_stone = models.CharField(max_length=120)
     shape_and_cutting = models.CharField(max_length=120)
-    diamond_description	= models.CharField(max_length=120)
+    diamond_description = models.CharField(max_length=120)
     nano_etch_inscription = models.CharField(max_length=120)
-    basic_carat_1 = models.DecimalField(max_digits=5, decimal_places=3, null=True, blank=True)
-    basic_carat_2 = models.DecimalField(max_digits=5, decimal_places=3, null=True, blank=True)	
-    basic_carat_3 = models.DecimalField(max_digits=5, decimal_places=3, null=True, blank=True)
+    basic_carat_1 = models.DecimalField(
+        max_digits=5, decimal_places=3, null=True, blank=True
+    )
+    basic_carat_2 = models.DecimalField(
+        max_digits=5, decimal_places=3, null=True, blank=True
+    )
+    basic_carat_3 = models.DecimalField(
+        max_digits=5, decimal_places=3, null=True, blank=True
+    )
     basic_final_carat = models.DecimalField(max_digits=5, decimal_places=3)
-    GW_carat = models.DecimalField(max_digits=5, decimal_places=3, null=True, blank=True)
-    post_GW_final_carat = models.DecimalField(max_digits=5, decimal_places=3, null=True, blank=True) 	
-    GW_repolish_carat = models.DecimalField(max_digits=5, decimal_places=3, null=True, blank=True)	
-    carat_weight = models.DecimalField(max_digits=4, decimal_places=3, null=True, blank=True)
+    GW_carat = models.DecimalField(
+        max_digits=5, decimal_places=3, null=True, blank=True
+    )
+    post_GW_final_carat = models.DecimalField(
+        max_digits=5, decimal_places=3, null=True, blank=True
+    )
+    GW_repolish_carat = models.DecimalField(
+        max_digits=5, decimal_places=3, null=True, blank=True
+    )
+    carat_weight = models.DecimalField(
+        max_digits=4, decimal_places=3, null=True, blank=True
+    )
     basic_color_1 = models.CharField(choices=ColorGrading.CHOICES, max_length=1)
     basic_color_2 = models.CharField(choices=ColorGrading.CHOICES, max_length=1)
     basic_color_3 = models.CharField(choices=ColorGrading.CHOICES, max_length=1)
     basic_final_color = models.CharField(choices=ColorGrading.CHOICES, max_length=1)
-    GW_color = models.CharField(choices=ColorGrading.CHOICES, max_length=1, null=True, blank=True)	
-    post_GW_final_color	= models.CharField(choices=ColorGrading.CHOICES, max_length=1, null=True, blank=True)
-    color = models.CharField(choices=ColorGrading.CHOICES, max_length=1, null=True, blank=True)
-    basic_clarity_1	= models.CharField(choices=ClarityGrading.CHOICES, max_length=4)
-    basic_clarity_2	= models.CharField(choices=ClarityGrading.CHOICES, max_length=4)
-    basic_clarity_3	= models.CharField(choices=ClarityGrading.CHOICES, max_length=4)
+    GW_color = models.CharField(
+        choices=ColorGrading.CHOICES, max_length=1, null=True, blank=True
+    )
+    post_GW_final_color = models.CharField(
+        choices=ColorGrading.CHOICES, max_length=1, null=True, blank=True
+    )
+    color = models.CharField(
+        choices=ColorGrading.CHOICES, max_length=1, null=True, blank=True
+    )
+    basic_clarity_1 = models.CharField(choices=ClarityGrading.CHOICES, max_length=4)
+    basic_clarity_2 = models.CharField(choices=ClarityGrading.CHOICES, max_length=4)
+    basic_clarity_3 = models.CharField(choices=ClarityGrading.CHOICES, max_length=4)
     basic_final_clarity = models.CharField(choices=ClarityGrading.CHOICES, max_length=4)
-    GW_clarity = models.CharField(choices=ClarityGrading.CHOICES, max_length=4, null=True, blank=True)
-    post_GW_final_clarity = models.CharField(choices=ClarityGrading.CHOICES, max_length=4, null=True, blank=True)
-    clarity = models.CharField(choices=ClarityGrading.CHOICES, max_length=4, null=True, blank=True)
+    GW_clarity = models.CharField(
+        choices=ClarityGrading.CHOICES, max_length=4, null=True, blank=True
+    )
+    post_GW_final_clarity = models.CharField(
+        choices=ClarityGrading.CHOICES, max_length=4, null=True, blank=True
+    )
+    clarity = models.CharField(
+        choices=ClarityGrading.CHOICES, max_length=4, null=True, blank=True
+    )
     remarks = models.TextField(null=True, blank=True)
-    post_GW_remarks	= models.TextField(null=True, blank=True)
-    basic_fluorescence = models.CharField(choices=FluorescenceGrading.CHOICES, max_length=4)
-    GW_fluo	= models.CharField(choices=FluorescenceGrading.CHOICES, max_length=4, null=True, blank=True)
-    post_GW_fluo = models.CharField(choices=FluorescenceGrading.CHOICES, max_length=4, null=True, blank=True)
-    fluoresence	= models.CharField(choices=FluorescenceGrading.CHOICES, max_length=4, null=True, blank=True)
+    post_GW_remarks = models.TextField(null=True, blank=True)
+    basic_fluorescence = models.CharField(
+        choices=FluorescenceGrading.CHOICES, max_length=4
+    )
+    GW_fluo = models.CharField(
+        choices=FluorescenceGrading.CHOICES, max_length=4, null=True, blank=True
+    )
+    post_GW_fluo = models.CharField(
+        choices=FluorescenceGrading.CHOICES, max_length=4, null=True, blank=True
+    )
+    fluoresence = models.CharField(
+        choices=FluorescenceGrading.CHOICES, max_length=4, null=True, blank=True
+    )
     basic_culet = models.CharField(choices=Culet.CHOICES, max_length=2)
-    GW_culet = models.CharField(choices=Culet.CHOICES, max_length=2, null=True, blank=True)	
-    post_GW_culet = models.CharField(choices=Culet.CHOICES, max_length=2, null=True, blank=True)
-    culet = models.CharField(choices=Culet.CHOICES, max_length=2, null=True, blank=True)	
+    GW_culet = models.CharField(
+        choices=Culet.CHOICES, max_length=2, null=True, blank=True
+    )
+    post_GW_culet = models.CharField(
+        choices=Culet.CHOICES, max_length=2, null=True, blank=True
+    )
+    culet = models.CharField(choices=Culet.CHOICES, max_length=2, null=True, blank=True)
     inclusions = models.ManyToManyField(Inclusion)
     basic_polish_1 = models.CharField(choices=BaseGrading.CHOICES, max_length=4)
     basic_polish_2 = models.CharField(choices=BaseGrading.CHOICES, max_length=4)
-    basic_polish_3 = models.CharField(choices=BaseGrading.CHOICES, max_length=4)	 
+    basic_polish_3 = models.CharField(choices=BaseGrading.CHOICES, max_length=4)
     polish = models.CharField(choices=BaseGrading.CHOICES, max_length=4)
-    dia_minimum	= models.DecimalField(max_digits=5, decimal_places=3)
-    diameter_max = models.DecimalField(max_digits=5, decimal_places=3)	
+    dia_minimum = models.DecimalField(max_digits=5, decimal_places=3)
+    diameter_max = models.DecimalField(max_digits=5, decimal_places=3)
     height = models.DecimalField(max_digits=5, decimal_places=3)
-    grader =  models.ForeignKey(
+    grader = models.ForeignKey(
         User, on_delete=models.PROTECT, related_name="entered_data_for_stone"
     )
-    table_size	= models.PositiveIntegerField()
+    table_size = models.PositiveIntegerField()
     table_size_grade = models.CharField(choices=BaseGrading.CHOICES, max_length=4)
-    crown_angle	= models.DecimalField(max_digits=4, decimal_places=1)
+    crown_angle = models.DecimalField(max_digits=4, decimal_places=1)
     crown_angle_grade = models.CharField(choices=BaseGrading.CHOICES, max_length=4)
     pavilion_angle = models.DecimalField(max_digits=4, decimal_places=1)
     pavilion_angle_grade = models.CharField(choices=BaseGrading.CHOICES, max_length=4)
-    star_length	= models.PositiveIntegerField()
+    star_length = models.PositiveIntegerField()
     star_length_grade = models.CharField(choices=BaseGrading.CHOICES, max_length=4)
     lower_half = models.PositiveIntegerField()
-    lower_half_grade = models.CharField(choices=BaseGrading.CHOICES, max_length=4)	
+    lower_half_grade = models.CharField(choices=BaseGrading.CHOICES, max_length=4)
     girdle_thick = models.DecimalField(max_digits=3, decimal_places=1)
-    girdle_thick_grade = models.CharField(choices=BaseGrading.CHOICES, max_length=4)	
+    girdle_thick_grade = models.CharField(choices=BaseGrading.CHOICES, max_length=4)
     girdle_min = models.CharField(choices=Girdle.CHOICES, max_length=3)
     girdle_max = models.CharField(choices=Girdle.CHOICES, max_length=3)
     girdle_grade = models.CharField(choices=BaseGrading.CHOICES, max_length=4)
@@ -441,30 +483,30 @@ class Stone(models.Model):
     total_depth = models.DecimalField(max_digits=4, decimal_places=1)
     total_depth_grade = models.CharField(choices=BaseGrading.CHOICES, max_length=4)
     sheryl_cut = models.CharField(choices=BaseGrading.CHOICES, max_length=4)
-    sarine_cut = models.CharField(choices=BaseGrading.CHOICES, max_length=4)	
-    cut_grade_est_table = models.CharField(choices=BaseGrading.CHOICES, max_length=4)	
-    cut_grade = models.CharField(choices=BaseGrading.CHOICES, max_length=4)	
-    sheryl_symmetry	= models.CharField(choices=BaseGrading.CHOICES, max_length=4)
-    sarine_symmetry	= models.CharField(choices=BaseGrading.CHOICES, max_length=4)
-    symmetry_grade = models.CharField(choices=BaseGrading.CHOICES, max_length=4)	
+    sarine_cut = models.CharField(choices=BaseGrading.CHOICES, max_length=4)
+    cut_grade_est_table = models.CharField(choices=BaseGrading.CHOICES, max_length=4)
+    cut_grade = models.CharField(choices=BaseGrading.CHOICES, max_length=4)
+    sheryl_symmetry = models.CharField(choices=BaseGrading.CHOICES, max_length=4)
+    sarine_symmetry = models.CharField(choices=BaseGrading.CHOICES, max_length=4)
+    symmetry_grade = models.CharField(choices=BaseGrading.CHOICES, max_length=4)
     comments = models.TextField()
     roundness = models.DecimalField(max_digits=4, decimal_places=1)
-    roundness_grade	= models.CharField(choices=BaseGrading.CHOICES, max_length=4)
+    roundness_grade = models.CharField(choices=BaseGrading.CHOICES, max_length=4)
     table_size = models.DecimalField(max_digits=4, decimal_places=1)
     table_size_grade = models.CharField(choices=BaseGrading.CHOICES, max_length=4)
-    crown_angle	= models.DecimalField(max_digits=4, decimal_places=1)
+    crown_angle = models.DecimalField(max_digits=4, decimal_places=1)
     crown_angle_grade = models.CharField(choices=BaseGrading.CHOICES, max_length=4)
     pavilion_angle = models.DecimalField(max_digits=4, decimal_places=1)
-    pavilion_angle_grade = models.CharField(choices=BaseGrading.CHOICES, max_length=4)	
-    star_length	= models.DecimalField(max_digits=4, decimal_places=1)
+    pavilion_angle_grade = models.CharField(choices=BaseGrading.CHOICES, max_length=4)
+    star_length = models.DecimalField(max_digits=4, decimal_places=1)
     star_length_grade = models.CharField(choices=BaseGrading.CHOICES, max_length=4)
-    lower_half	= models.DecimalField(max_digits=4, decimal_places=1)
+    lower_half = models.DecimalField(max_digits=4, decimal_places=1)
     lower_half_grade = models.CharField(choices=BaseGrading.CHOICES, max_length=4)
     girdle_thick = models.DecimalField(max_digits=4, decimal_places=1)
     girdle_thick_grade = models.CharField(choices=BaseGrading.CHOICES, max_length=4)
     crown_height = models.DecimalField(max_digits=4, decimal_places=1)
     crown_height_grade = models.CharField(choices=BaseGrading.CHOICES, max_length=4)
-    pavilion_depth	= models.DecimalField(max_digits=4, decimal_places=1)
+    pavilion_depth = models.DecimalField(max_digits=4, decimal_places=1)
     pavilion_depth_grade = models.CharField(choices=BaseGrading.CHOICES, max_length=4)
     misalignment = models.DecimalField(max_digits=4, decimal_places=1)
     misalignment_grade = models.CharField(choices=BaseGrading.CHOICES, max_length=4)
@@ -474,12 +516,12 @@ class Stone(models.Model):
     table_off_center_grade = models.CharField(choices=BaseGrading.CHOICES, max_length=4)
     culet_off_center = models.DecimalField(max_digits=4, decimal_places=1)
     culet_off_center_grade = models.CharField(choices=BaseGrading.CHOICES, max_length=4)
-    table_off_culet	= models.DecimalField(max_digits=4, decimal_places=1)
+    table_off_culet = models.DecimalField(max_digits=4, decimal_places=1)
     table_off_culet_grade = models.CharField(choices=BaseGrading.CHOICES, max_length=4)
     star_angle = models.DecimalField(max_digits=4, decimal_places=1)
     star_angle_grade = models.CharField(choices=BaseGrading.CHOICES, max_length=4)
     upper_half_angle = models.DecimalField(max_digits=4, decimal_places=1)
-    upper_half_angle_grade	= models.CharField(choices=BaseGrading.CHOICES, max_length=4)
+    upper_half_angle_grade = models.CharField(choices=BaseGrading.CHOICES, max_length=4)
     lower_half_angle = models.DecimalField(max_digits=4, decimal_places=1)
     lower_half_angle_grade = models.CharField(choices=BaseGrading.CHOICES, max_length=4)
     split_from = models.ForeignKey(

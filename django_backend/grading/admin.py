@@ -130,7 +130,8 @@ class ItemOwnerFilter(admin.SimpleListFilter):
 
         if username_filter:
             fresh_transfers = self.transfer_model.objects.filter(
-                to_user__username=username_filter, fresh=True)
+                to_user__username=username_filter, fresh=True
+            )
         else:
             # the __all__ case where self.value() == None
             fresh_transfers = (
@@ -173,8 +174,12 @@ class ParcelAdmin(admin.ModelAdmin):
         "most_recent_transfer",
     ]
 
-    search_fields = ["gradia_parcel_code", "customer_parcel_code",
-                     "receipt__code", "receipt__entity__name"]
+    search_fields = [
+        "gradia_parcel_code",
+        "customer_parcel_code",
+        "receipt__code",
+        "receipt__entity__name",
+    ]
     list_filter = [ParcelOwnerFilter]
     list_display_links = ["gradia_parcel_code"]
 
@@ -213,14 +218,19 @@ class ReceiptAdmin(admin.ModelAdmin):
 
     search_fields = ["code", "entity__name"]
 
-    readonly_fields = ["intake_by", "intake_date",
-                       "release_by", "release_date"]
+    readonly_fields = ["intake_by", "intake_date", "release_by", "release_date"]
     # readonly_fields = ["code", "entity", "intake_by", "intake_date", "release_by", "release_date"]
 
     inlines = [ParcelInline]
 
     def get_list_display(self, request):
-        return ["__str__", "intake_date", "release_date", "closed_out", self.model.get_action_html_link]
+        return [
+            "__str__",
+            "intake_date",
+            "release_date",
+            "closed_out",
+            self.model.get_action_html_link,
+        ]
 
     def has_add_permission(self, request, obj=None):
         return True
@@ -293,10 +303,24 @@ class StoneAdmin(admin.ModelAdmin):
     list_filter = [StoneOwnerFilter]
 
     def get_list_display(self, request):
-        return ["stone_id", "current_location", "carats", "color", "clarity", "fluo", "culet", parcel]
+        return [
+            "stone_id",
+            "current_location",
+            "carats",
+            "color",
+            "clarity",
+            "fluo",
+            "culet",
+            parcel,
+        ]
 
-    actions = ["transfer_to_goldway", "transfer_to_GIA",
-               "transfer_to_vault", "confirm_received_stones", "download_ids"]
+    actions = [
+        "transfer_to_goldway",
+        "transfer_to_GIA",
+        "transfer_to_vault",
+        "confirm_received_stones",
+        "download_ids",
+    ]
 
     def get_actions(self, request):
         actions = super().get_actions(request)
@@ -305,18 +329,20 @@ class StoneAdmin(admin.ModelAdmin):
             del actions["transfer_to_GIA"]
         return actions
 
-    def download_ids(self,request,queryset):
+    def download_ids(self, request, queryset):
         from django.http import HttpResponse
 
-        filename = "Stone_id_"+str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S"))+".txt"
-        file = open(filename,"w+")
+        filename = (
+            "Stone_id_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".txt"
+        )
+        file = open(filename, "w+")
         for stone in queryset.all():
-            file.write(stone.stone_id+',')
+            file.write(stone.stone_id + ",")
         file.close()
 
-        f = open(filename, 'r')
-        response = HttpResponse(f, content_type='text/plain')
-        response['Content-Disposition'] = 'attachment; filename=%s.txt' % filename
+        f = open(filename, "r")
+        response = HttpResponse(f, content_type="text/plain")
+        response["Content-Disposition"] = "attachment; filename=%s.txt" % filename
         return response
 
     download_ids.short_description = "Download Diamond(s) External Nanotech IDs"
@@ -327,12 +353,14 @@ class StoneAdmin(admin.ModelAdmin):
 
         for stone in queryset.all():
             StoneTransfer.can_create_transfer(
-                item=stone, from_user=vault, to_user=goldway)
+                item=stone, from_user=vault, to_user=goldway
+            )
 
         verification = GoldwayVerification.objects.create()
         for stone in queryset.all():
             StoneTransfer.initiate_transfer(
-                item=stone, from_user=vault, to_user=goldway, created_by=request.user)
+                item=stone, from_user=vault, to_user=goldway, created_by=request.user
+            )
             stone.goldway_verification = verification
             stone.save()
 
@@ -343,13 +371,13 @@ class StoneAdmin(admin.ModelAdmin):
         gia = User.objects.get(username="gia")
 
         for stone in queryset.all():
-            StoneTransfer.can_create_transfer(
-                item=stone, from_user=vault, to_user=gia)
+            StoneTransfer.can_create_transfer(item=stone, from_user=vault, to_user=gia)
 
         verification = GiaVerification.objects.create()
         for stone in queryset.all():
             StoneTransfer.initiate_transfer(
-                item=stone, from_user=vault, to_user=gia, created_by=request.user)
+                item=stone, from_user=vault, to_user=gia, created_by=request.user
+            )
             stone.gia_verification = verification
             stone.save()
 
