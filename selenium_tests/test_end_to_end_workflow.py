@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from selenium.webdriver.support.ui import Select
 
 from grading.models import Stone
@@ -156,8 +158,24 @@ def test_end_to_end_workflow(browser, customer_page_mixin, receptionist, vault_m
     # browser.logout()
 
     ####################################################################
-    ## 8. someone confirms goldway has received stones                ##
+    ## 8. someone confirms goldway has received stones by giving the purchase oder ##
     ####################################################################
+    # browser.login(receptionist.username, receptionist.raw_password)
+    # browser.go_to_stone_page()
+
+    # confirm_link = browser.find_element_by_link_text("Confirm Stones at Goldway")
+    # confirm_link.click()
+
+    # # we go to a new page
+    # browser.assert_body_contains_text("You are about to confirm")
+    # browser.assert_body_contains_text(f"transfer on {datetime.today()} date")
+    # browser.assert_body_contains_text("1 stone")
+
+    # # input the purchase order number
+
+    # # click submit
+    # submit_button = browser.find_element_by_name("submit")
+    # submit_button.click()
 
     ####################################################################
     ## 9. goldway is ready to send us back stuff                      ##
