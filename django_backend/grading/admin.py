@@ -1,3 +1,4 @@
+import csv
 from datetime import datetime
 
 from django.contrib import admin
@@ -13,7 +14,7 @@ from .models import GiaVerification, GoldwayVerification, Parcel, Receipt, Split
 class StoneInline(admin.TabularInline):
     model = Stone
 
-    readonly_fields = ["grader"]
+    readonly_fields = ["data_entry_user"]
     form = StoneForm
 
     def has_delete_permission(self, request, obj=None):
@@ -129,9 +130,7 @@ class ItemOwnerFilter(admin.SimpleListFilter):
             username_filter = request.user.username
 
         if username_filter:
-            fresh_transfers = self.transfer_model.objects.filter(
-                to_user__username=username_filter, fresh=True
-            )
+            fresh_transfers = self.transfer_model.objects.filter(to_user__username=username_filter, fresh=True)
         else:
             # the __all__ case where self.value() == None
             fresh_transfers = (
@@ -174,12 +173,7 @@ class ParcelAdmin(admin.ModelAdmin):
         "most_recent_transfer",
     ]
 
-    search_fields = [
-        "gradia_parcel_code",
-        "customer_parcel_code",
-        "receipt__code",
-        "receipt__entity__name",
-    ]
+    search_fields = ["gradia_parcel_code", "customer_parcel_code", "receipt__code", "receipt__entity__name"]
     list_filter = [ParcelOwnerFilter]
     list_display_links = ["gradia_parcel_code"]
 
@@ -224,13 +218,7 @@ class ReceiptAdmin(admin.ModelAdmin):
     inlines = [ParcelInline]
 
     def get_list_display(self, request):
-        return [
-            "__str__",
-            "intake_date",
-            "release_date",
-            "closed_out",
-            self.model.get_action_html_link,
-        ]
+        return ["__str__", "intake_date", "release_date", "closed_out", self.model.get_action_html_link]
 
     def has_add_permission(self, request, obj=None):
         return True
@@ -269,114 +257,7 @@ def parcel(stone):
 class StoneAdmin(admin.ModelAdmin):
     model = Stone
 
-    readonly_fields = ["grader", "date_created"]
-    fields = readonly_fields + [
-        "gradia_id",
-        "receipt",
-        "date_to_GW",
-        "GW_returned_date",
-        "goldway_AI_code",
-        "date_to_GIA",
-        "GIA_returned_date",
-        "GIA_batch_code",
-        "parcel",
-        "post_GW_rejection",
-        "post_GIA_rejection",
-        "sample_stone",
-        "shape_and_cutting",
-        "diamond_description",
-        "nano_etch_inscription",
-        "basic_carat_1",
-        "basic_carat_2",
-        "basic_carat_3",
-        "basic_final_carat",
-        "GW_carat",
-        "post_GW_final_carat",
-        "GW_repolish_carat",
-        "carat_weight",
-        "basic_color_1",
-        "basic_color_2",
-        "basic_color_3",
-        "basic_final_color",
-        "GW_color",
-        "post_GW_final_color",
-        "color",
-        "basic_clarity_1",
-        "basic_clarity_2",
-        "basic_clarity_3",
-        "basic_final_clarity",
-        "GW_clarity",
-        "post_GW_final_clarity",
-        "clarity",
-        "remarks",
-        "post_GW_remarks",
-        "basic_fluorescence",
-        "GW_fluo",
-        "post_GW_fluo",
-        "fluoresence",
-        "basic_culet",
-        "GW_culet",
-        "post_GW_culet", 
-        "culet", 
-        "inclusions", 
-        "basic_polish_1",
-        "basic_polish_2", 
-        "basic_polish_3",
-        "polish", 
-        "dia_minimum", 
-        "diameter_max", 
-        "height", 
-        "girdle_min", 
-        "girdle_max", 
-        "girdle_grade", 
-        "culet_size",
-        "total_depth", 
-        "total_depth_grade", 
-        "sheryl_cut", 
-        "sarine_cut", 
-        "cut_grade_est_table", 
-        "cut_grade", 
-        "sheryl_symmetry", 
-        "sarine_symmetry", 
-        "symmetry_grade", 
-        "comments",
-        "roundness", 
-        "roundness_grade", 
-        "table_size", 
-        "table_size_grade", 
-        "crown_angle", 
-        "crown_angle_grade", 
-        "pavilion_angle", 
-        "pavilion_angle_grade", 
-        "star_length", 
-        "star_length_grade", 
-        "lower_half", 
-        "lower_half_grade", 
-        "girdle_thick", 
-        "girdle_thick_grade", 
-        "crown_height", 
-        "crown_height_grade", 
-        "pavilion_depth", 
-        "pavilion_depth_grade", 
-        "misalignment", 
-        "misalignment_grade", 
-        "table_edge_var", 
-        "table_edge_var_grade",
-        "table_off_center", 
-        "table_off_center_grade", 
-        "culet_off_center", 
-        "culet_off_center_grade", 
-        "table_off_culet", 
-        "table_off_culet_grade",
-        "star_angle", 
-        "star_angle_grade", 
-        "upper_half_angle", 
-        "upper_half_angle_grade",
-        "lower_half_angle",
-        "lower_half_angle_grade",
-    ]
     list_filter = [StoneOwnerFilter]
-
 
     def get_list_display(self, request):
         return [
@@ -387,7 +268,7 @@ class StoneAdmin(admin.ModelAdmin):
             "clarity",
             "fluoresence",
             "culet",
-            "parcel",
+            "split_from",
         ]
 
     actions = [
@@ -408,17 +289,16 @@ class StoneAdmin(admin.ModelAdmin):
     def download_ids(self, request, queryset):
         from django.http import HttpResponse
 
-        filename = (
-            "Stone_id_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".txt"
-        )
-        file = open(filename, "w+")
+        filename = "Gradia_id_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
+        file = open(filename, mode="w")
+        writer = csv.writer(file, delimiter=",")
         for stone in queryset.all():
-            file.write(stone.stone_id + ",")
+            writer.writerow(stone.gradia_id)
         file.close()
 
-        f = open(filename, "r")
+        f = open(filename, mode="r")
         response = HttpResponse(f, content_type="text/plain")
-        response["Content-Disposition"] = "attachment; filename=%s.txt" % filename
+        response["Content-Disposition"] = "attachment; filename=%s.csv" % filename
         return response
 
     download_ids.short_description = "Download Diamond(s) External Nanotech IDs"
@@ -428,15 +308,11 @@ class StoneAdmin(admin.ModelAdmin):
         goldway = User.objects.get(username="goldway")
 
         for stone in queryset.all():
-            StoneTransfer.can_create_transfer(
-                item=stone, from_user=vault, to_user=goldway
-            )
+            StoneTransfer.can_create_transfer(item=stone, from_user=vault, to_user=goldway)
 
         verification = GoldwayVerification.objects.create()
         for stone in queryset.all():
-            StoneTransfer.initiate_transfer(
-                item=stone, from_user=vault, to_user=goldway, created_by=request.user
-            )
+            StoneTransfer.initiate_transfer(item=stone, from_user=vault, to_user=goldway, created_by=request.user)
             stone.goldway_verification = verification
             stone.save()
 
@@ -451,9 +327,7 @@ class StoneAdmin(admin.ModelAdmin):
 
         verification = GiaVerification.objects.create()
         for stone in queryset.all():
-            StoneTransfer.initiate_transfer(
-                item=stone, from_user=vault, to_user=gia, created_by=request.user
-            )
+            StoneTransfer.initiate_transfer(item=stone, from_user=vault, to_user=gia, created_by=request.user)
             stone.gia_verification = verification
             stone.save()
 
@@ -477,7 +351,7 @@ class StoneAdmin(admin.ModelAdmin):
     confirm_received_stones.short_description = "Confirm Received Stones"
 
     def has_change_permission(self, request, obj=None):
-        return True
+        return False
 
     def has_delete_permission(self, request, obj=None):
         return False
@@ -486,7 +360,7 @@ class StoneAdmin(admin.ModelAdmin):
         return True
 
     def has_add_permission(self, request):
-        return True
+        return False
 
     def save_model(self, request, obj, form, change):
         obj.data_entry_user = request.user
