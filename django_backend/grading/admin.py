@@ -6,11 +6,13 @@ from django.contrib import admin
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.utils.timezone import utc
+from django.http import HttpResponse
 
 from ownerships.models import ParcelTransfer, StoneTransfer
 
 from .forms import StoneForm
 from .models import GiaVerification, GoldwayVerification, Parcel, Receipt, Split, Stone
+from .helpers import get_model_fields, get_field_names
 
 
 class StoneInline(admin.TabularInline):
@@ -279,6 +281,7 @@ class StoneAdmin(admin.ModelAdmin):
         "transfer_to_vault",
         "confirm_received_stones",
         "download_ids",
+        "download_master_reports",
     ]
 
     def get_actions(self, request):
@@ -289,17 +292,15 @@ class StoneAdmin(admin.ModelAdmin):
         return actions
 
     def download_ids(self, request, queryset):
-        from django.http import HttpResponse
-
         filename = "Gradia_id_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
         file_path = settings.MEDIA_ROOT + "/csv_downloads/download_ids/" + filename
         file = open(file_path, "w")
         #if we don't want it saved on the server
         #f = StringIO.StringIO()
         writer = csv.writer(file, delimiter=",")
-        writer.writerow(["gradia_id"])
+        writer.writerow(["gradia_id", "blockchain_ID_code", "carat_weight", "color", "clarity",])
         for stone in queryset.all():
-            writer.writerow([stone.gradia_id])
+            writer.writerow([stone.gradia_id, stone.blockchain_ID_code, stone.carat_weight, stone.color, stone.clarity,])
         file.close()
 
         #if we don't want it saved on the server
@@ -310,6 +311,33 @@ class StoneAdmin(admin.ModelAdmin):
         return response
 
     download_ids.short_description = "Download Diamond(s) External Nanotech IDs"
+
+    def download_master_reports(self, request, queryset):
+        filename = "Master_report_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
+        file_path = settings.MEDIA_ROOT + "/csv_downloads/master_reports/" + filename
+        file = open(file_path, "w")
+        #if we don't want it saved on the server
+        #f = StringIO.StringIO()
+        writer = csv.writer(file, delimiter=",")
+        model_fields = get_model_fields(Stone)
+        field_names = get_field_names(model_fields)
+        writer.writerow(field_names)
+        for stone in queryset.all():
+            values = []
+            for field in model_fields:
+                value = field.value_from_object(stone)
+                values.append(value)
+            writer.writerow(values)
+        file.close()
+
+        #if we don't want it saved on the server
+        #f.seek(0)
+        f = open(file_path, mode="r")
+        response = HttpResponse(f, content_type="text/csv")
+        response["Content-Disposition"] = "attachment; filename=%s" % file_path
+        return response
+
+    download_master_reports.short_description = "Download Master Report"
 
     def transfer_to_goldway(self, request, queryset):
         vault = User.objects.get(username="vault")
