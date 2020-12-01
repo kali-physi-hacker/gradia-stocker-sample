@@ -1,6 +1,7 @@
 from functools import partial
 
 from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
 
 import pytest
 from customers.models import Entity
@@ -24,7 +25,9 @@ def browser(live_server, settings):
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument("--headless")
         chrome_options.add_argument("--disable-gpu")
-        driver = webdriver.Chrome(options=chrome_options)
+        driver = webdriver.Chrome(
+            ChromeDriverManager().install(), options=chrome_options
+        )
         driver.implicitly_wait(5)  # seconds
 
         driver.goto = partial(goto, driver, live_server.url)

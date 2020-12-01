@@ -1,7 +1,9 @@
+import os
 import csv
 from datetime import datetime
 
 from django.contrib import admin
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.utils.timezone import utc
 
@@ -290,15 +292,21 @@ class StoneAdmin(admin.ModelAdmin):
         from django.http import HttpResponse
 
         filename = "Gradia_id_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
-        file = open(filename, mode="w")
+        file_path = settings.MEDIA_ROOT + "/csv_downloads/download_ids/" + filename
+        file = open(file_path, "w")
+        #if we don't want it saved on the server
+        #f = StringIO.StringIO()
         writer = csv.writer(file, delimiter=",")
+        writer.writerow(["gradia_id"])
         for stone in queryset.all():
-            writer.writerow(stone.gradia_id)
+            writer.writerow([stone.gradia_id])
         file.close()
 
-        f = open(filename, mode="r")
-        response = HttpResponse(f, content_type="text/plain")
-        response["Content-Disposition"] = "attachment; filename=%s.csv" % filename
+        #if we don't want it saved on the server
+        #f.seek(0)
+        f = open(file_path, mode="r")
+        response = HttpResponse(f, content_type="text/csv")
+        response["Content-Disposition"] = "attachment; filename=%s" % file_path
         return response
 
     download_ids.short_description = "Download Diamond(s) External Nanotech IDs"
