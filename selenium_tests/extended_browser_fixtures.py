@@ -15,7 +15,9 @@ def assert_body_contains_text(browser, search_string):
     try:
         browser.find_element_by_xpath(f'//*[text()[contains(., "{search_string}")]]')
     except NoSuchElementException:
-        pytest.fail(f"unable to find {search_string} in browser body:\n\n{browser.get_body_text()}")
+        pytest.fail(
+            f"unable to find {search_string} in browser body:\n\n{browser.get_body_text()}"
+        )
 
 
 def login(browser, username, password):
@@ -25,6 +27,7 @@ def login(browser, username, password):
     password_field.send_keys(password)
     password_field.send_keys(Keys.RETURN)
     browser.wait_till_gone(password_field)
+
 
 def logout(browser):
     confirm_logout = browser.find_element_by_link_text("LOG OUT")
@@ -47,13 +50,17 @@ def slowly_click(browser, elem, elem_should_disappear=True):
 
 
 def click_add(browser):
-    add_link = browser.find_element_by_xpath("//a[contains(translate(., 'AD', 'ad'), 'add')]")
+    add_link = browser.find_element_by_xpath(
+        "//a[contains(translate(., 'AD', 'ad'), 'add')]"
+    )
     # when clicking inline add new row, elem stays
     browser.slowly_click(add_link, elem_should_disappear=False)
 
 
 def click_go(browser):
-    add_link = browser.find_element_by_css_selector('button[title="Run the selected action"]')
+    add_link = browser.find_element_by_css_selector(
+        'button[title="Run the selected action"]'
+    )
     # when clicking inline add new row, elem stays
     browser.slowly_click(add_link, elem_should_disappear=False)
 

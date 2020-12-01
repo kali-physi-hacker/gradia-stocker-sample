@@ -6,7 +6,9 @@ from grading.models import Stone
 from test_admin_page_receptionist import customer_page_mixin  # noqa to be refactored
 
 
-def test_end_to_end_workflow(browser, customer_page_mixin, receptionist, vault_manager, grader, data_entry_clerk):
+def test_end_to_end_workflow(
+    browser, customer_page_mixin, receptionist, vault_manager, grader, data_entry_clerk
+):
 
     #################################################################
     # 1. client gives us stones, we open a receipt with one parcel ##
@@ -24,11 +26,15 @@ def test_end_to_end_workflow(browser, customer_page_mixin, receptionist, vault_m
     customer_dropdown.select_by_visible_text("Van Klaren")
     browser.find_element_by_name("code").send_keys("VK20200723")
     browser.click_add()
-    browser.find_element_by_name("parcel_set-0-gradia_parcel_code").send_keys("VK20200723-1")
+    browser.find_element_by_name("parcel_set-0-gradia_parcel_code").send_keys(
+        "VK20200723-1"
+    )
     browser.find_element_by_name("parcel_set-0-customer_parcel_code").send_keys("001")
     browser.find_element_by_name("parcel_set-0-total_carats").send_keys("1")
     browser.find_element_by_name("parcel_set-0-total_pieces").send_keys("1")
-    browser.find_element_by_name("parcel_set-0-reference_price_per_carat").send_keys("500")
+    browser.find_element_by_name("parcel_set-0-reference_price_per_carat").send_keys(
+        "500"
+    )
     browser.click_save()
     browser.logout()
 
@@ -54,27 +60,39 @@ def test_end_to_end_workflow(browser, customer_page_mixin, receptionist, vault_m
     browser.go_to_split_page()
     browser.click_add()
     parcel_dropdown = Select(browser.find_element_by_id("id_original_parcel"))
-    parcel_dropdown.select_by_visible_text("parcel VK20200723-1 (1.000ct, 1pcs, receipt VK20200723)")
+    parcel_dropdown.select_by_visible_text(
+        "parcel VK20200723-1 (1.000ct, 1pcs, receipt VK20200723)"
+    )
     add_link = browser.find_element_by_link_text("Add another Parcel")
     add_link.click()
-    browser.find_element_by_name("parcel_set-0-gradia_parcel_code").send_keys("VK20200723-1A")
+    browser.find_element_by_name("parcel_set-0-gradia_parcel_code").send_keys(
+        "VK20200723-1A"
+    )
     browser.find_element_by_name("parcel_set-0-customer_parcel_code").send_keys("001")
     browser.find_element_by_name("parcel_set-0-total_carats").send_keys("1")
     browser.find_element_by_name("parcel_set-0-total_pieces").send_keys("1")
-    browser.find_element_by_name("parcel_set-0-reference_price_per_carat").send_keys("500")
+    browser.find_element_by_name("parcel_set-0-reference_price_per_carat").send_keys(
+        "500"
+    )
     add_link = browser.find_element_by_link_text("Add another Parcel")
     add_link.click()
-    browser.find_element_by_name("parcel_set-1-gradia_parcel_code").send_keys("VK20200723-1B")
+    browser.find_element_by_name("parcel_set-1-gradia_parcel_code").send_keys(
+        "VK20200723-1B"
+    )
     browser.find_element_by_name("parcel_set-1-customer_parcel_code").send_keys("001")
     browser.find_element_by_name("parcel_set-1-total_carats").send_keys("1")
     browser.find_element_by_name("parcel_set-1-total_pieces").send_keys("1")
-    browser.find_element_by_name("parcel_set-1-reference_price_per_carat").send_keys("500")
+    browser.find_element_by_name("parcel_set-1-reference_price_per_carat").send_keys(
+        "500"
+    )
     browser.click_save()
 
     browser.go_to_transfer_page()
     browser.click_add()
     parcel_dropdown = Select(browser.find_element_by_id("id_item"))
-    parcel_dropdown.select_by_visible_text("parcel VK20200723-1A (1.000ct, 1pcs, receipt VK20200723)")
+    parcel_dropdown.select_by_visible_text(
+        "parcel VK20200723-1A (1.000ct, 1pcs, receipt VK20200723)"
+    )
     to_user_dropdown = Select(browser.find_element_by_id("id_to_user"))
     to_user_dropdown.select_by_visible_text(str(grader))
     browser.click_save()

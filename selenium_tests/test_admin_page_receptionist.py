@@ -38,7 +38,9 @@ def customer_page_mixin(browser):
     browser.create_customer = partial(create_customer, browser)
 
 
-def test_receptionist_can_create_new_customer(browser, receptionist, customer_page_mixin):
+def test_receptionist_can_create_new_customer(
+    browser, receptionist, customer_page_mixin
+):
     # Roxy is a receptionist
     # A customer has submitted documents to go through the registration process
     # and the customer has passed KYC and DD
@@ -69,7 +71,9 @@ def test_receptionist_can_create_new_customer(browser, receptionist, customer_pa
     browser.find_element_by_link_text("new_customer")
 
 
-def test_receptionist_can_receive_stones_and_create_a_receipt(browser, receptionist, customer_page_mixin):
+def test_receptionist_can_receive_stones_and_create_a_receipt(
+    browser, receptionist, customer_page_mixin
+):
     browser.login(receptionist.username, receptionist.raw_password)
     # Customer Van Klaren is an old customer
     browser.create_customer()
@@ -100,11 +104,15 @@ def test_receptionist_can_receive_stones_and_create_a_receipt(browser, reception
 
     # she adds a new parcel that goes with this receipt
     browser.click_add()
-    browser.find_element_by_name("parcel_set-0-gradia_parcel_code").send_keys("VK20200723-1")
+    browser.find_element_by_name("parcel_set-0-gradia_parcel_code").send_keys(
+        "VK20200723-1"
+    )
     browser.find_element_by_name("parcel_set-0-customer_parcel_code").send_keys("001")
     browser.find_element_by_name("parcel_set-0-total_carats").send_keys("1")
     browser.find_element_by_name("parcel_set-0-total_pieces").send_keys("1")
-    browser.find_element_by_name("parcel_set-0-reference_price_per_carat").send_keys("500")
+    browser.find_element_by_name("parcel_set-0-reference_price_per_carat").send_keys(
+        "500"
+    )
 
     # she saved it
     browser.click_save()
