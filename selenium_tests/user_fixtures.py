@@ -194,3 +194,10 @@ def vault_manager(django_user_model, erp):
 
     user.raw_password = user_data.password
     return user
+
+
+@pytest.fixture
+def user_admin(admin_user):
+    admin_user.set_password("admin")
+    admin_user.raw_password = "admin"
+    return admin_user
