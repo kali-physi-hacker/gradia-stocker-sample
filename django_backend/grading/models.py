@@ -350,7 +350,8 @@ class Inclusion(models.Model):
 class Stone(models.Model):
     data_entry_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="entered_data_for_stone")
     date_created = models.DateTimeField(auto_now_add=True)
-    gradia_id = models.CharField(max_length=11, unique=True)
+    internal_id = models.IntegerField(unique=True)
+    external_id = models.CharField(max_length=11, unique=True, blank=True, null=True)
     # you can get the parcel and the receipt from split_from
     split_from = models.ForeignKey(Split, on_delete=models.PROTECT)
     # we are merging all comments and remarks into a single field
@@ -359,8 +360,6 @@ class Stone(models.Model):
     ########################################################################
     # basic grading                                                        #
     ########################################################################
-    sample_stone = models.CharField(max_length=120, null=True, blank=True)
-    shape_and_cutting = models.CharField(max_length=120, null=True, blank=True)
     diamond_description = models.CharField(max_length=120, null=True, blank=True)
     basic_carat = models.DecimalField(max_digits=5, decimal_places=3)
     basic_culet = models.CharField(choices=CuletGrades.CHOICES, max_length=2)
