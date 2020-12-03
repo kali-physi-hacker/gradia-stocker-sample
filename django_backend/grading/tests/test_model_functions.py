@@ -5,9 +5,7 @@ from grading.helpers import get_model_fields, get_field_names
 
 
 class TestPdfGeneration(TestCase):
-    fixtures = (
-        "data_migration/test_data.json",
-    )
+    fixtures = ("data_migration/test_data.json",)
 
     def setUp(self):
         self.stone1 = Stone.objects.get(internal_id=1)
@@ -24,13 +22,13 @@ class TestPdfGeneration(TestCase):
 
         file = open(file_path)
         # import pdb; pdb.set_trace()
-        csv_reader = csv.reader(file, delimiter=',')
+        csv_reader = csv.reader(file, delimiter=",")
         for row in csv_reader:
             # import pdb; pdb.set_trace()
             self.assertTrue("internal_id" in row)
 
             break
-        
+
     def test_master_download(self):
 
         queryset = Stone.objects.all()
@@ -40,7 +38,7 @@ class TestPdfGeneration(TestCase):
         model_fields = get_model_fields(Stone)
         field_names = get_field_names(model_fields)
         # import pdb; pdb.set_trace()
-        csv_reader = csv.reader(file, delimiter=',')
+        csv_reader = csv.reader(file, delimiter=",")
         for row in csv_reader:
             # import pdb; pdb.set_trace()
             for field in field_names:

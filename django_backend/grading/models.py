@@ -13,6 +13,7 @@ from datetime import datetime
 from django.conf import settings
 from django.utils.timezone import utc
 
+
 class StoneManager(models.Manager):
     def download_ids(self, queryset):
         filename = (
@@ -35,7 +36,7 @@ class StoneManager(models.Manager):
                 ]
             )
         file.close()
-        
+
         return file_path
 
     def download_master_reports(self, queryset):
