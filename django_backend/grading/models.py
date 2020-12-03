@@ -5,6 +5,62 @@ from django.utils.html import format_html
 
 from customers.models import Entity
 from ownerships.models import ParcelTransfer, StoneTransfer
+from .helpers import get_model_fields, get_field_names
+
+import os
+import csv
+from datetime import datetime
+from django.conf import settings
+from django.utils.timezone import utc
+
+class StoneManager(models.Manager):
+    def download_ids(self, queryset):
+        filename = (
+            "Gradia_id_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
+        )
+        file_path = settings.MEDIA_ROOT + "/csv_downloads/download_ids/" + filename
+        file = open(file_path, "w")
+        # if we don't want it saved on the server
+        # f = StringIO.StringIO()
+        writer = csv.writer(file, delimiter=",")
+        writer.writerow(
+            [
+                "internal_id",
+            ]
+        )
+        for stone in queryset.all():
+            writer.writerow(
+                [
+                    stone.internal_id,
+                ]
+            )
+        file.close()
+        
+        return file_path
+
+    def download_master_reports(self, queryset):
+        filename = (
+            "Master_report_"
+            + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S"))
+            + ".csv"
+        )
+        file_path = settings.MEDIA_ROOT + "/csv_downloads/master_reports/" + filename
+        file = open(file_path, "w")
+        # if we don't want it saved on the server
+        # f = StringIO.StringIO()
+        writer = csv.writer(file, delimiter=",")
+        model_fields = get_model_fields(Stone)
+        field_names = get_field_names(model_fields)
+        writer.writerow(field_names)
+        for stone in queryset.all():
+            values = []
+            for field in model_fields:
+                value = field.value_from_object(stone)
+                values.append(value)
+            writer.writerow(values)
+        file.close()
+
+        return file_path
 
 
 class Split(models.Model):
@@ -569,6 +625,7 @@ class Stone(models.Model):
     carat_weight = models.DecimalField(
         max_digits=4, decimal_places=3, null=True, blank=True
     )
+    objects = StoneManager()
 
     def current_location(self):
         return StoneTransfer.get_current_location(self)

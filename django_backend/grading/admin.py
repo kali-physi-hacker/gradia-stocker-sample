@@ -12,7 +12,6 @@ from ownerships.models import ParcelTransfer, StoneTransfer
 
 from .forms import StoneForm
 from .models import GiaVerification, GoldwayVerification, Parcel, Receipt, Split, Stone
-from .helpers import get_model_fields, get_field_names
 
 
 class StoneInline(admin.TabularInline):
@@ -278,7 +277,7 @@ class StoneAdmin(admin.ModelAdmin):
 
     def get_list_display(self, request):
         return [
-            "gradia_id",
+            "internal_id",
             "current_location",
             "carat_weight",
             "color",
@@ -305,37 +304,7 @@ class StoneAdmin(admin.ModelAdmin):
         return actions
 
     def download_ids(self, request, queryset):
-        filename = (
-            "Gradia_id_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
-        )
-        file_path = settings.MEDIA_ROOT + "/csv_downloads/download_ids/" + filename
-        file = open(file_path, "w")
-        # if we don't want it saved on the server
-        # f = StringIO.StringIO()
-        writer = csv.writer(file, delimiter=",")
-        writer.writerow(
-            [
-                "gradia_id",
-                "blockchain_ID_code",
-                "carat_weight",
-                "color",
-                "clarity",
-            ]
-        )
-        for stone in queryset.all():
-            writer.writerow(
-                [
-                    stone.gradia_id,
-                    stone.blockchain_ID_code,
-                    stone.carat_weight,
-                    stone.color,
-                    stone.clarity,
-                ]
-            )
-        file.close()
-
-        # if we don't want it saved on the server
-        # f.seek(0)
+        file_path = Stone.objects.download_ids(request, queryset)
         f = open(file_path, mode="r")
         response = HttpResponse(f, content_type="text/csv")
         response["Content-Disposition"] = "attachment; filename=%s" % file_path
@@ -344,29 +313,7 @@ class StoneAdmin(admin.ModelAdmin):
     download_ids.short_description = "Download Diamond(s) External Nanotech IDs"
 
     def download_master_reports(self, request, queryset):
-        filename = (
-            "Master_report_"
-            + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S"))
-            + ".csv"
-        )
-        file_path = settings.MEDIA_ROOT + "/csv_downloads/master_reports/" + filename
-        file = open(file_path, "w")
-        # if we don't want it saved on the server
-        # f = StringIO.StringIO()
-        writer = csv.writer(file, delimiter=",")
-        model_fields = get_model_fields(Stone)
-        field_names = get_field_names(model_fields)
-        writer.writerow(field_names)
-        for stone in queryset.all():
-            values = []
-            for field in model_fields:
-                value = field.value_from_object(stone)
-                values.append(value)
-            writer.writerow(values)
-        file.close()
-
-        # if we don't want it saved on the server
-        # f.seek(0)
+        file_path = Stone.objects.download_master_reports(queryset)
         f = open(file_path, mode="r")
         response = HttpResponse(f, content_type="text/csv")
         response["Content-Disposition"] = "attachment; filename=%s" % file_path
