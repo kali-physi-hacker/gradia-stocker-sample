@@ -93,13 +93,14 @@ def test_receptionist_can_receive_stones_and_create_a_receipt(browser, reception
 
     # Roxy selects Van Klaren from the customer dropdown menu
     customer_dropdown = Select(browser.find_element_by_id("id_entity"))
+
     customer_dropdown.select_by_visible_text("Van Klaren")
 
     # she enters the receipt code
     browser.find_element_by_name("code").send_keys("VK20200723")
 
     # she adds a new parcel that goes with this receipt
-    browser.click_add()
+    browser.click_add(should_disappear=False)
     browser.find_element_by_name("parcel_set-0-gradia_parcel_code").send_keys("VK20200723-1")
     browser.find_element_by_name("parcel_set-0-customer_parcel_code").send_keys("001")
     browser.find_element_by_name("parcel_set-0-total_carats").send_keys("1")

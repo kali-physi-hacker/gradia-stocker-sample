@@ -3,6 +3,7 @@ from datetime import datetime
 
 from django.contrib import admin
 from django.contrib.auth.models import User
+from django.http import HttpResponse
 from django.utils.timezone import utc
 
 from ownerships.models import ParcelTransfer, StoneTransfer
@@ -261,7 +262,7 @@ class StoneAdmin(admin.ModelAdmin):
 
     def get_list_display(self, request):
         return [
-            "gradia_id",
+            "external_id",
             "current_location",
             "carat_weight",
             "color",
@@ -287,13 +288,11 @@ class StoneAdmin(admin.ModelAdmin):
         return actions
 
     def download_ids(self, request, queryset):
-        from django.http import HttpResponse
-
-        filename = "Gradia_id_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
+        filename = "Gradia_ids_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
         file = open(filename, mode="w")
         writer = csv.writer(file, delimiter=",")
         for stone in queryset.all():
-            writer.writerow(stone.gradia_id)
+            writer.writerow(stone.internal_id)
         file.close()
 
         f = open(filename, mode="r")
