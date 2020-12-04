@@ -5,6 +5,7 @@ from datetime import datetime
 from django.contrib import admin
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.http import HttpResponse
 from django.utils.timezone import utc
 from django.http import HttpResponse
 
@@ -277,7 +278,7 @@ class StoneAdmin(admin.ModelAdmin):
 
     def get_list_display(self, request):
         return [
-            "internal_id",
+            "external_id",
             "current_location",
             "carat_weight",
             "color",

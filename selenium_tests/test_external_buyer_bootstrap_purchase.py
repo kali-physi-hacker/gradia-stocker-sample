@@ -67,7 +67,7 @@ def test_buyer_can_setup_new_sellers_and_take_in_a_bag_of_stones(browser, buyer)
     browser.find_element_by_name("code").send_keys("123456")
 
     # he adds a new parcel that goes with this receipt
-    browser.click_add()
+    browser.click_add(should_disappear=False)
     # there is no gradia parcel code for this
     browser.find_element_by_name("parcel_set-0-customer_parcel_code").send_keys("001")
     browser.find_element_by_name("parcel_set-0-total_carats").send_keys("1")
@@ -77,7 +77,7 @@ def test_buyer_can_setup_new_sellers_and_take_in_a_bag_of_stones(browser, buyer)
     )
 
     # he adds another parcel
-    browser.click_add()
+    browser.click_add(should_disappear=False)
     browser.find_element_by_name("parcel_set-1-customer_parcel_code").send_keys("002")
     browser.find_element_by_name("parcel_set-1-total_carats").send_keys("2")
     browser.find_element_by_name("parcel_set-1-total_pieces").send_keys("2")

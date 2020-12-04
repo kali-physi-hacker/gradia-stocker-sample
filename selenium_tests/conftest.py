@@ -83,7 +83,7 @@ def stones(django_user_model, receipt, data_entry_clerk, grader, receptionist):
     stone_list = [
         Stone.objects.create(
             data_entry_user=data_entry_clerk,
-            internal_id="1",
+            internal_id=1,
             split_from=split,
             basic_carat=4,
             basic_culet=CuletGrades.VERY_SMALL,
@@ -147,7 +147,7 @@ def stones(django_user_model, receipt, data_entry_clerk, grader, receptionist):
         ),
         Stone.objects.create(
             data_entry_user=data_entry_clerk,
-            internal_id="2",
+            internal_id=2,
             split_from=split,
             basic_carat=4,
             basic_culet=CuletGrades.VERY_SMALL,
@@ -211,7 +211,7 @@ def stones(django_user_model, receipt, data_entry_clerk, grader, receptionist):
         ),
         Stone.objects.create(
             data_entry_user=data_entry_clerk,
-            internal_id="3",
+            internal_id=3,
             split_from=split,
             basic_carat=4,
             basic_culet=CuletGrades.VERY_SMALL,
