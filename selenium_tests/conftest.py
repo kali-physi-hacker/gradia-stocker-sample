@@ -6,8 +6,16 @@ import pytest
 from customers.models import Entity
 from extended_browser_fixtures import setup_browser_helper_functions
 from grading.models import (
-    ClarityGrades, ColorGrades, CuletGrades, FluorescenceGrades,
-    GeneralGrades, GirdleGrades, Parcel, Receipt, Split, Stone
+    ClarityGrades,
+    ColorGrades,
+    CuletGrades,
+    FluorescenceGrades,
+    GeneralGrades,
+    GirdleGrades,
+    Parcel,
+    Receipt,
+    Split,
+    Stone,
 )
 from ownerships.models import ParcelTransfer, StoneTransfer
 from urls import goto
@@ -39,7 +47,9 @@ def browser(live_server, settings):
 @pytest.fixture
 def receipt(django_user_model, erp, admin_user):
     created_receipt = Receipt.objects.create(
-        entity=Entity.objects.create(name="Van Klaren", address="addressy", phone="12345678", email="vk@vk.com"),
+        entity=Entity.objects.create(
+            name="Van Klaren", address="addressy", phone="12345678", email="vk@vk.com"
+        ),
         code="VK-0001",
         intake_by=admin_user,
     )

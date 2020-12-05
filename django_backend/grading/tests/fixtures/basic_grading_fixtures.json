@@ -1,0 +1,64 @@
+[
+  {
+    "model": "auth.user",
+    "pk": 2,
+    "fields": {
+      "password": "pbkdf2_sha256$180000$QEWXsDCN7uNC$l6sDhyYZgeYLlv9NeGX13/cylvLbl/RhnwL0qzsChbs=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "graderuser",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2020-12-04T06:00:35.918Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "customers.entity",
+    "pk": 1,
+    "fields": {
+      "name": "ent 1",
+      "address": "some address",
+      "remarks": "no comments",
+      "phone": "12345689",
+      "email": "email@email.com"
+    }
+  },
+  {
+    "model": "grading.receipt",
+    "pk": 1,
+    "fields": {
+      "entity": 1,
+      "code": "12345689",
+      "intake_date": "2020-12-04T06:29:14.950Z",
+      "release_date": null,
+      "intake_by": 2,
+      "release_by": null
+    }
+  },
+  {
+    "model": "grading.parcel",
+    "pk": 1,
+    "fields": {
+      "receipt": 1,
+      "customer_parcel_code": "0123456789",
+      "total_carats": "23.000",
+      "total_pieces": 43,
+      "reference_price_per_carat": 32,
+      "split_from": null,
+      "gradia_parcel_code": "123456789"
+    }
+  },
+  {
+    "model": "grading.split",
+    "pk": 1,
+    "fields": {
+      "split_by": 2,
+      "split_date": "2020-12-04T06:32:36.845Z"
+    }
+  }
+]

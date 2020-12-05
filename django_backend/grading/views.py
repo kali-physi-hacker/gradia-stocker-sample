@@ -9,6 +9,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.utils.timezone import utc
 from django.views import View
+from django.contrib import messages
 
 from ownerships.models import ParcelTransfer, StoneTransfer
 
@@ -16,33 +17,46 @@ from .models import Parcel, Receipt, Stone, Split, ParcelTransfer
 
 from .helpers import column_tuple_to_value_tuple_dict_map, get_field_names_snake_case
 
+from .forms import CSVImportForm
+
 
 class ReturnToVaultView(View):
     def get(self, request, pk, *args, **kwargs):
         parcel = Parcel.objects.get(pk=pk)
         try:
             ParcelTransfer.can_create_transfer(
-                item=parcel, from_user=request.user, to_user=User.objects.get(username="vault")
+                item=parcel,
+                from_user=request.user,
+                to_user=User.objects.get(username="vault"),
             )
         except Exception as e:
             return HttpResponse(e)
 
         return render(
-            request, "grading/return_to_vault_confirmation.html", {"username": request.user.username, "item": parcel}
+            request,
+            "grading/return_to_vault_confirmation.html",
+            {"username": request.user.username, "item": parcel},
         )
 
     def post(self, request, pk, *args, **kwargs):
         parcel = Parcel.objects.get(pk=pk)
         try:
             ParcelTransfer.can_create_transfer(
-                item=parcel, from_user=request.user, to_user=User.objects.get(username="vault")
+                item=parcel,
+                from_user=request.user,
+                to_user=User.objects.get(username="vault"),
             )
         except Exception as e:
             return HttpResponse(e)
         ParcelTransfer.initiate_transfer(
-            item=parcel, from_user=request.user, to_user=User.objects.get(username="vault"), created_by=request.user
+            item=parcel,
+            from_user=request.user,
+            to_user=User.objects.get(username="vault"),
+            created_by=request.user,
         )
-        return HttpResponseRedirect(reverse("admin:grading_parcel_change", args=[parcel.id]))
+        return HttpResponseRedirect(
+            reverse("admin:grading_parcel_change", args=[parcel.id])
+        )
 
 
 class ConfirmReceivedView(View):
@@ -56,7 +70,11 @@ class ConfirmReceivedView(View):
 
         parcel_owner, status = parcel.current_location()
 
-        return render(request, "grading/confirm_received.html", {"username": request.user.username, "item": parcel})
+        return render(
+            request,
+            "grading/confirm_received.html",
+            {"username": request.user.username, "item": parcel},
+        )
 
     def post(self, request, pk, *args, **kwargs):
         parcel = Parcel.objects.get(pk=pk)
@@ -66,20 +84,28 @@ class ConfirmReceivedView(View):
             return HttpResponse(e)
 
         ParcelTransfer.confirm_received(parcel)
-        return HttpResponseRedirect(reverse("admin:grading_parcel_change", args=[parcel.id]))
+        return HttpResponseRedirect(
+            reverse("admin:grading_parcel_change", args=[parcel.id])
+        )
 
 
 class CloseReceiptView(View):
     def get(self, request, pk, *args, **kwargs):
         receipt = Receipt.objects.get(pk=pk)
-        return render(request, "grading/close_receipt.html", {"username": request.user.username, "receipt": receipt})
+        return render(
+            request,
+            "grading/close_receipt.html",
+            {"username": request.user.username, "receipt": receipt},
+        )
 
     def post(self, request, pk, *args, **kwargs):
         receipt = Receipt.objects.get(pk=pk)
         receipt.release_by = request.user
         receipt.release_date = datetime.utcnow().replace(tzinfo=utc)
         receipt.save()
-        return HttpResponseRedirect(reverse("admin:grading_receipt_change", args=[receipt.id]))
+        return HttpResponseRedirect(
+            reverse("admin:grading_receipt_change", args=[receipt.id])
+        )
 
 
 class UploadParcelCSVFile(View):
@@ -91,7 +117,14 @@ class UploadParcelCSVFile(View):
         :param kwargs:
         :return:
         """
-        pass
+        # messages.add_message(request, messages.ERROR, "error 1")
+        # messages.add_message(request, messages.ERROR, "error 2")
+        # messages.add_message(request, messages.ERROR, "error 3")
+        # messages.add_message(request, messages.ERROR, "error 4")
+        context = {"form": CSVImportForm()}
+        if "errors" in kwargs:
+            context["errors"] = kwargs["errors"]
+        return render(request, "grading/upload.html", context)
 
     def post(self, request, *args, **kwargs):
         """
@@ -101,8 +134,7 @@ class UploadParcelCSVFile(View):
         :param kwargs:
         :return:
         """
-        csv_file = request.FILES["parcel_csv_file"]
-
+        csv_file = request.FILES["file"]
         # TODO: What is happening here ?
         #  1. Get the gradia_parcel_code from the filename
         #  2. Get the existing parcel (original) using the gradia_parcel_code)
@@ -117,16 +149,20 @@ class UploadParcelCSVFile(View):
             parcel = None
 
         if parcel is None:
-            return Http404("Parcel name in the csv does not exist")
+            messages.add_message(request, messages.ERROR, "Parcel name does not exist")
+            return HttpResponseRedirect(
+                reverse("grading:upload_parcel_csv")
+            )  # Http404("Parcel name in the csv does not exist")
 
         split = Split.objects.get(original_parcel=parcel)
 
         # TODO: Ways of Implementing the csv_columns
         #  1. By manually entering them
-        #  2. By use django's model._meta.fields and passing that to a function that returns
+        #  2. By using django's model._meta.fields and passing that to a function that returns
         #       a snake case word
 
         # TODO: 1 Using the 1st Implementation for 1st Cut
+        #   We may fallback to this method depending
         # csv_columns = (
         #     'gradia_id', 'split_from', 'remarks', 'sample_stone',
         #     'shape_and_cutting', 'diamond_description', 'basic_carat', 'basic_culet',
@@ -153,26 +189,48 @@ class UploadParcelCSVFile(View):
         data_frame = pd.DataFrame(csv_data, columns=csv_columns)
 
         # Get parcel owner
-        parcel_owner = ParcelTransfer.most_recent_transfer(parcel).from_user
+        # parcel_owner = ParcelTransfer.most_recent_transfer(parcel).from_user
 
         # Map column_fields to values in a dictionary data structure
         for stone_entry in data_frame.values:
             data_dict = column_tuple_to_value_tuple_dict_map(csv_columns, stone_entry)
-            data_dict['data_entry_user'] = request.user
+            data_dict["data_entry_user"] = request.user
+
+            # Delete ID
+            del data_dict["ID"]
+
+            # Set the split_from value
+            data_dict["split_from"] = split
+            for data in data_dict:
+                if pd.isna(data_dict[data]):
+                    data_dict[data] = None
+
+            # Will change this implementation later for a better way of giving error messages
+            try:
+                data_dict["grader_1"] = User.objects.get(username=data_dict["grader_1"])
+            except User.DoesNotExist:
+                messages.add_message(
+                    request,
+                    messages.ERROR,
+                    f"Grader: {data_dict['grader_1']} Does not exist",
+                )
+                return HttpResponseRedirect(reverse("grading:upload_parcel_csv"))
 
             # Create Stones
             stone = Stone.objects.create(**data_dict)
             stone.split_from = split
             stone.save()
-
             # Do a stone transfer
-            StoneTransfer.objects.create(
-                item=stone,
-                from_user=User.objects.get(username="split"),
-                created_by=request.user,
-                to_user=parcel_owner,
-                confirmed_date=datetime.utcnow().replace(tzinfo=utc)
-            )
+            # StoneTransfer.objects.create(
+            #     item=stone,
+            #     from_user=User.objects.get(username="split"),
+            #     created_by=request.user,
+            #     to_user=parcel_owner,
+            #     confirmed_date=datetime.utcnow().replace(tzinfo=utc)
+            # )
+        return HttpResponseRedirect(
+            reverse("admin:grading_split_change", args=(split.pk,))
+        )
 
 
 """

@@ -4,6 +4,7 @@ from datetime import datetime
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.utils.timezone import utc
+from django.urls import path
 
 from ownerships.models import ParcelTransfer, StoneTransfer
 
@@ -56,6 +57,8 @@ class SplitAdmin(admin.ModelAdmin):
     inlines = [ParcelInline, StoneInline]
 
     readonly_fields = ["split_by"]
+
+    change_list_template = "grading/split_change_list.html"
 
     def save_formset(self, request, form, formset, change):
         instances = formset.save(commit=False)
@@ -130,7 +133,9 @@ class ItemOwnerFilter(admin.SimpleListFilter):
             username_filter = request.user.username
 
         if username_filter:
-            fresh_transfers = self.transfer_model.objects.filter(to_user__username=username_filter, fresh=True)
+            fresh_transfers = self.transfer_model.objects.filter(
+                to_user__username=username_filter, fresh=True
+            )
         else:
             # the __all__ case where self.value() == None
             fresh_transfers = (
@@ -173,7 +178,12 @@ class ParcelAdmin(admin.ModelAdmin):
         "most_recent_transfer",
     ]
 
-    search_fields = ["gradia_parcel_code", "customer_parcel_code", "receipt__code", "receipt__entity__name"]
+    search_fields = [
+        "gradia_parcel_code",
+        "customer_parcel_code",
+        "receipt__code",
+        "receipt__entity__name",
+    ]
     list_filter = [ParcelOwnerFilter]
     list_display_links = ["gradia_parcel_code"]
 
@@ -218,7 +228,13 @@ class ReceiptAdmin(admin.ModelAdmin):
     inlines = [ParcelInline]
 
     def get_list_display(self, request):
-        return ["__str__", "intake_date", "release_date", "closed_out", self.model.get_action_html_link]
+        return [
+            "__str__",
+            "intake_date",
+            "release_date",
+            "closed_out",
+            self.model.get_action_html_link,
+        ]
 
     def has_add_permission(self, request, obj=None):
         return True
@@ -289,7 +305,9 @@ class StoneAdmin(admin.ModelAdmin):
     def download_ids(self, request, queryset):
         from django.http import HttpResponse
 
-        filename = "Gradia_id_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
+        filename = (
+            "Gradia_id_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
+        )
         file = open(filename, mode="w")
         writer = csv.writer(file, delimiter=",")
         for stone in queryset.all():
@@ -308,11 +326,15 @@ class StoneAdmin(admin.ModelAdmin):
         goldway = User.objects.get(username="goldway")
 
         for stone in queryset.all():
-            StoneTransfer.can_create_transfer(item=stone, from_user=vault, to_user=goldway)
+            StoneTransfer.can_create_transfer(
+                item=stone, from_user=vault, to_user=goldway
+            )
 
         verification = GoldwayVerification.objects.create()
         for stone in queryset.all():
-            StoneTransfer.initiate_transfer(item=stone, from_user=vault, to_user=goldway, created_by=request.user)
+            StoneTransfer.initiate_transfer(
+                item=stone, from_user=vault, to_user=goldway, created_by=request.user
+            )
             stone.goldway_verification = verification
             stone.save()
 
@@ -327,7 +349,9 @@ class StoneAdmin(admin.ModelAdmin):
 
         verification = GiaVerification.objects.create()
         for stone in queryset.all():
-            StoneTransfer.initiate_transfer(item=stone, from_user=vault, to_user=gia, created_by=request.user)
+            StoneTransfer.initiate_transfer(
+                item=stone, from_user=vault, to_user=gia, created_by=request.user
+            )
             stone.gia_verification = verification
             stone.save()
 
