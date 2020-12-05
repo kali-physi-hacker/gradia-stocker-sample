@@ -125,7 +125,7 @@ USE_TZ = True
 STATIC_URL = "/static/"
 MEDIA_URL = "/media/"
 STATIC_ROOT = os.path.join(os.path.dirname(BASE_DIR), "static")
-MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), "django_backend/media")
+MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), "media")
 # for the compiled assets from the frontend
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "frontend_static_files")]
 

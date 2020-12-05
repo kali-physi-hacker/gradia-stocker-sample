@@ -5,10 +5,11 @@ from django.utils.html import format_html
 
 from customers.models import Entity
 from ownerships.models import ParcelTransfer, StoneTransfer
-from .helpers import get_model_fields, get_field_names
+from .helpers import get_model_fields, get_field_names, CSVManager
 
 import os
 import csv
+# import StringIO
 from datetime import datetime
 from django.conf import settings
 from django.utils.timezone import utc
@@ -20,22 +21,21 @@ class StoneManager(models.Manager):
             "Gradia_id_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
         )
         file_path = settings.MEDIA_ROOT + "/csv_downloads/download_ids/" + filename
-        file = open(file_path, "w")
-        # if we don't want it saved on the server
-        # f = StringIO.StringIO()
-        writer = csv.writer(file, delimiter=",")
-        writer.writerow(
-            [
-                "internal_id",
-            ]
-        )
-        for stone in queryset.all():
+        with CSVManager(file_path, 'w') as file: 
+            # if we don't want it saved on the server
+            # f = StringIO.StringIO()
+            writer = csv.writer(file, delimiter=",")
             writer.writerow(
                 [
-                    stone.internal_id,
+                    "internal_id",
                 ]
             )
-        file.close()
+            for stone in reversed(queryset.all()):
+                writer.writerow(
+                    [
+                        stone.internal_id,
+                    ]
+                )
 
         return file_path
 
@@ -46,20 +46,41 @@ class StoneManager(models.Manager):
             + ".csv"
         )
         file_path = settings.MEDIA_ROOT + "/csv_downloads/master_reports/" + filename
-        file = open(file_path, "w")
-        # if we don't want it saved on the server
-        # f = StringIO.StringIO()
-        writer = csv.writer(file, delimiter=",")
-        model_fields = get_model_fields(Stone)
-        field_names = get_field_names(model_fields)
-        writer.writerow(field_names)
-        for stone in queryset.all():
-            values = []
-            for field in model_fields:
-                value = field.value_from_object(stone)
-                values.append(value)
-            writer.writerow(values)
-        file.close()
+        with CSVManager(file_path, 'w') as file: 
+            # if we don't want it saved on the server
+            # f = StringIO.StringIO()
+            writer = csv.writer(file, delimiter=",")
+            model_fields = get_model_fields(Stone)
+            field_names = get_field_names(model_fields)
+            writer.writerow(field_names)
+            for stone in reversed(queryset.all()):
+                values = []
+                for field in field_names:
+                    value = getattr(stone, field)
+                    values.append(value)
+                writer.writerow(values)
+
+        return file_path
+
+    def download_to_goldway_csv(self, queryset):
+        filename = (
+            "To_Goldway_"
+            + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S"))
+            + ".csv"
+        )
+        file_path = settings.MEDIA_ROOT + "/csv_downloads/to_goldway/" + filename
+        with CSVManager(file_path, 'w') as file: 
+            # if we don't want it saved on the server
+            # f = StringIO.StringIO()
+            writer = csv.writer(file, delimiter=",")
+            field_names = ["date_to_GW", "internal_id", "basic_carat"]
+            writer.writerow(field_names)
+            for stone in reversed(queryset.all()):
+                values = []
+                for field in field_names:
+                    value = getattr(stone, field)
+                    values.append(value)
+                writer.writerow(values)
 
         return file_path
 

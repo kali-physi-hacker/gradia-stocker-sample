@@ -45,3 +45,19 @@ class TestPdfGeneration(TestCase):
                 self.assertTrue(field in row)
 
             break
+
+    def test_download_to_goldway_csv(self):
+
+        queryset = Stone.objects.all()
+        file_path = Stone.objects.download_to_goldway_csv(queryset=queryset)
+
+        file = open(file_path)
+        field_names = ["date_to_GW", "internal_id", "basic_carat"]
+        # import pdb; pdb.set_trace()
+        csv_reader = csv.reader(file, delimiter=",")
+        for row in csv_reader:
+            # import pdb; pdb.set_trace()
+            for field in field_names:
+                self.assertTrue(field in row)
+
+            break
