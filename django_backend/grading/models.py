@@ -9,6 +9,7 @@ from .helpers import get_model_fields, get_field_names, CSVManager
 
 import os
 import csv
+
 # import StringIO
 from datetime import datetime
 from django.conf import settings
@@ -21,7 +22,7 @@ class StoneManager(models.Manager):
             "Gradia_id_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
         )
         file_path = settings.MEDIA_ROOT + "/csv_downloads/download_ids/" + filename
-        with CSVManager(file_path, 'w') as file: 
+        with CSVManager(file_path, "w") as file:
             # if we don't want it saved on the server
             # f = StringIO.StringIO()
             writer = csv.writer(file, delimiter=",")
@@ -46,7 +47,7 @@ class StoneManager(models.Manager):
             + ".csv"
         )
         file_path = settings.MEDIA_ROOT + "/csv_downloads/master_reports/" + filename
-        with CSVManager(file_path, 'w') as file: 
+        with CSVManager(file_path, "w") as file:
             # if we don't want it saved on the server
             # f = StringIO.StringIO()
             writer = csv.writer(file, delimiter=",")
@@ -69,7 +70,7 @@ class StoneManager(models.Manager):
             + ".csv"
         )
         file_path = settings.MEDIA_ROOT + "/csv_downloads/to_goldway/" + filename
-        with CSVManager(file_path, 'w') as file: 
+        with CSVManager(file_path, "w") as file:
             # if we don't want it saved on the server
             # f = StringIO.StringIO()
             writer = csv.writer(file, delimiter=",")

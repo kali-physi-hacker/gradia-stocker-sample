@@ -105,7 +105,9 @@ def test_receptionist_can_receive_stones_and_create_a_receipt(
 
     # she adds a new parcel that goes with this receipt
     browser.click_add(should_disappear=False)
-    browser.find_element_by_name("parcel_set-0-gradia_parcel_code").send_keys("VK20200723-1")
+    browser.find_element_by_name("parcel_set-0-gradia_parcel_code").send_keys(
+        "VK20200723-1"
+    )
     browser.find_element_by_name("parcel_set-0-customer_parcel_code").send_keys("001")
     browser.find_element_by_name("parcel_set-0-total_carats").send_keys("1")
     browser.find_element_by_name("parcel_set-0-total_pieces").send_keys("1")

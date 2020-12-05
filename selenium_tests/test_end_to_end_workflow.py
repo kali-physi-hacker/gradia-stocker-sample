@@ -26,7 +26,9 @@ def test_end_to_end_workflow(
     customer_dropdown.select_by_visible_text("Van Klaren")
     browser.find_element_by_name("code").send_keys("VK20200723")
     browser.click_add(should_disappear=False)
-    browser.find_element_by_name("parcel_set-0-gradia_parcel_code").send_keys("VK20200723-1")
+    browser.find_element_by_name("parcel_set-0-gradia_parcel_code").send_keys(
+        "VK20200723-1"
+    )
     browser.find_element_by_name("parcel_set-0-customer_parcel_code").send_keys("001")
     browser.find_element_by_name("parcel_set-0-total_carats").send_keys("1")
     browser.find_element_by_name("parcel_set-0-total_pieces").send_keys("1")

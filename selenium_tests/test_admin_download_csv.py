@@ -53,6 +53,7 @@ def test_grader_can_download_master_report(browser, stones, grader):
 
     browser.click_go()
 
+
 def test_grader_can_download_goldway_transfer(browser, stones, grader):
 
     browser.login(grader.username, grader.raw_password)
