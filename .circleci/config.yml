@@ -24,7 +24,7 @@ commands:
         command: |
           python3 -m venv venv
           . venv/bin/activate
-          pip install -r requirements37.txt
+          pip install -r requirements39.txt
   django_unittests:
     steps:
     - run:
@@ -52,7 +52,7 @@ executors:
     - image: circleci/python:<<parameters.python>>-browsers
     parameters:
       python:
-        default: "3.7"
+        default: "3.9"
         type: string
 ################################################################################
 jobs:
@@ -66,14 +66,14 @@ jobs:
     steps:
     - steps: <<parameters.before_install>>
     - restore_cache:
-        key: deps1-{{ .Branch }}-{{ checksum "requirements37.txt" }}
+        key: deps1-{{ .Branch }}-{{ checksum "requirements39.txt" }}
     - python_install
     - persist_to_workspace:
         paths:
         - project
         root: ~/
     - save_cache:
-        key: deps1-{{ .Branch }}-{{ checksum "requirements37.txt" }}
+        key: deps1-{{ .Branch }}-{{ checksum "requirements39.txt" }}
         paths:
         - "venv"
   django_unittests:
