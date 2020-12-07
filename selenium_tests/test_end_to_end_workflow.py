@@ -3,10 +3,12 @@
 from selenium.webdriver.support.ui import Select
 
 # from grading.models import Stone
-from test_admin_page_receptionist import customer_page_mixin  # noqa to be refactored
+from customer_page_mixin import create_customer_browser_mixin  # noqa
 
 
-def test_end_to_end_workflow(browser, customer_page_mixin, receptionist, vault_manager, grader, data_entry_clerk):
+def test_end_to_end_workflow(
+    browser, create_customer_browser_mixin, receptionist, vault_manager, grader, data_entry_clerk  # noqa
+):
 
     #################################################################
     # 1. client gives us stones, we open a receipt with one parcel ##

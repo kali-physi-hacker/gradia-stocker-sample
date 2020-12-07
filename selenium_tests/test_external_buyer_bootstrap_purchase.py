@@ -1,8 +1,8 @@
 from selenium.webdriver.support.ui import Select
 
 import pytest
+from customer_page_mixin import create_entity
 from purchases.models import Parcel, Receipt, Seller
-from test_admin_page_receptionist import create_entity
 
 
 @pytest.fixture
