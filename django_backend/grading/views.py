@@ -117,10 +117,6 @@ class UploadParcelCSVFile(View):
         :param kwargs:
         :return:
         """
-        # messages.add_message(request, messages.ERROR, "error 1")
-        # messages.add_message(request, messages.ERROR, "error 2")
-        # messages.add_message(request, messages.ERROR, "error 3")
-        # messages.add_message(request, messages.ERROR, "error 4")
         context = {"form": CSVImportForm()}
         if "errors" in kwargs:
             context["errors"] = kwargs["errors"]
@@ -156,32 +152,6 @@ class UploadParcelCSVFile(View):
 
         split = Split.objects.get(original_parcel=parcel)
 
-        # TODO: Ways of Implementing the csv_columns
-        #  1. By manually entering them
-        #  2. By using django's model._meta.fields and passing that to a function that returns
-        #       a snake case word
-
-        # TODO: 1 Using the 1st Implementation for 1st Cut
-        #   We may fallback to this method depending
-        # csv_columns = (
-        #     'gradia_id', 'split_from', 'remarks', 'sample_stone',
-        #     'shape_and_cutting', 'diamond_description', 'basic_carat', 'basic_culet',
-        #     'basic_fluorescence', 'inclusions', 'grader_1', 'grader_2', 'grader_3',
-        #     'basic_color_1', 'basic_color_2', 'basic_color_3', 'basic_final_color',
-        #     'basic_clarity_1', 'basic_clarity_2', 'basic_clarity_3', 'basic_final_clarity',
-        #     'basic_polish_1', 'basic_polish_2', 'basic_polish_3', 'basic_final_polish',
-        #     'diameter_min', 'diameter_max', 'height', 'girdle_min', 'girdle_max', 'girdle_grade',
-        #     'culet_size', 'total_depth', 'total_depth_grade', 'sheryl_cut', 'sarine_cut',
-        #     'symmetry_grade', 'roundness', 'roundness_grade', 'table_size', 'table_size_grade',
-        #     'crown_angle', 'crown_angle_grade', 'pavilion_angle', 'pavilion_angle_grade',
-        #     'star_length', 'star_length_grade', 'lower_half', 'lower_half_grade', 'girdle_thick',
-        #     'girdle_thick_grade', 'crown_height', 'crown_height_grade', 'pavilion_depth', 'pavilion_depth_angle',
-        #     'misalignment', 'misalignment_grade', 'table_edge_var', 'table_edge_var_grade', 'table_off_center',
-        #     'table_off_center_grade', 'culet_off_center', 'culet_off_center_grade', 'table_off_culet',
-        #     'table_off_culet_grade', 'star_angle', 'star_angle_grade', 'upper_half_angle', 'upper_half_angle_grade',
-        #     'lower_half_angle', 'lower_half_angle_grade'
-        # )
-
         # TODO: Going by the second implementation
         csv_columns = get_field_names_snake_case(Stone)
 
@@ -189,7 +159,12 @@ class UploadParcelCSVFile(View):
         data_frame = pd.DataFrame(csv_data, columns=csv_columns)
 
         # Get parcel owner
-        # parcel_owner = ParcelTransfer.most_recent_transfer(parcel).from_user
+        parcel_transfer = ParcelTransfer.most_recent_transfer(parcel)
+
+        if parcel_transfer is None:
+            parcel_owner = User.objects.get(username="split")
+        else:
+            parcel_owner = parcel_transfer.from_user
 
         # Map column_fields to values in a dictionary data structure
         for stone_entry in data_frame.values:
@@ -221,13 +196,13 @@ class UploadParcelCSVFile(View):
             stone.split_from = split
             stone.save()
             # Do a stone transfer
-            # StoneTransfer.objects.create(
-            #     item=stone,
-            #     from_user=User.objects.get(username="split"),
-            #     created_by=request.user,
-            #     to_user=parcel_owner,
-            #     confirmed_date=datetime.utcnow().replace(tzinfo=utc)
-            # )
+            StoneTransfer.objects.create(
+                item=stone,
+                from_user=User.objects.get(username="split"),
+                created_by=request.user,
+                to_user=parcel_owner,
+                confirmed_date=datetime.utcnow().replace(tzinfo=utc)
+            )
         return HttpResponseRedirect(
             reverse("admin:grading_split_change", args=(split.pk,))
         )
