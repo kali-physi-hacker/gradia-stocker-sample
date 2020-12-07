@@ -1,46 +1,9 @@
-from functools import partial
-
 from selenium.webdriver.support.ui import Select
 
-import pytest
+from customer_page_mixin import create_customer_browser_mixin  # noqa
 
 
-def create_entity(browser, entity_details):
-    browser.click_add()
-
-    # She fills in the details of the new entity
-    browser.find_element_by_name("name").send_keys(entity_details["name"])
-    browser.find_element_by_name("address").send_keys(entity_details["address"])
-    browser.find_element_by_name("phone").send_keys(entity_details["phone"])
-    browser.find_element_by_name("email").send_keys(entity_details["email"])
-
-    # TODO: also fill in the authorized personnels form
-
-    # She saves the entity detail
-    browser.click_save()
-
-
-def create_customer(browser, customer_details=None):
-    if customer_details is None:
-        customer_details = {
-            "name": "Van Klaren",
-            "address": "customer_address",
-            "phone": "12345",
-            "email": "cust@customer.com",
-        }
-
-    browser.go_to_customer_page()
-    create_entity(browser, customer_details)
-
-
-@pytest.fixture
-def customer_page_mixin(browser):
-    browser.create_customer = partial(create_customer, browser)
-
-
-def test_receptionist_can_create_new_customer(
-    browser, receptionist, customer_page_mixin
-):
+def test_receptionist_can_create_new_customer(browser, receptionist, create_customer_browser_mixin):  # noqa
     # Roxy is a receptionist
     # A customer has submitted documents to go through the registration process
     # and the customer has passed KYC and DD
@@ -72,7 +35,7 @@ def test_receptionist_can_create_new_customer(
 
 
 def test_receptionist_can_receive_stones_and_create_a_receipt(
-    browser, receptionist, customer_page_mixin
+    browser, receptionist, create_customer_browser_mixin  # noqa
 ):
     browser.login(receptionist.username, receptionist.raw_password)
     # Customer Van Klaren is an old customer

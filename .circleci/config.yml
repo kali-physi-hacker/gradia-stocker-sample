@@ -6,6 +6,9 @@ workflows:
   backend:
     jobs:
       - python_install
+      - django_checks:
+          requires:
+            - python_install
       - django_unittests:
           requires:
             - python_install
@@ -24,7 +27,15 @@ commands:
         command: |
           python3 -m venv venv
           . venv/bin/activate
-          pip install -r requirements37.txt
+          pip install -r requirements39.txt
+  django_checks:
+    steps:
+    - run:
+        command: |
+          . ../venv/bin/activate
+          python3 manage.py check
+          python3 manage.py migrate --settings=gradia_stocker.settings_dev
+        working_directory: django_backend
   django_unittests:
     steps:
     - run:
@@ -52,7 +63,7 @@ executors:
     - image: circleci/python:<<parameters.python>>-browsers
     parameters:
       python:
-        default: "3.7"
+        default: "3.9"
         type: string
 ################################################################################
 jobs:
@@ -66,16 +77,27 @@ jobs:
     steps:
     - steps: <<parameters.before_install>>
     - restore_cache:
-        key: deps1-{{ .Branch }}-{{ checksum "requirements37.txt" }}
+        key: deps1-{{ .Branch }}-{{ checksum "requirements39.txt" }}
     - python_install
     - persist_to_workspace:
         paths:
         - project
         root: ~/
     - save_cache:
-        key: deps1-{{ .Branch }}-{{ checksum "requirements37.txt" }}
+        key: deps1-{{ .Branch }}-{{ checksum "requirements39.txt" }}
         paths:
         - "venv"
+  django_checks:
+    executor: python_environment
+    steps:
+    - attach_workspace:
+        at: ~/
+    - django_checks
+    - store_test_results:
+        path: reports/django_checks
+    - store_artifacts:
+        path: test-reports/
+        destination: python_app
   django_unittests:
     executor: python_environment
     steps:

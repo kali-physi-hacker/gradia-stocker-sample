@@ -29,13 +29,13 @@ def browser(live_server, settings):
     # we need it to be true because otherwise django.conf.urls.static just
     # ignores everything, and we don't serve the translation files
     settings.DEBUG = True
-    try:
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument("--headless")
-        chrome_options.add_argument("--disable-gpu")
-        driver = webdriver.Chrome(
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--disable-gpu")
+    driver = webdriver.Chrome(
             ChromeDriverManager().install(), options=chrome_options
         )
+    try:
         driver.implicitly_wait(5)  # seconds
 
         driver.goto = partial(goto, driver, live_server.url)
