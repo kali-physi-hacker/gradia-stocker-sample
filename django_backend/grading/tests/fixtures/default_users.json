@@ -1,0 +1,74 @@
+[
+{
+    "model": "auth.user",
+    "pk": 3,
+    "fields": {
+        "password": "!m1fG3yO5CUSSnQDLI0hJQBCZgzsdwBvBLqVobMZ1",
+        "last_login": null,
+        "is_superuser": false,
+        "username": "vault",
+        "first_name": "",
+        "last_name": "",
+        "email": "",
+        "is_staff": false,
+        "is_active": true,
+        "date_joined": "2020-12-07T08:45:47.298Z",
+        "groups": [],
+        "user_permissions": []
+    }
+},
+{
+    "model": "auth.user",
+    "pk": 4,
+    "fields": {
+        "password": "!WIZ8j9xOLtkNKACrZpXPnf6ecmr9V85itVmx4Fst",
+        "last_login": null,
+        "is_superuser": false,
+        "username": "split",
+        "first_name": "",
+        "last_name": "",
+        "email": "",
+        "is_staff": false,
+        "is_active": true,
+        "date_joined": "2020-12-07T08:47:06.870Z",
+        "groups": [],
+        "user_permissions": []
+    }
+},
+{
+    "model": "auth.user",
+    "pk": 5,
+    "fields": {
+        "password": "!7HXmAh0FvWF2PqObcPGfulAAuKimjHtiHCvT0qcD",
+        "last_login": null,
+        "is_superuser": false,
+        "username": "goldway",
+        "first_name": "",
+        "last_name": "",
+        "email": "",
+        "is_staff": false,
+        "is_active": true,
+        "date_joined": "2020-12-07T08:47:11.818Z",
+        "groups": [],
+        "user_permissions": []
+    }
+},
+{
+    "model": "auth.user",
+    "pk": 6,
+    "fields": {
+        "password": "!vy4ErcTrOudzH9nIaKGaHC886fTSsysp2q5NQd67",
+        "last_login": null,
+        "is_superuser": false,
+        "username": "gia",
+        "first_name": "",
+        "last_name": "",
+        "email": "",
+        "is_staff": false,
+        "is_active": true,
+        "date_joined": "2020-12-07T08:47:15.643Z",
+        "groups": [],
+        "user_permissions": []
+    }
+}
+]
