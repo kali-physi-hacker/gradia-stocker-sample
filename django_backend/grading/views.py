@@ -148,11 +148,10 @@ class UploadParcelCSVFile(View):
             messages.add_message(request, messages.ERROR, "Parcel name does not exist")
             return HttpResponseRedirect(
                 reverse("grading:upload_parcel_csv")
-            )  # Http404("Parcel name in the csv does not exist")
+            )  # Return a redirect with an error message
 
         split = Split.objects.get(original_parcel=parcel)
 
-        # TODO: Going by the second implementation
         csv_columns = get_field_names_snake_case(Stone)
 
         csv_data = pd.read_csv(csv_file)

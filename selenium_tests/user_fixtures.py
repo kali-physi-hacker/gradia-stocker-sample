@@ -5,6 +5,10 @@ from django.contrib.contenttypes.models import ContentType
 
 import pytest
 
+from grading.models import Entity, Receipt, Split
+from purchases.models import Seller
+from grading.models import Parcel
+
 
 def erp_setup(django_user_model):
     # for the erp to work, there are some users and group permissions that we need
@@ -248,7 +252,54 @@ def vault_manager(django_user_model, erp):
 
 
 @pytest.fixture
-def user_admin(admin_user):
-    admin_user.set_password("admin")
-    admin_user.raw_password = "admin"
-    return admin_user
+def grading_parcel(django_user_model):
+    customer = django_user_model.objects.create_user("graderuser")
+    split = django_user_model.objects.create_user("split")  # Creating this user for parcel
+
+    data = {
+        "name": "ent 1",
+        "address": "some address",
+        "remarks": "no coments",
+        "phone": "123456789",
+        "email": "email@email.com"
+    }
+    # Create Entity for Receipt
+    entity = Entity.objects.create(
+        **data
+    )
+
+    # Create Receipt for parcel
+    receipt = Receipt.objects.create(
+        entity=entity,
+        code="123456789",
+        intake_by=customer,
+    )
+
+    # import pdb; pdb.set_trace()
+    # Create Existing Parcel
+    parcel = Parcel.objects.create(
+        receipt=receipt,
+        customer_parcel_code="0123456789",
+        total_carats="23.00",
+        reference_price_per_carat=32,
+        gradia_parcel_code="123456789",
+        total_pieces=43
+    )
+
+    # Create split
+    Split.objects.create(
+        original_parcel=parcel, split_by=split
+    )
+
+    return parcel
+
+
+@pytest.fixture
+def admin_user(django_user_model):
+    user_data = UserData(username="admin", password="admin")
+    user = django_user_model.objects.create_superuser(
+        username=user_data.username, password=user_data.password
+    )
+    user.raw_password = user_data.password
+
+    return user
