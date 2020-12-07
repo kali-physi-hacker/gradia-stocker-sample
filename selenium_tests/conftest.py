@@ -32,9 +32,7 @@ def browser(live_server, settings):
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--disable-gpu")
-    driver = webdriver.Chrome(
-            ChromeDriverManager().install(), options=chrome_options
-        )
+    driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
     try:
         driver.implicitly_wait(5)  # seconds
 

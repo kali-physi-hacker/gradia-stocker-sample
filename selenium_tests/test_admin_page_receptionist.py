@@ -3,7 +3,9 @@ from selenium.webdriver.support.ui import Select
 from customer_page_mixin import create_customer_browser_mixin  # noqa
 
 
-def test_receptionist_can_create_new_customer(browser, receptionist, create_customer_browser_mixin):  # noqa
+def test_receptionist_can_create_new_customer(
+    browser, receptionist, create_customer_browser_mixin
+):  # noqa
     # Roxy is a receptionist
     # A customer has submitted documents to go through the registration process
     # and the customer has passed KYC and DD
