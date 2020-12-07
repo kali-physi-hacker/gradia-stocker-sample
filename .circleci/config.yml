@@ -35,8 +35,6 @@ commands:
           . ../venv/bin/activate
           python3 manage.py check
           python3 manage.py migrate --settings=gradia_stocker.settings_dev
-          python3 manage.py loaddata accounts/fixtures/initial_data.json --settings=gradia_stocker.settings_dev
-          python3 manage.py loaddata reports/fixtures/initial_data.json --settings=gradia_stocker.settings_dev
         working_directory: django_backend
   django_unittests:
     steps:
