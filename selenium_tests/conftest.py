@@ -28,11 +28,11 @@ def browser(live_server, settings):
     # we need it to be true because otherwise django.conf.urls.static just
     # ignores everything, and we don't serve the translation files
     settings.DEBUG = True
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--disable-gpu")
+    driver = webdriver.Chrome(options=chrome_options)
     try:
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument("--headless")
-        chrome_options.add_argument("--disable-gpu")
-        driver = webdriver.Chrome(options=chrome_options)
         driver.implicitly_wait(5)  # seconds
 
         driver.goto = partial(goto, driver, live_server.url)
@@ -81,7 +81,7 @@ def stones(django_user_model, receipt, data_entry_clerk, grader, receptionist):
     stone_list = [
         Stone.objects.create(
             data_entry_user=data_entry_clerk,
-            gradia_id="stoneid1",
+            internal_id=1,
             split_from=split,
             basic_carat=4,
             basic_culet=CuletGrades.VERY_SMALL,
@@ -145,7 +145,7 @@ def stones(django_user_model, receipt, data_entry_clerk, grader, receptionist):
         ),
         Stone.objects.create(
             data_entry_user=data_entry_clerk,
-            gradia_id="stoneid2",
+            internal_id=2,
             split_from=split,
             basic_carat=4,
             basic_culet=CuletGrades.VERY_SMALL,
@@ -209,7 +209,7 @@ def stones(django_user_model, receipt, data_entry_clerk, grader, receptionist):
         ),
         Stone.objects.create(
             data_entry_user=data_entry_clerk,
-            gradia_id="stoneid3",
+            internal_id=3,
             split_from=split,
             basic_carat=4,
             basic_culet=CuletGrades.VERY_SMALL,

@@ -1,7 +1,11 @@
 import time
 from functools import partial
 
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
+from selenium.common.exceptions import (
+    ElementClickInterceptedException,
+    NoSuchElementException,
+    TimeoutException,
+)
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -43,18 +47,30 @@ def wait_till_gone(browser, elem):
 
 def slowly_click(browser, elem, elem_should_disappear=True):
     # can go lower for headless, but need more leeway when not running headless
-    time.sleep(0.4)
+    time.sleep(0.5)
     elem.click()
     if elem_should_disappear:
         browser.wait_till_gone(elem)
 
 
-def click_add(browser):
-    add_link = browser.find_element_by_xpath(
+def click_add(browser, should_disappear=True):
+    # new django has a weird navigation sidebar on the left that has more add
+    # buttons etc, so we need to toggle it to hide it so there's only one add
+    # button on pages
+    elem = browser.find_element_by_css_selector(".main")
+    if "shifted" in elem.get_attribute("class"):
+        browser.find_element_by_id("toggle-nav-sidebar").click()
+
+    add_links = browser.find_elements_by_xpath(
         "//a[contains(translate(., 'AD', 'ad'), 'add')]"
     )
-    # when clicking inline add new row, elem stays
-    browser.slowly_click(add_link, elem_should_disappear=False)
+
+    for add_link in add_links:
+        try:
+            browser.slowly_click(add_link, elem_should_disappear=should_disappear)
+            break
+        except ElementClickInterceptedException:
+            pass
 
 
 def click_go(browser):
