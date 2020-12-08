@@ -75,7 +75,7 @@ class StoneManager(models.Manager):
             + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S"))
             + ".csv"
         )
-        dir_name = settings.MEDIA_ROOT + "/csv_downloads/to_goldway/" 
+        dir_name = settings.MEDIA_ROOT + "/csv_downloads/to_goldway/"
         if not os.path.exists(dir_name):
             os.makedirs(dir_name)
         file_path = dir_name + filename
