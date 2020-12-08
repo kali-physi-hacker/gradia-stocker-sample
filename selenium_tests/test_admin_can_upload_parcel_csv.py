@@ -36,4 +36,3 @@ def test_upload_of_csv_parcel_file(browser, data_entry_clerk, stones):
     browser.assert_body_contains_text("123456789")
     browser.assert_body_contains_text("dataentry")
     browser.assert_body_contains_text("Original parcel")
-    browser.assert_body_contains_text("Split by")
