@@ -21,7 +21,10 @@ class StoneManager(models.Manager):
         filename = (
             "Gradia_id_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
         )
-        file_path = settings.MEDIA_ROOT + "/csv_downloads/download_ids/" + filename
+        dir_name = settings.MEDIA_ROOT + "/csv_downloads/download_ids/"
+        if not os.path.exists(dir_name):
+            os.makedirs(dir_name)
+        file_path = dir_name + filename
         with open(file_path, "w") as file:
             # if we don't want it saved on the server
             # f = StringIO.StringIO()
@@ -46,7 +49,10 @@ class StoneManager(models.Manager):
             + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S"))
             + ".csv"
         )
-        file_path = settings.MEDIA_ROOT + "/csv_downloads/master_reports/" + filename
+        dir_name = settings.MEDIA_ROOT + "/csv_downloads/master_reports/"
+        if not os.path.exists(dir_name):
+            os.makedirs(dir_name)
+        file_path = dir_name + filename
         with open(file_path, "w") as file:
             # if we don't want it saved on the server
             # f = StringIO.StringIO()
@@ -69,7 +75,10 @@ class StoneManager(models.Manager):
             + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S"))
             + ".csv"
         )
-        file_path = settings.MEDIA_ROOT + "/csv_downloads/to_goldway/" + filename
+        dir_name = settings.MEDIA_ROOT + "/csv_downloads/to_goldway/" 
+        if not os.path.exists(dir_name):
+            os.makedirs(dir_name)
+        file_path = dir_name + filename
         with open(file_path, "w") as file:
             # if we don't want it saved on the server
             # f = StringIO.StringIO()
