@@ -2,13 +2,15 @@ import os
 from django.conf import settings
 
 
-def test_upload_of_csv_parcel_file(browser, admin_user, grading_parcel):
+def test_upload_of_csv_parcel_file(browser, data_entry_clerk, stones):
     """
     Test that admin can upload a csv file and save
     :param browser:
     :return:
     """
-    browser.login(admin_user.username, admin_user.raw_password)
+
+    # TODO: Refactor Tests (CSV Upload file) to conform to parcel ==> original owner
+    browser.login(data_entry_clerk.username, data_entry_clerk.raw_password)
 
     # Find Split link and click
     split_link = browser.find_element_by_link_text("Splits")
@@ -20,7 +22,7 @@ def test_upload_of_csv_parcel_file(browser, admin_user, grading_parcel):
 
     # Find Upload Input and add csv file path
     csv_upload_input = browser.find_element_by_name("file")
-    csv_upload_path = os.path.join(settings.BASE_DIR, "grading/tests/fixtures/123456789.csv")
+    csv_upload_path = os.path.join(settings.BASE_DIR, "grading/tests/fixtures/parcel1.csv")
     csv_upload_input.send_keys(csv_upload_path)
 
     # Find the upload button and click
@@ -31,7 +33,7 @@ def test_upload_of_csv_parcel_file(browser, admin_user, grading_parcel):
     # split page will contain grader (graderuser according to fixtures),
     # and some other texts
 
-    browser.assert_body_contains_text("View split")
-    browser.assert_body_contains_text("graderuser")
+    browser.assert_body_contains_text("123456789")
+    browser.assert_body_contains_text("dataentry")
     browser.assert_body_contains_text("Original parcel")
     browser.assert_body_contains_text("Split by")

@@ -43,8 +43,13 @@ class TestCSVUpload(TestCase):
 
         split = Split.objects.get(original_parcel=self.parcel)
 
-        truth = all(stone.split_from == split for stone in stones)
-        self.assertTrue(truth)
+        # This is a python idiom and a generator is returned which is
+        # a performance gain over a native loop
+        # truth = all(stone.split_from == split for stone in stones)
+        # self.assertTrue(truth)
+
+        for stone in stones:
+            self.assertEqual(stone.split_from, split)
 
     def test_views_basic_grading_does_not_upload_and_returns_400_with_invalid_csv_file_fields(
         self
