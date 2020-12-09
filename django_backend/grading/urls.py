@@ -18,4 +18,5 @@ urlpatterns = [
         views.CloseReceiptView.as_view(),
         name="close_receipt",
     ),
+    path("upload/", views.UploadParcelCSVFile.as_view(), name="upload_parcel_csv"),
 ]

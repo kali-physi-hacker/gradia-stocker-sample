@@ -35,3 +35,7 @@ class StoneForm(forms.ModelForm):
             "symmetry": longer_text_input,
             "cut": longer_text_input,
         }
+
+
+class CSVImportForm(forms.Form):
+    file = forms.FileField()

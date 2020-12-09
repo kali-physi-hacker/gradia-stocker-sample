@@ -1,0 +1,23 @@
+{% extends 'admin/change_list.html' %}
+
+{% block content %}
+<div>
+    <form action="." method="POST" enctype="multipart/form-data">
+        {{ form.as_p }}
+        {% csrf_token %}
+        <ul class="object-tools">
+            <li>
+                <a href="/admin/grading/split/add/" class="addlink">
+                    Add Split
+                </a>
+                <a style="margin-left: 15px;" href="{% url 'grading:upload_parcel_csv' %}" class="addlink">
+                    Upload File
+                </a>
+            </li>
+        </ul>
+
+    </form>
+</div>
+<br/>
+
+{% endblock %}

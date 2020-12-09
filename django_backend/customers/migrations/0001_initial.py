@@ -8,38 +8,55 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Entity',
+            name="Entity",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=255)),
-                ('address', models.TextField()),
-                ('remarks', models.TextField(blank=True)),
-                ('phone', models.CharField(max_length=11)),
-                ('email', models.CharField(max_length=255)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=255)),
+                ("address", models.TextField()),
+                ("remarks", models.TextField(blank=True)),
+                ("phone", models.CharField(max_length=11)),
+                ("email", models.CharField(max_length=255)),
             ],
-            options={
-                'abstract': False,
-            },
+            options={"abstract": False},
         ),
         migrations.CreateModel(
-            name='AuthorizedPersonnel',
+            name="AuthorizedPersonnel",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('position', models.CharField(max_length=11)),
-                ('name', models.CharField(max_length=255)),
-                ('email', models.CharField(max_length=255)),
-                ('mobile', models.CharField(max_length=11)),
-                ('hkid', models.CharField(max_length=10)),
-                ('remarks', models.TextField(blank=True)),
-                ('entity', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='customers.Entity')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("position", models.CharField(max_length=11)),
+                ("name", models.CharField(max_length=255)),
+                ("email", models.CharField(max_length=255)),
+                ("mobile", models.CharField(max_length=11)),
+                ("hkid", models.CharField(max_length=10)),
+                ("remarks", models.TextField(blank=True)),
+                (
+                    "entity",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="customers.Entity",
+                    ),
+                ),
             ],
-            options={
-                'abstract': False,
-            },
+            options={"abstract": False},
         ),
     ]
