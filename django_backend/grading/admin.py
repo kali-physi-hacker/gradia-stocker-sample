@@ -304,12 +304,7 @@ class StoneAdmin(admin.ModelAdmin):
         return actions
 
     def download_ids(self, request, queryset):
-
-        from django.http import HttpResponse
-
-        filename = (
-            "Gradia_id_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
-        )
+        filename = "Gradia_ids_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
         file = open(filename, mode="w")
         writer = csv.writer(file, delimiter=",")
         for stone in queryset.all():

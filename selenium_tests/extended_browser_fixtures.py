@@ -1,11 +1,7 @@
 import time
 from functools import partial
 
-from selenium.common.exceptions import (
-    ElementClickInterceptedException,
-    NoSuchElementException,
-    TimeoutException,
-)
+from selenium.common.exceptions import ElementClickInterceptedException, NoSuchElementException, TimeoutException
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -61,9 +57,8 @@ def click_add(browser, should_disappear=True):
     if "shifted" in elem.get_attribute("class"):
         browser.find_element_by_id("toggle-nav-sidebar").click()
 
-    add_links = browser.find_elements_by_xpath(
-        "//a[contains(translate(., 'AD', 'ad'), 'add')]"
-    )
+
+    add_links = browser.find_elements_by_xpath("//a[contains(translate(., 'AD', 'ad'), 'add')]")
 
     for add_link in add_links:
         try:
