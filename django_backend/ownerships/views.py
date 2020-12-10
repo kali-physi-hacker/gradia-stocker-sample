@@ -2,8 +2,6 @@ from datetime import datetime
 
 from django.utils.timezone import utc
 
-# Create your views here.
-
 
 def confirm_stones_checked(self, request, obj):
     if "_confirm_transfer" in request.POST:

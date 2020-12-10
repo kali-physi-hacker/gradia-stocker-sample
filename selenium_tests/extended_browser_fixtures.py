@@ -61,9 +61,8 @@ def click_add(browser, should_disappear=True):
     if "shifted" in elem.get_attribute("class"):
         browser.find_element_by_id("toggle-nav-sidebar").click()
 
-    add_links = browser.find_elements_by_xpath(
-        "//a[contains(translate(., 'AD', 'ad'), 'add')]"
-    )
+
+    add_links = browser.find_elements_by_xpath("//a[contains(translate(., 'AD', 'ad'), 'add')]")
 
     for add_link in add_links:
         try:

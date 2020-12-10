@@ -3,9 +3,8 @@ from selenium.webdriver.support.ui import Select
 from customer_page_mixin import create_customer_browser_mixin  # noqa
 
 
-def test_receptionist_can_create_new_customer(
-    browser, receptionist, create_customer_browser_mixin
-):  # noqa
+
+def test_receptionist_can_create_new_customer(browser, receptionist, create_customer_browser_mixin):  # noqa
     # Roxy is a receptionist
     # A customer has submitted documents to go through the registration process
     # and the customer has passed KYC and DD
@@ -70,9 +69,7 @@ def test_receptionist_can_receive_stones_and_create_a_receipt(
 
     # she adds a new parcel that goes with this receipt
     browser.click_add(should_disappear=False)
-    browser.find_element_by_name("parcel_set-0-gradia_parcel_code").send_keys(
-        "VK20200723-1"
-    )
+    browser.find_element_by_name("parcel_set-0-gradia_parcel_code").send_keys("VK20200723-1")
     browser.find_element_by_name("parcel_set-0-customer_parcel_code").send_keys("001")
     browser.find_element_by_name("parcel_set-0-total_carats").send_keys("1")
     browser.find_element_by_name("parcel_set-0-total_pieces").send_keys("1")

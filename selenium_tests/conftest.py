@@ -69,7 +69,8 @@ def browser(live_server, settings):
 
         yield driver
     finally:
-        driver.quit()
+        pass
+        # driver.quit()
 
 
 @pytest.fixture

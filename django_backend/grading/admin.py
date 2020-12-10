@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from django.http import HttpResponse
 from django.utils.timezone import utc
 from django.http import HttpResponse
+from django.urls import path
 
 from ownerships.models import ParcelTransfer, StoneTransfer
 
@@ -60,6 +61,8 @@ class SplitAdmin(admin.ModelAdmin):
     inlines = [ParcelInline, StoneInline]
 
     readonly_fields = ["split_by"]
+
+    change_list_template = "grading/split_change_list.html"
 
     def save_formset(self, request, form, formset, change):
         instances = formset.save(commit=False)

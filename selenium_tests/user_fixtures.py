@@ -5,6 +5,10 @@ from django.contrib.contenttypes.models import ContentType
 
 import pytest
 
+from grading.models import Entity, Receipt, Split
+from purchases.models import Seller
+from grading.models import Parcel
+
 
 def erp_setup(django_user_model):
     # for the erp to work, there are some users and group permissions that we need

@@ -109,9 +109,7 @@ class Migration(migrations.Migration):
                 ("reference_price_per_carat", models.PositiveIntegerField()),
                 ("gradia_parcel_code", models.CharField(max_length=15)),
             ],
-            options={
-                "abstract": False,
-            },
+            options={"abstract": False},
         ),
         migrations.CreateModel(
             name="Split",
@@ -176,9 +174,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            options={
-                "verbose_name": "customer receipt",
-            },
+            options={"verbose_name": "customer receipt"},
         ),
         migrations.AddField(
             model_name="parcel",
