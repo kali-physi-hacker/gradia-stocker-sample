@@ -48,7 +48,9 @@ def browser(live_server, settings):
     chrome_options.add_experimental_option(
         "prefs",
         {
-            "download.default_directory": settings.MEDIA_ROOT + "/" + "confirm_download",
+            "download.default_directory": settings.MEDIA_ROOT
+            + "/"
+            + "confirm_download",
             "download.prompt_for_download": False,
             "download.directory_upgrade": True,
             "safebrowsing_for_trusted_sources_enabled": False,

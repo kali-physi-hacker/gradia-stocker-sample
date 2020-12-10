@@ -14,7 +14,7 @@ class TestCSVUpload(TestCase):
 
     fixtures = (
         "grading/tests/fixtures/basic_grading_fixtures.json",
-        "grading/tests/fixtures/default_users.json"
+        "grading/tests/fixtures/default_users.json",
     )
 
     def setUp(self):
@@ -32,7 +32,7 @@ class TestCSVUpload(TestCase):
         self.parcel = Parcel.objects.get(gradia_parcel_code=self.gradia_parcel_code)
 
     def test_views_basic_grading_uploads_with_valid_in_csv_file_fields_and_returns_201(
-        self
+        self,
     ):
         self.client.login(username="graderuser", password="Passw0rd!")
         response = self.client.post(self.basic_grading_url, {"file": self.csv_file})
@@ -52,7 +52,7 @@ class TestCSVUpload(TestCase):
             self.assertEqual(stone.split_from, split)
 
     def test_views_basic_grading_does_not_upload_and_returns_400_with_invalid_csv_file_fields(
-        self
+        self,
     ):
         response = self.client.post(
             self.basic_grading_url, {"file": self.invalid_csv_file}
@@ -63,7 +63,7 @@ class TestCSVUpload(TestCase):
         self.assertEqual(len(stones), 0)
 
     def test_views_basic_grading_does_not_upload_and_returns_400_with_invalid_csv_file_field_values(
-        self
+        self,
     ):
         pass
 
@@ -74,12 +74,12 @@ class TestCSVUpload(TestCase):
         pass
 
     def test_views_GW_does_not_upload_and_returns_400_with_invalid_csv_file_fields(
-        self
+        self,
     ):
         pass
 
     def test_views_GW_does_not_upload_and_returns_400_with_invalid_csv_file_field_values(
-        self
+        self,
     ):
         pass
 
@@ -87,22 +87,22 @@ class TestCSVUpload(TestCase):
         pass
 
     def test_views_post_GW_checks_uploads_with_valid_csv_file_fields_and_returns_201(
-        self
+        self,
     ):
         pass
 
     def test_views_post_GW_checks_does_not_upload_and_returns_400_with_invalid_csv_file_fields(
-        self
+        self,
     ):
         pass
 
     def test_views_post_GW_checks_does_not_upload_and_returns_400_with_invalid_csv_file_field_values(
-        self
+        self,
     ):
         pass
 
     def test_views_post_GW_checks_returns_404_if_receipt_reference_number_not_found(
-        self
+        self,
     ):
         pass
 
@@ -110,12 +110,12 @@ class TestCSVUpload(TestCase):
         pass
 
     def test_views_GIA_does_not_upload_and_returns_400_with_invalid_csv_file_fields(
-        self
+        self,
     ):
         pass
 
     def test_views_GIA_does_not_upload_and_returns_400_with_invalid_csv_file_field_values(
-        self
+        self,
     ):
         pass
 
