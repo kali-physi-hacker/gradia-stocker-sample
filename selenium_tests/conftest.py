@@ -48,7 +48,7 @@ def browser(live_server, settings):
     chrome_options.add_experimental_option(
         "prefs",
         {
-            "download.default_directory": "~/code/django/",
+            "download.default_directory": settings.MEDIA_ROOT + "/" + "confirm_download",
             "download.prompt_for_download": False,
             "download.directory_upgrade": True,
             "safebrowsing_for_trusted_sources_enabled": False,
@@ -57,7 +57,7 @@ def browser(live_server, settings):
     )
     driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
     # change the <path_to_place_downloaded_file> to your directory where you would like to place the downloaded file
-    download_dir = "~/code/django/"
+    download_dir = settings.MEDIA_ROOT + "/" + "confirm_download"
 
     # function to handle setting up headless download
     enable_download_headless(driver, download_dir)
