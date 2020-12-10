@@ -22,6 +22,11 @@ from ownerships.models import ParcelTransfer, StoneTransfer
 from urls import goto
 from user_fixtures import *  # NOQA
 
+# function to take care of downloading file
+def enable_download_headless(browser,download_dir):
+    browser.command_executor._commands["send_command"] = ("POST", '/session/$sessionId/chromium/send_command')
+    params = {'cmd':'Page.setDownloadBehavior', 'params': {'behavior': 'allow', 'downloadPath': download_dir}}
+    browser.execute("send_command", params)
 
 @pytest.fixture
 def browser(live_server, settings):
@@ -32,7 +37,20 @@ def browser(live_server, settings):
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--disable-gpu")
+    # change the <path_to_download_default_directory> to whatever your default download folder is located
+    chrome_options.add_experimental_option("prefs", {
+            "download.default_directory": "~/code/django/",
+            "download.prompt_for_download": False,
+            "download.directory_upgrade": True,
+            "safebrowsing_for_trusted_sources_enabled": False,
+            "safebrowsing.enabled": False
+    })
     driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
+    # change the <path_to_place_downloaded_file> to your directory where you would like to place the downloaded file
+    download_dir = "~/code/django/"
+
+    # function to handle setting up headless download
+    enable_download_headless(driver, download_dir)
     try:
         driver.implicitly_wait(5)  # seconds
 

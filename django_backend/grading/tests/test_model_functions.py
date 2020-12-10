@@ -1,3 +1,4 @@
+import os
 import csv
 from django.test import TestCase
 from grading.models import Stone
@@ -9,7 +10,7 @@ class TestPdfGeneration(TestCase):
 
     def setUp(self):
         self.stone1 = Stone.objects.get(internal_id=1)
-        self.stone2 = Stone.objects.get(internal_id=1)
+        self.stone3 = Stone.objects.get(internal_id=3)
 
     def test_download_id_csv_is_created(self):
         """
@@ -19,15 +20,14 @@ class TestPdfGeneration(TestCase):
         """
         queryset = Stone.objects.all()
         file_path = Stone.objects.download_ids(queryset=queryset)
-
-        file = open(file_path)
-        # import pdb; pdb.set_trace()
-        csv_reader = csv.reader(file, delimiter=",")
-        for row in csv_reader:
-            # import pdb; pdb.set_trace()
-            self.assertTrue("internal_id" in row)
-
-            break
+        self.assertTrue(os.path.exists(file_path))
+        with open(file_path, "r") as file:
+            reader = csv.DictReader(file)
+            csv_list = list(reader)
+            self.assertTrue(4, len(csv_list))
+            self.assertTrue(str(self.stone3.internal_id), csv_list[0]['internal_id'])
+            self.assertTrue(str(self.stone1.internal_id), csv_list[2]['internal_id'])
+            self.assertIn("internal_id", reader.fieldnames)
 
     def test_master_download(self):
 
@@ -37,27 +37,25 @@ class TestPdfGeneration(TestCase):
         file = open(file_path)
         model_fields = get_model_fields(Stone)
         field_names = get_field_names(model_fields)
-        # import pdb; pdb.set_trace()
-        csv_reader = csv.reader(file, delimiter=",")
-        for row in csv_reader:
-            # import pdb; pdb.set_trace()
+        with open(file_path, "r") as file:
+            reader = csv.DictReader(file)
+            csv_list = list(reader)
+            self.assertTrue(4, len(csv_list))
+            self.assertTrue(str(self.stone3.data_entry_user), csv_list[0]['data_entry_user'])
+            self.assertTrue(str(self.stone1.date_created), csv_list[2]['date_created'])
             for field in field_names:
-                self.assertTrue(field in row)
-
-            break
+                self.assertIn(field, reader.fieldnames)
 
     def test_download_to_goldway_csv(self):
 
         queryset = Stone.objects.all()
         file_path = Stone.objects.download_to_goldway_csv(queryset=queryset)
-
-        file = open(file_path)
         field_names = ["date_to_GW", "internal_id", "basic_carat"]
-        # import pdb; pdb.set_trace()
-        csv_reader = csv.reader(file, delimiter=",")
-        for row in csv_reader:
-            # import pdb; pdb.set_trace()
+        with open(file_path, "r") as file:
+            reader = csv.DictReader(file)
+            csv_list = list(reader)
+            self.assertTrue(4, len(csv_list))
+            self.assertTrue(str(self.stone3.basic_carat), csv_list[0]['basic_carat'])
+            self.assertTrue(str(self.stone1.internal_id), csv_list[2]['internal_id'])
             for field in field_names:
-                self.assertTrue(field in row)
-
-            break
+                self.assertIn(field, reader.fieldnames)
