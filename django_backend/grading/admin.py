@@ -309,29 +309,29 @@ class StoneAdmin(admin.ModelAdmin):
         return actions
 
     def download_ids(self, request, queryset):
-        file_path = Stone.objects.download_ids(queryset)
-        f = open(file_path, mode="r")
-        response = HttpResponse(f, content_type="text/csv")
-        response["Content-Disposition"] = "attachment; filename=%s" % file_path
-        return response
+        file_path = Stone.objects.generate_id_csv(queryset)
+        with open(file_path, mode="r") as file:
+            response = HttpResponse(file, content_type="text/csv")
+            response["Content-Disposition"] = "attachment; filename=%s" % file_path
+            return response
 
     download_ids.short_description = "Download Diamond(s) External Nanotech IDs"
 
     def download_to_goldway_csv(self, request, queryset):
-        file_path = Stone.objects.download_to_goldway_csv(queryset)
-        f = open(file_path, mode="r")
-        response = HttpResponse(f, content_type="text/csv")
-        response["Content-Disposition"] = "attachment; filename=%s" % file_path
-        return response
+        file_path = Stone.objects.generate_to_goldway_csv(queryset)
+        with open(file_path, mode="r") as file:
+            response = HttpResponse(file, content_type="text/csv")
+            response["Content-Disposition"] = "attachment; filename=%s" % file_path
+            return response
 
     download_to_goldway_csv.short_description = "Download Goldway CV Trasfer"
 
     def download_master_reports(self, request, queryset):
-        file_path = Stone.objects.download_master_reports(queryset)
-        f = open(file_path, mode="r")
-        response = HttpResponse(f, content_type="text/csv")
-        response["Content-Disposition"] = "attachment; filename=%s" % file_path
-        return response
+        file_path = Stone.objects.generate_master_report_csv(queryset)
+        with open(file_path, mode="r") as file:
+            response = HttpResponse(file, content_type="text/csv")
+            response["Content-Disposition"] = "attachment; filename=%s" % file_path
+            return response
 
     download_master_reports.short_description = "Download Master Report"
 

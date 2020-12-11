@@ -1,7 +1,9 @@
+import os
 from functools import partial
 
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
+from django.conf import settings
 
 import pytest
 from customers.models import Entity
@@ -34,6 +36,10 @@ def enable_download_headless(browser, download_dir):
     }
     browser.execute("send_command", params)
 
+download_dir = settings.SELENIUM_DOWNLOADS
+if not os.path.exists(download_dir):
+    os.makedirs(download_dir)
+
 
 @pytest.fixture
 def browser(live_server, settings):
@@ -48,9 +54,7 @@ def browser(live_server, settings):
     chrome_options.add_experimental_option(
         "prefs",
         {
-            "download.default_directory": settings.MEDIA_ROOT
-            + "/"
-            + "confirm_download",
+            "download.default_directory": download_dir,
             "download.prompt_for_download": False,
             "download.directory_upgrade": True,
             "safebrowsing_for_trusted_sources_enabled": False,
@@ -59,15 +63,14 @@ def browser(live_server, settings):
     )
     driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
     # change the <path_to_place_downloaded_file> to your directory where you would like to place the downloaded file
-    download_dir = settings.MEDIA_ROOT + "/" + "confirm_download"
 
-    # function to handle setting up headless download
-    enable_download_headless(driver, download_dir)
     try:
         driver.implicitly_wait(5)  # seconds
 
         driver.goto = partial(goto, driver, live_server.url)
         setup_browser_helper_functions(driver)
+        # function to handle setting up headless download
+        enable_download_headless(driver, download_dir)
 
         yield driver
     finally:

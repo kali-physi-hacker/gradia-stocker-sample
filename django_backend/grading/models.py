@@ -5,7 +5,7 @@ from django.utils.html import format_html
 
 from customers.models import Entity
 from ownerships.models import ParcelTransfer, StoneTransfer
-from .helpers import get_model_fields, get_field_names
+from .helpers import get_stone_fields
 
 import os
 import csv
@@ -16,84 +16,53 @@ from django.conf import settings
 from django.utils.timezone import utc
 
 
+def generate_csv(filename, dir_name, field_names, queryset):
+    if not os.path.exists(dir_name):
+        os.makedirs(dir_name)
+    file_path = dir_name + filename
+    with open(file_path, "w") as file:
+        writer = csv.writer(file, delimiter=",")
+        writer.writerow(field_names)
+        for stone in reversed(queryset.all()):
+            values = []
+            for field in field_names:
+                value = getattr(stone, field)
+                values.append(value)
+            writer.writerow(values)
+    
+    return file_path
+
 class StoneManager(models.Manager):
-    def download_ids(self, queryset):
+    def generate_id_csv(self, queryset):
         filename = (
             "Gradia_id_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
         )
         dir_name = settings.MEDIA_ROOT + "/csv_downloads/download_ids/"
-        if not os.path.exists(dir_name):
-            os.makedirs(dir_name)
-        file_path = dir_name + filename
-        with open(file_path, "w") as file:
-            # if we don't want it saved on the server
-            # f = StringIO.StringIO()
-            writer = csv.writer(file, delimiter=",")
-            writer.writerow(
-                [
-                    "internal_id",
-                ]
-            )
-            for stone in reversed(queryset.all()):
-                writer.writerow(
-                    [
-                        stone.internal_id,
-                    ]
-                )
+        field_names = ["internal_id"]
 
-        return file_path
+        return generate_csv(filename, dir_name, field_names, queryset)
 
-    def download_master_reports(self, queryset):
+    def generate_master_report_csv(self, queryset):
         filename = (
             "Master_report_"
             + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S"))
             + ".csv"
         )
         dir_name = settings.MEDIA_ROOT + "/csv_downloads/master_reports/"
-        if not os.path.exists(dir_name):
-            os.makedirs(dir_name)
-        file_path = dir_name + filename
-        with open(file_path, "w") as file:
-            # if we don't want it saved on the server
-            # f = StringIO.StringIO()
-            writer = csv.writer(file, delimiter=",")
-            model_fields = get_model_fields(Stone)
-            field_names = get_field_names(model_fields)
-            writer.writerow(field_names)
-            for stone in reversed(queryset.all()):
-                values = []
-                for field in field_names:
-                    value = getattr(stone, field)
-                    values.append(value)
-                writer.writerow(values)
+        field_names = get_stone_fields(Stone)
 
-        return file_path
+        return generate_csv(filename, dir_name, field_names, queryset)
 
-    def download_to_goldway_csv(self, queryset):
+    def generate_to_goldway_csv(self, queryset):
         filename = (
             "To_Goldway_"
             + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S"))
             + ".csv"
         )
         dir_name = settings.MEDIA_ROOT + "/csv_downloads/to_goldway/"
-        if not os.path.exists(dir_name):
-            os.makedirs(dir_name)
-        file_path = dir_name + filename
-        with open(file_path, "w") as file:
-            # if we don't want it saved on the server
-            # f = StringIO.StringIO()
-            writer = csv.writer(file, delimiter=",")
-            field_names = ["date_to_GW", "internal_id", "basic_carat"]
-            writer.writerow(field_names)
-            for stone in reversed(queryset.all()):
-                values = []
-                for field in field_names:
-                    value = getattr(stone, field)
-                    values.append(value)
-                writer.writerow(values)
+        field_names = ["date_to_GW", "internal_id", "basic_carat"]
 
-        return file_path
-
+        return generate_csv(filename, dir_name, field_names, queryset)
 
 class Split(models.Model):
     original_parcel = models.OneToOneField(
