@@ -73,7 +73,7 @@ def click_add(browser, should_disappear=True):
             pass
 
 
-def click_go(browser, elem = True):
+def click_go(browser, elem=True):
     add_link = browser.find_element_by_css_selector(
         'button[title="Run the selected action"]'
     )

@@ -29,8 +29,9 @@ def generate_csv(filename, dir_name, field_names, queryset):
                 value = getattr(stone, field)
                 values.append(value)
             writer.writerow(values)
-    
+
     return file_path
+
 
 class StoneManager(models.Manager):
     def generate_id_csv(self, queryset):
@@ -63,6 +64,7 @@ class StoneManager(models.Manager):
         field_names = ["date_to_GW", "internal_id", "basic_carat"]
 
         return generate_csv(filename, dir_name, field_names, queryset)
+
 
 class Split(models.Model):
     original_parcel = models.OneToOneField(

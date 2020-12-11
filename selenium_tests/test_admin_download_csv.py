@@ -36,7 +36,7 @@ def test_grader_can_download_id_stones(browser, stones, grader):
 
     browser.click_go(elem=False)
     path = settings.SELENIUM_DOWNLOADS
-    sleep(5)  
+    sleep(5)
     file_path = "downloads/" + os.listdir(path)[0]
     with open(file_path, "r") as file:
         reader = csv.DictReader(file)
@@ -45,6 +45,7 @@ def test_grader_can_download_id_stones(browser, stones, grader):
         assert str(stones[0].internal_id) in csv_list[0]["internal_id"]
         assert str(stones[1].internal_id) in csv_list[1]["internal_id"]
     os.remove(file_path)
+
 
 def test_grader_can_download_master_report(browser, stones, grader):
 
@@ -71,7 +72,7 @@ def test_grader_can_download_master_report(browser, stones, grader):
     browser.click_go(elem=False)
 
     path = settings.SELENIUM_DOWNLOADS
-    sleep(5)   
+    sleep(5)
     file_path = "downloads/" + os.listdir(path)[0]
     field_names = get_stone_fields(Stone)
     with open(file_path, "r") as file:
@@ -80,8 +81,9 @@ def test_grader_can_download_master_report(browser, stones, grader):
         for field in field_names:
             assert field in reader.fieldnames
         assert str(stones[0].data_entry_user) in csv_list[0]["data_entry_user"]
-        assert str(stones[2].date_created)in csv_list[2]["date_created"]
+        assert str(stones[2].date_created) in csv_list[2]["date_created"]
     os.remove(file_path)
+
 
 def test_grader_can_download_goldway_transfer(browser, stones, grader):
 
@@ -108,7 +110,7 @@ def test_grader_can_download_goldway_transfer(browser, stones, grader):
     browser.click_go(elem=False)
 
     path = settings.SELENIUM_DOWNLOADS
-    sleep(5)  
+    sleep(5)
     file_path = "downloads/" + os.listdir(path)[0]
     field_names = ["date_to_GW", "internal_id", "basic_carat"]
     with open(file_path, "r") as file:

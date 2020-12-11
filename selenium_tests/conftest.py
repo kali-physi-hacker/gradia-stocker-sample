@@ -36,6 +36,7 @@ def enable_download_headless(browser, download_dir):
     }
     browser.execute("send_command", params)
 
+
 download_dir = settings.SELENIUM_DOWNLOADS
 if not os.path.exists(download_dir):
     os.makedirs(download_dir)
