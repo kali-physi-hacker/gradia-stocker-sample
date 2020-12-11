@@ -26,7 +26,7 @@ def test_grader_can_download_id_stones(browser, stones, grader):
     action_dropdown = Select(browser.find_element_by_name("action"))
     action_dropdown.select_by_visible_text("Download Diamond(s) External Nanotech IDs")
 
-    browser.click_go()
+    browser.click_go(elem = False)
 
 
 def test_grader_can_download_master_report(browser, stones, grader):
@@ -51,7 +51,7 @@ def test_grader_can_download_master_report(browser, stones, grader):
     action_dropdown = Select(browser.find_element_by_name("action"))
     action_dropdown.select_by_visible_text("Download Master Report")
 
-    browser.click_go()
+    browser.click_go(elem = False)
 
 
 def test_grader_can_download_goldway_transfer(browser, stones, grader):
@@ -76,4 +76,4 @@ def test_grader_can_download_goldway_transfer(browser, stones, grader):
     action_dropdown = Select(browser.find_element_by_name("action"))
     action_dropdown.select_by_visible_text("Download Goldway CV Trasfer")
 
-    browser.click_go()
+    browser.click_go(elem=False)
