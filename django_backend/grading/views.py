@@ -200,7 +200,7 @@ class UploadParcelCSVFile(View):
                 from_user=User.objects.get(username="split"),
                 created_by=request.user,
                 to_user=parcel_owner,
-                confirmed_date=datetime.utcnow().replace(tzinfo=utc)
+                confirmed_date=datetime.utcnow().replace(tzinfo=utc),
             )
         return HttpResponseRedirect(
             reverse("admin:grading_split_change", args=(split.pk,))

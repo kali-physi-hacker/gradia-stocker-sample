@@ -29,7 +29,9 @@ class Migration(migrations.Migration):
                 ("phone", models.CharField(max_length=11)),
                 ("email", models.CharField(max_length=255)),
             ],
-            options={"abstract": False},
+            options={
+                "abstract": False,
+            },
         ),
         migrations.CreateModel(
             name="AuthorizedPersonnel",
@@ -57,6 +59,8 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            options={"abstract": False},
+            options={
+                "abstract": False,
+            },
         ),
     ]
