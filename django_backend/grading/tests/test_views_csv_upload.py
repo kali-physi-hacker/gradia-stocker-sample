@@ -53,6 +53,17 @@ class TestCSVUpload(TestCase):
         stones = Stone.objects.all()
         self.assertEqual(len(stones), 0)
 
+    def test_views_basic_csv_upload_generates_basic_id_hash(self):
+        """
+        Tests that basic csv upload generates id hashing
+        :return:
+        """
+        self.client.login(username="graderuser", password="Passw0rd!")
+        self.client.post(self.basic_grading_url, {"file": self.csv_file})
+
+        stone = Stone.objects.all()[0]
+        self.assertIsNotNone(stone.external_id)
+
     def test_views_basic_grading_does_not_upload_and_returns_400_with_invalid_csv_file_field_values(self):
         pass
 
