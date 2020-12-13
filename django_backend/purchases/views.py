@@ -13,9 +13,7 @@ class CloseReceiptView(View):
     def get(self, request, pk, *args, **kwargs):
         receipt = Receipt.objects.get(pk=pk)
         return render(
-            request,
-            "purchases/close_receipt.html",
-            {"username": request.user.username, "receipt": receipt},
+            request, "purchases/close_receipt.html", {"username": request.user.username, "receipt": receipt}
         )
 
     def post(self, request, pk, *args, **kwargs):
@@ -23,6 +21,4 @@ class CloseReceiptView(View):
         receipt.release_by = request.user
         receipt.release_date = datetime.utcnow().replace(tzinfo=utc)
         receipt.save()
-        return HttpResponseRedirect(
-            reverse("admin:purchases_receipt_change", args=[receipt.id])
-        )
+        return HttpResponseRedirect(reverse("admin:purchases_receipt_change", args=[receipt.id]))

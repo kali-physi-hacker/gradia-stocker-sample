@@ -7,10 +7,7 @@ from grading.models import Stone
 
 
 class TestIDHashGeneration(TestCase):
-    fixtures = (
-        "grading/tests/fixtures/basic_grading_fixtures.json",
-        "grading/tests/fixtures/default_users.json"
-    )
+    fixtures = ("grading/tests/fixtures/basic_grading_fixtures.json", "grading/tests/fixtures/default_users.json")
 
     def setUp(self):
 
@@ -20,7 +17,7 @@ class TestIDHashGeneration(TestCase):
         self.client.login(username="graderuser", password="Passw0rd!")
         self.client.post(basic_grading_url, {"file": csv_file})
 
-        self.stones = Stone.objects.all()     # Stones created
+        self.stones = Stone.objects.all()  # Stones created
 
     def test_generated_hashed_id_format_correct(self):
         """
@@ -32,7 +29,7 @@ class TestIDHashGeneration(TestCase):
         stone = self.stones[0]
         stone.generate_basic_external_id()
         hashed = stone.external_id
-        self.assertEqual(hashed[0], 'G')
+        self.assertEqual(hashed[0], "G")
 
     def test_basic_hashed_id_is_saved_to_stone(self):
         """
@@ -46,9 +43,9 @@ class TestIDHashGeneration(TestCase):
 
         stone = self.stones[0]
         stone.generate_basic_external_id()
-        self.assertEqual(len(stone.external_id), 11)   # This is true for basic id
-        self.assertIn('G', stone.external_id)
-        self.assertIn('-B', stone.external_id)
+        self.assertEqual(len(stone.external_id), 11)  # This is true for basic id
+        self.assertIn("G", stone.external_id)
+        self.assertIn("-B", stone.external_id)
 
     def test_triple_hashed_id_is_saved_to_stone(self):
         """
@@ -58,7 +55,7 @@ class TestIDHashGeneration(TestCase):
         stone = self.stones[0]
         stone.generate_triple_verified_external_id()
         self.assertEqual(len(stone.external_id), 9)  # This is true for triple id
-        self.assertIn('G', stone.external_id)
+        self.assertIn("G", stone.external_id)
 
     def test_basic_id_hashing_deterministic(self):
         """
@@ -70,7 +67,7 @@ class TestIDHashGeneration(TestCase):
             hashed_1 = stone.external_id
             stone.generate_basic_external_id()
             hashed_2 = stone.external_id
-            self.assertIn('-B', stone.external_id)
+            self.assertIn("-B", stone.external_id)
             self.assertEqual(hashed_1, hashed_2)
 
     def test_triple_verified_hashing_deterministic(self):
