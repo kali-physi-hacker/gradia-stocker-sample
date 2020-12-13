@@ -36,7 +36,7 @@ class TestIDHashGeneration(TestCase):
 
     def test_basic_hashed_id_is_saved_to_stone(self):
         """
-        Tests that the generated id is saved to DB
+        Tests that the basic generated id is saved to stone (DB)
         :return:
         """
         # If there were a last updated field? We could use that
@@ -50,9 +50,19 @@ class TestIDHashGeneration(TestCase):
         self.assertIn('G', stone.external_id)
         self.assertIn('-B', stone.external_id)
 
+    def test_triple_hashed_id_is_saved_to_stone(self):
+        """
+        Tests that the triple generated id is saved to stone (DB)
+        :return:
+        """
+        stone = self.stones[0]
+        stone.generate_triple_verified_external_id()
+        self.assertEqual(len(stone.external_id), 9)  # This is true for triple id
+        self.assertIn('G', stone.external_id)
+
     def test_basic_id_hashing_deterministic(self):
         """
-        Tests that the same id hash is generated for the same stone
+        Tests that the same basic id hash is generated for the same stone
         :return:
         """
         for stone in self.stones:
@@ -63,9 +73,9 @@ class TestIDHashGeneration(TestCase):
             self.assertIn('-B', stone.external_id)
             self.assertEqual(hashed_1, hashed_2)
 
-    def test_triple_verified_hashed_id_generation(self):
+    def test_triple_verified_hashing_deterministic(self):
         """
-        Tests that the hashed id generated is of the format G12345678 (triple
+        Test that same triple verified hash is generated for the same stone
         :return:
         """
         for stone in self.stones:
@@ -84,7 +94,19 @@ class TestIDHashGeneration(TestCase):
         stone_2 = self.stones[1]
 
         # We assuming a collision has occurred during generation
+
+        # Generate a basic external id some stone and clear back
+        stone_1.generate_basic_external_id()
+        stone_1_external_id = stone_1.external_id
+        stone_1.external_id = ""
+        stone_1.save()
+
+        # Assign saved hashed ID to stone_2
+        stone_2.external_id = stone_1_external_id
+        stone_2.save()
+
         with self.assertRaises(IntegrityError):
             stone_1.generate_basic_external_id()
-            stone_2.external_id = stone_1.external_id
-            stone_2.save()
+
+        # Making sure that stone_2 stone_1 have different value for external_id
+        self.assertNotEqual(stone_1, stone_2)
