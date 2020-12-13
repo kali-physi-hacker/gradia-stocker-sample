@@ -1,7 +1,11 @@
 import time
 from functools import partial
 
-from selenium.common.exceptions import ElementClickInterceptedException, NoSuchElementException, TimeoutException
+from selenium.common.exceptions import (
+    ElementClickInterceptedException,
+    NoSuchElementException,
+    TimeoutException,
+)
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -67,8 +71,9 @@ def click_add(browser, should_disappear=True):
 
 def click_go(browser):
     add_link = browser.find_element_by_css_selector('button[title="Run the selected action"]')
+
     # when clicking inline add new row, elem stays
-    browser.slowly_click(add_link, elem_should_disappear=True)
+    browser.slowly_click(add_link, elem_should_disappear=elem)
 
 
 def click_save(browser):

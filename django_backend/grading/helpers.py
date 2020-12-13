@@ -1,3 +1,8 @@
+def get_stone_fields(model):
+    fields = model._meta.fields
+    return [str(field).split(".")[2] for field in fields]
+
+
 def column_tuple_to_value_tuple_dict_map(column, values):
     assert len(column) == len(values), "Column tuple must be of the same length as Values"
 

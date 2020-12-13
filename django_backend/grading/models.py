@@ -8,6 +8,65 @@ from django.db.utils import IntegrityError
 
 from customers.models import Entity
 from ownerships.models import ParcelTransfer, StoneTransfer
+from .helpers import get_stone_fields
+
+import os
+import csv
+
+# import StringIO
+from datetime import datetime
+from django.conf import settings
+from django.utils.timezone import utc
+
+
+def generate_csv(filename, dir_name, field_names, queryset):
+    if not os.path.exists(dir_name):
+        os.makedirs(dir_name)
+    file_path = dir_name + filename
+    with open(file_path, "w") as file:
+        writer = csv.writer(file, delimiter=",")
+        writer.writerow(field_names)
+        for stone in reversed(queryset.all()):
+            values = []
+            for field in field_names:
+                value = getattr(stone, field)
+                values.append(value)
+            writer.writerow(values)
+
+    return file_path
+
+
+class StoneManager(models.Manager):
+    def generate_id_csv(self, queryset):
+        filename = (
+            "Gradia_id_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
+        )
+        dir_name = settings.MEDIA_ROOT + "/csv_downloads/download_ids/"
+        field_names = ["internal_id"]
+
+        return generate_csv(filename, dir_name, field_names, queryset)
+
+    def generate_master_report_csv(self, queryset):
+        filename = (
+            "Master_report_"
+            + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S"))
+            + ".csv"
+        )
+        dir_name = settings.MEDIA_ROOT + "/csv_downloads/master_reports/"
+        field_names = get_stone_fields(Stone)
+
+        return generate_csv(filename, dir_name, field_names, queryset)
+
+    def generate_to_goldway_csv(self, queryset):
+        filename = (
+            "To_Goldway_"
+            + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S"))
+            + ".csv"
+        )
+        dir_name = settings.MEDIA_ROOT + "/csv_downloads/to_goldway/"
+        field_names = ["date_to_GW", "internal_id", "basic_carat"]
+
+        return generate_csv(filename, dir_name, field_names, queryset)
 
 
 class Split(models.Model):
@@ -481,6 +540,7 @@ class Stone(models.Model):
     ########################################################################
     # final results                                                   #
     ########################################################################
+
     color = models.CharField(choices=ColorGrades.CHOICES, max_length=1, null=True, blank=True)
     clarity = models.CharField(choices=ClarityGrades.CHOICES, max_length=4, null=True, blank=True)
     culet = models.CharField(choices=CuletGrades.CHOICES, max_length=2, null=True, blank=True)
