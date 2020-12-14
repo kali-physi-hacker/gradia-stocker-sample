@@ -1,11 +1,8 @@
-import os
-
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
-from django.contrib.auth import get_user_model
 
-from grading.models import Stone, Split, Parcel
-
+from grading.models import Parcel, Split, Stone
 
 User = get_user_model()
 
@@ -15,7 +12,7 @@ class TestCSVUpload(TestCase):
     fixtures = ("grading/tests/fixtures/basic_grading_fixtures.json", "grading/tests/fixtures/default_users.json")
 
     def setUp(self):
-        receipt_number = "012345689"
+        # receipt_number = "012345689"
 
         self.basic_grading_url = reverse("grading:upload_parcel_csv")
         # self.GW_url = reverse("GW", args=(receipt_number,))

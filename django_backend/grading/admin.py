@@ -1,10 +1,13 @@
+import os
 import csv
 from datetime import datetime
 
 from django.contrib import admin
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.http import HttpResponse
 from django.utils.timezone import utc
+from django.http import HttpResponse
 from django.urls import path
 
 from ownerships.models import ParcelTransfer, StoneTransfer
@@ -281,6 +284,8 @@ class StoneAdmin(admin.ModelAdmin):
         "transfer_to_vault",
         "confirm_received_stones",
         "download_ids",
+        "download_to_goldway_csv",
+        "download_master_reports",
     ]
 
     def get_actions(self, request):
@@ -291,19 +296,31 @@ class StoneAdmin(admin.ModelAdmin):
         return actions
 
     def download_ids(self, request, queryset):
-        filename = "Gradia_ids_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
-        file = open(filename, mode="w")
-        writer = csv.writer(file, delimiter=",")
-        for stone in queryset.all():
-            writer.writerow(stone.internal_id)
-        file.close()
-
-        f = open(filename, mode="r")
-        response = HttpResponse(f, content_type="text/plain")
-        response["Content-Disposition"] = "attachment; filename=%s.csv" % filename
-        return response
+        file_path = Stone.objects.generate_id_csv(queryset)
+        with open(file_path, mode="r") as file:
+            response = HttpResponse(file, content_type="text/csv")
+            response["Content-Disposition"] = "attachment; filename=%s" % file_path
+            return response
 
     download_ids.short_description = "Download Diamond(s) External Nanotech IDs"
+
+    def download_to_goldway_csv(self, request, queryset):
+        file_path = Stone.objects.generate_to_goldway_csv(queryset)
+        with open(file_path, mode="r") as file:
+            response = HttpResponse(file, content_type="text/csv")
+            response["Content-Disposition"] = "attachment; filename=%s" % file_path
+            return response
+
+    download_to_goldway_csv.short_description = "Download Goldway CV Trasfer"
+
+    def download_master_reports(self, request, queryset):
+        file_path = Stone.objects.generate_master_report_csv(queryset)
+        with open(file_path, mode="r") as file:
+            response = HttpResponse(file, content_type="text/csv")
+            response["Content-Disposition"] = "attachment; filename=%s" % file_path
+            return response
+
+    download_master_reports.short_description = "Download Master Report"
 
     def transfer_to_goldway(self, request, queryset):
         vault = User.objects.get(username="vault")

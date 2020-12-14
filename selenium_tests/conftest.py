@@ -1,6 +1,9 @@
+import os
 from functools import partial
 
 from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
+from django.conf import settings
 
 import pytest
 from customers.models import Entity
@@ -21,6 +24,23 @@ from ownerships.models import ParcelTransfer, StoneTransfer
 from urls import goto
 from user_fixtures import *  # NOQA
 
+# function to take care of downloading file
+def enable_download_headless(browser, download_dir):
+    browser.command_executor._commands["send_command"] = (
+        "POST",
+        "/session/$sessionId/chromium/send_command",
+    )
+    params = {
+        "cmd": "Page.setDownloadBehavior",
+        "params": {"behavior": "allow", "downloadPath": download_dir},
+    }
+    browser.execute("send_command", params)
+
+
+download_dir = settings.SELENIUM_DOWNLOADS
+if not os.path.exists(download_dir):
+    os.makedirs(download_dir)
+
 
 @pytest.fixture
 def browser(live_server, settings):
@@ -31,12 +51,27 @@ def browser(live_server, settings):
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--disable-gpu")
-    driver = webdriver.Chrome(options=chrome_options)
+    # change the <path_to_download_default_directory> to whatever your default download folder is located
+    chrome_options.add_experimental_option(
+        "prefs",
+        {
+            "download.default_directory": download_dir,
+            "download.prompt_for_download": False,
+            "download.directory_upgrade": True,
+            "safebrowsing_for_trusted_sources_enabled": False,
+            "safebrowsing.enabled": False,
+        },
+    )
+    driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
+    # change the <path_to_place_downloaded_file> to your directory where you would like to place the downloaded file
+
     try:
         driver.implicitly_wait(5)  # seconds
 
         driver.goto = partial(goto, driver, live_server.url)
         setup_browser_helper_functions(driver)
+        # function to handle setting up headless download
+        enable_download_headless(driver, download_dir)
 
         yield driver
     finally:
