@@ -28,7 +28,6 @@ class TestCSVGeneration(TestCase):
         self.assertEqual(3, len(csv_list))
         self.assertTrue(str(self.stone3.internal_id), csv_list[0]["internal_id"])
         self.assertTrue(str(self.stone1.internal_id), csv_list[2]["internal_id"])
-            
 
     def test_generated_master_report_csv(self):
 
@@ -59,4 +58,3 @@ class TestCSVGeneration(TestCase):
         self.assertEqual(3, len(csv_list))
         self.assertTrue(str(self.stone3.basic_carat), csv_list[0]["basic_carat"])
         self.assertTrue(str(self.stone1.internal_id), csv_list[2]["internal_id"])
-            
