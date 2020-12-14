@@ -35,9 +35,7 @@ for parcel in Parcel.objects.all():
 for split in Split.objects.all():
     original_location, status = split.original_parcel.current_location()
     assert status == "confirmed"
-    ParcelTransfer.initiate_transfer(
-        split.original_parcel, original_location, split_user, admin_user
-    )
+    ParcelTransfer.initiate_transfer(split.original_parcel, original_location, split_user, admin_user)
     ParcelTransfer.confirm_received(split.original_parcel)
 
 # create stones

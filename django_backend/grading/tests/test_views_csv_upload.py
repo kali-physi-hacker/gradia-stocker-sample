@@ -54,9 +54,7 @@ class TestCSVUpload(TestCase):
     def test_views_basic_grading_does_not_upload_and_returns_400_with_invalid_csv_file_fields(
         self,
     ):
-        response = self.client.post(
-            self.basic_grading_url, {"file": self.invalid_csv_file}
-        )
+        response = self.client.post(self.basic_grading_url, {"file": self.invalid_csv_file})
         self.assertEqual(response.status_code, 302)
 
         stones = Stone.objects.all()

@@ -93,9 +93,7 @@ class Migration(migrations.Migration):
                 ("reference_price_per_carat", models.PositiveIntegerField()),
                 (
                     "rejected_carats",
-                    models.DecimalField(
-                        blank=True, decimal_places=3, max_digits=5, null=True
-                    ),
+                    models.DecimalField(blank=True, decimal_places=3, max_digits=5, null=True),
                 ),
                 ("rejected_pieces", models.IntegerField(blank=True, null=True)),
                 ("total_price_paid", models.IntegerField(blank=True, null=True)),

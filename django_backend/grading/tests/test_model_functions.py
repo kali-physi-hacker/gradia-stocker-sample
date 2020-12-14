@@ -40,9 +40,7 @@ class TestCSVGeneration(TestCase):
             reader = csv.DictReader(file)
             csv_list = list(reader)
             self.assertEqual(len(csv_list), 3)
-            self.assertTrue(
-                str(self.stone3.data_entry_user), csv_list[0]["data_entry_user"]
-            )
+            self.assertTrue(str(self.stone3.data_entry_user), csv_list[0]["data_entry_user"])
             self.assertTrue(str(self.stone1.date_created), csv_list[2]["date_created"])
             for field in field_names:
                 self.assertIn(field, reader.fieldnames)

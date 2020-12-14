@@ -54,9 +54,7 @@ class ReturnToVaultView(View):
             to_user=User.objects.get(username="vault"),
             created_by=request.user,
         )
-        return HttpResponseRedirect(
-            reverse("admin:grading_parcel_change", args=[parcel.id])
-        )
+        return HttpResponseRedirect(reverse("admin:grading_parcel_change", args=[parcel.id]))
 
 
 class ConfirmReceivedView(View):
@@ -84,9 +82,7 @@ class ConfirmReceivedView(View):
             return HttpResponse(e)
 
         ParcelTransfer.confirm_received(parcel)
-        return HttpResponseRedirect(
-            reverse("admin:grading_parcel_change", args=[parcel.id])
-        )
+        return HttpResponseRedirect(reverse("admin:grading_parcel_change", args=[parcel.id]))
 
 
 class CloseReceiptView(View):
@@ -103,9 +99,7 @@ class CloseReceiptView(View):
         receipt.release_by = request.user
         receipt.release_date = datetime.utcnow().replace(tzinfo=utc)
         receipt.save()
-        return HttpResponseRedirect(
-            reverse("admin:grading_receipt_change", args=[receipt.id])
-        )
+        return HttpResponseRedirect(reverse("admin:grading_receipt_change", args=[receipt.id]))
 
 
 class UploadParcelCSVFile(View):
@@ -202,9 +196,7 @@ class UploadParcelCSVFile(View):
                 to_user=parcel_owner,
                 confirmed_date=datetime.utcnow().replace(tzinfo=utc),
             )
-        return HttpResponseRedirect(
-            reverse("admin:grading_split_change", args=(split.pk,))
-        )
+        return HttpResponseRedirect(reverse("admin:grading_split_change", args=(split.pk,)))
 
 
 """

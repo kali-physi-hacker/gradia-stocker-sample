@@ -23,6 +23,4 @@ class CloseReceiptView(View):
         receipt.release_by = request.user
         receipt.release_date = datetime.utcnow().replace(tzinfo=utc)
         receipt.save()
-        return HttpResponseRedirect(
-            reverse("admin:purchases_receipt_change", args=[receipt.id])
-        )
+        return HttpResponseRedirect(reverse("admin:purchases_receipt_change", args=[receipt.id]))

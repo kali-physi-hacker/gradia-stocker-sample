@@ -70,15 +70,11 @@ def erp_setup(django_user_model):
         ),
         Permission.objects.get(
             codename="view_receipt",
-            content_type=ContentType.objects.get(
-                app_label="purchases", model="receipt"
-            ),
+            content_type=ContentType.objects.get(app_label="purchases", model="receipt"),
         ),
         Permission.objects.get(
             codename="add_receipt",
-            content_type=ContentType.objects.get(
-                app_label="purchases", model="receipt"
-            ),
+            content_type=ContentType.objects.get(app_label="purchases", model="receipt"),
         ),
         Permission.objects.get(
             codename="view_parcel",
@@ -136,27 +132,19 @@ def erp_setup(django_user_model):
         ),
         Permission.objects.get(
             codename="view_goldwayverification",
-            content_type=ContentType.objects.get(
-                app_label="grading", model="goldwayverification"
-            ),
+            content_type=ContentType.objects.get(app_label="grading", model="goldwayverification"),
         ),
         Permission.objects.get(
             codename="view_giaverification",
-            content_type=ContentType.objects.get(
-                app_label="grading", model="giaverification"
-            ),
+            content_type=ContentType.objects.get(app_label="grading", model="giaverification"),
         ),
         Permission.objects.get(
             codename="view_parceltransfer",
-            content_type=ContentType.objects.get(
-                app_label="ownerships", model="parceltransfer"
-            ),
+            content_type=ContentType.objects.get(app_label="ownerships", model="parceltransfer"),
         ),
         Permission.objects.get(
             codename="add_parceltransfer",
-            content_type=ContentType.objects.get(
-                app_label="ownerships", model="parceltransfer"
-            ),
+            content_type=ContentType.objects.get(app_label="ownerships", model="parceltransfer"),
         ),
     )
 

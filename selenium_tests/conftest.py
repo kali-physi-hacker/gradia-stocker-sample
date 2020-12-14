@@ -27,6 +27,7 @@ from user_fixtures import *  # NOQA
 
 SELENIUM_PATH = os.path.dirname(os.path.abspath(__file__))
 
+
 @pytest.fixture
 def download_file_dir():
     download_dir = os.path.join((SELENIUM_PATH), "downloads")
@@ -34,6 +35,7 @@ def download_file_dir():
         os.makedirs(download_dir)
     yield download_dir
     shutil.rmtree(download_dir)
+
 
 # function to take care of downloading file
 def enable_download_headless(browser, download_dir):
@@ -84,12 +86,11 @@ def browser(live_server, settings, download_file_dir):
         pass
         # driver.quit()
 
+
 @pytest.fixture
 def receipt(django_user_model, erp, admin_user):
     created_receipt = Receipt.objects.create(
-        entity=Entity.objects.create(
-            name="Van Klaren", address="addressy", phone="12345678", email="vk@vk.com"
-        ),
+        entity=Entity.objects.create(name="Van Klaren", address="addressy", phone="12345678", email="vk@vk.com"),
         code="VK-0001",
         intake_by=admin_user,
     )

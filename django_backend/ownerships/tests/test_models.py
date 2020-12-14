@@ -59,9 +59,7 @@ class ParcelTransferTest(TestCase):
         )
         # but cannot create fresh parcel
         with self.assertRaises(IntegrityError):
-            ParcelTransfer.objects.create(
-                item=self.parcel, fresh=True, from_user=self.user, to_user=self.user
-            )
+            ParcelTransfer.objects.create(item=self.parcel, fresh=True, from_user=self.user, to_user=self.user)
 
     def test_has_useful_repr(self):
         self.assertEqual(

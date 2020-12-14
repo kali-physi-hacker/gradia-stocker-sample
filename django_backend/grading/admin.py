@@ -137,9 +137,7 @@ class ItemOwnerFilter(admin.SimpleListFilter):
             username_filter = request.user.username
 
         if username_filter:
-            fresh_transfers = self.transfer_model.objects.filter(
-                to_user__username=username_filter, fresh=True
-            )
+            fresh_transfers = self.transfer_model.objects.filter(to_user__username=username_filter, fresh=True)
         else:
             # the __all__ case where self.value() == None
             fresh_transfers = (
@@ -340,15 +338,11 @@ class StoneAdmin(admin.ModelAdmin):
         goldway = User.objects.get(username="goldway")
 
         for stone in queryset.all():
-            StoneTransfer.can_create_transfer(
-                item=stone, from_user=vault, to_user=goldway
-            )
+            StoneTransfer.can_create_transfer(item=stone, from_user=vault, to_user=goldway)
 
         verification = GoldwayVerification.objects.create()
         for stone in queryset.all():
-            StoneTransfer.initiate_transfer(
-                item=stone, from_user=vault, to_user=goldway, created_by=request.user
-            )
+            StoneTransfer.initiate_transfer(item=stone, from_user=vault, to_user=goldway, created_by=request.user)
             stone.goldway_verification = verification
             stone.save()
 
@@ -363,9 +357,7 @@ class StoneAdmin(admin.ModelAdmin):
 
         verification = GiaVerification.objects.create()
         for stone in queryset.all():
-            StoneTransfer.initiate_transfer(
-                item=stone, from_user=vault, to_user=gia, created_by=request.user
-            )
+            StoneTransfer.initiate_transfer(item=stone, from_user=vault, to_user=gia, created_by=request.user)
             stone.gia_verification = verification
             stone.save()
 

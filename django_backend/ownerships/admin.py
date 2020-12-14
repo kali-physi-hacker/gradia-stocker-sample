@@ -51,9 +51,7 @@ class ItemTransferAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         vault = User.objects.get(username="vault")
         created_by = request.user
-        created = self.model.initiate_transfer(
-            obj.item, vault, obj.to_user, created_by, obj.remarks
-        )
+        created = self.model.initiate_transfer(obj.item, vault, obj.to_user, created_by, obj.remarks)
         obj.from_user = vault
         obj.pk = created.pk
 

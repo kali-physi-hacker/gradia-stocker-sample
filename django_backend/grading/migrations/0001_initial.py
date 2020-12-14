@@ -179,9 +179,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="parcel",
             name="receipt",
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.PROTECT, to="grading.Receipt"
-            ),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to="grading.Receipt"),
         ),
         migrations.CreateModel(
             name="Stone",
@@ -986,21 +984,15 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "GW_carat",
-                    models.DecimalField(
-                        blank=True, decimal_places=3, max_digits=5, null=True
-                    ),
+                    models.DecimalField(blank=True, decimal_places=3, max_digits=5, null=True),
                 ),
                 (
                     "post_GW_final_carat",
-                    models.DecimalField(
-                        blank=True, decimal_places=3, max_digits=5, null=True
-                    ),
+                    models.DecimalField(blank=True, decimal_places=3, max_digits=5, null=True),
                 ),
                 (
                     "GW_repolish_carat",
-                    models.DecimalField(
-                        blank=True, decimal_places=3, max_digits=5, null=True
-                    ),
+                    models.DecimalField(blank=True, decimal_places=3, max_digits=5, null=True),
                 ),
                 ("date_to_GW", models.DateTimeField(blank=True, null=True)),
                 ("GW_returned_date", models.DateTimeField(blank=True, null=True)),
@@ -1087,9 +1079,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "carat_weight",
-                    models.DecimalField(
-                        blank=True, decimal_places=3, max_digits=4, null=True
-                    ),
+                    models.DecimalField(blank=True, decimal_places=3, max_digits=4, null=True),
                 ),
                 (
                     "data_entry_user",
@@ -1146,9 +1136,7 @@ class Migration(migrations.Migration):
                 ("inclusions", models.ManyToManyField(to="grading.Inclusion")),
                 (
                     "split_from",
-                    models.ForeignKey(
-                        on_delete=django.db.models.deletion.PROTECT, to="grading.Split"
-                    ),
+                    models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to="grading.Split"),
                 ),
             ],
         ),

@@ -34,9 +34,7 @@ class Receipt(AbstractReceipt):
 class Parcel(AbstractParcel):
     receipt = models.ForeignKey(Receipt, on_delete=models.PROTECT)
 
-    rejected_carats = models.DecimalField(
-        max_digits=5, decimal_places=3, null=True, blank=True
-    )
+    rejected_carats = models.DecimalField(max_digits=5, decimal_places=3, null=True, blank=True)
     rejected_pieces = models.IntegerField(null=True, blank=True)
 
     total_price_paid = models.IntegerField(null=True, blank=True)
@@ -44,8 +42,6 @@ class Parcel(AbstractParcel):
     admin_url = "admin:purchases_parcel_change"
 
     def closed_out(self):
-        return (self.rejected_pieces is not None) and (
-            self.total_price_paid is not None
-        )
+        return (self.rejected_pieces is not None) and (self.total_price_paid is not None)
 
     closed_out.boolean = True

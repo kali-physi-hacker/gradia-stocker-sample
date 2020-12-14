@@ -49,9 +49,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "item",
-                    models.ForeignKey(
-                        on_delete=django.db.models.deletion.PROTECT, to="grading.Stone"
-                    ),
+                    models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to="grading.Stone"),
                 ),
                 (
                     "to_user",
@@ -97,9 +95,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "item",
-                    models.ForeignKey(
-                        on_delete=django.db.models.deletion.PROTECT, to="grading.Parcel"
-                    ),
+                    models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to="grading.Parcel"),
                 ),
                 (
                     "to_user",
