@@ -24,7 +24,7 @@ class TestCSVGeneration(TestCase):
         with open(file_path, "r") as file:
             reader = csv.DictReader(file)
             csv_list = list(reader)
-            self.assertTrue(len(csv_list) == 3)
+            self.assertEqual(len(csv_list), 3)
             self.assertTrue(str(self.stone3.internal_id), csv_list[0]["internal_id"])
             self.assertTrue(str(self.stone1.internal_id), csv_list[2]["internal_id"])
             self.assertIn("internal_id", reader.fieldnames)
@@ -39,7 +39,7 @@ class TestCSVGeneration(TestCase):
         with open(file_path, "r") as file:
             reader = csv.DictReader(file)
             csv_list = list(reader)
-            self.assertTrue(len(csv_list) == 3)
+            self.assertEqual(len(csv_list), 3)
             self.assertTrue(
                 str(self.stone3.data_entry_user), csv_list[0]["data_entry_user"]
             )
@@ -55,7 +55,7 @@ class TestCSVGeneration(TestCase):
         with open(file_path, "r") as file:
             reader = csv.DictReader(file)
             csv_list = list(reader)
-            self.assertTrue(len(csv_list) == 3)
+            self.assertEqual(len(csv_list), 3)
             self.assertTrue(str(self.stone3.basic_carat), csv_list[0]["basic_carat"])
             self.assertTrue(str(self.stone1.internal_id), csv_list[2]["internal_id"])
             for field in field_names:

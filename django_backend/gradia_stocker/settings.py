@@ -126,7 +126,6 @@ STATIC_URL = "/static/"
 MEDIA_URL = "/media/"
 STATIC_ROOT = os.path.join(os.path.dirname(BASE_DIR), "static")
 MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), "media")
-SELENIUM_DOWNLOADS = os.path.join(os.path.dirname(BASE_DIR), "selenium_tests/downloads")
 # for the compiled assets from the frontend
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "frontend_static_files")]
 
