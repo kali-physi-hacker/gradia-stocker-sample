@@ -40,7 +40,7 @@ def test_grader_can_download_id_stones(browser, stones, grader, download_file_di
     action_dropdown = Select(browser.find_element_by_name("action"))
     action_dropdown.select_by_visible_text("Download Diamond(s) External Nanotech IDs")
 
-    browser.click_go(elem=False)
+    browser.click_go(elem_should_disappear=False)
     sleep(5)
     file_path = os.path.join((download_file_dir), os.listdir(download_file_dir)[0])
     with open(file_path, "r") as file:
@@ -73,7 +73,7 @@ def test_grader_can_download_master_report(browser, stones, grader, download_fil
     action_dropdown = Select(browser.find_element_by_name("action"))
     action_dropdown.select_by_visible_text("Download Master Report")
 
-    browser.click_go(elem=False)
+    browser.click_go(elem_should_disappear=False)
     sleep(5)
     field_names = get_stone_fields(Stone)
     file_path = os.path.join((download_file_dir), os.listdir(download_file_dir)[0])
@@ -108,7 +108,7 @@ def test_grader_can_download_goldway_transfer(browser, stones, grader, download_
     action_dropdown = Select(browser.find_element_by_name("action"))
     action_dropdown.select_by_visible_text("Download Goldway CV Trasfer")
 
-    browser.click_go(elem=False)
+    browser.click_go(elem_should_disappear=False)
     sleep(5)
     field_names = ["date_to_GW", "internal_id", "basic_carat"]
     file_path = os.path.join((download_file_dir), os.listdir(download_file_dir)[0])

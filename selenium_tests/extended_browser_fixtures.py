@@ -69,10 +69,10 @@ def click_add(browser, should_disappear=True):
             pass
 
 
-def click_go(browser, elem=True):
+def click_go(browser, elem_should_disappear=True):
     add_link = browser.find_element_by_css_selector('button[title="Run the selected action"]')
     # when clicking inline add new row, elem stays
-    browser.slowly_click(add_link, elem_should_disappear=elem)
+    browser.slowly_click(add_link, elem_should_disappear)
 
 
 def click_save(browser):
