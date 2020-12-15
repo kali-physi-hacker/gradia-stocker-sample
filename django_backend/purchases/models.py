@@ -15,17 +15,9 @@ class AuthorizedPersonnel(AbstractAuthorizedPersonnel):
 
 class Receipt(AbstractReceipt):
     entity = models.ForeignKey(Seller, on_delete=models.PROTECT)
-    intake_by = models.ForeignKey(
-        User,
-        on_delete=models.PROTECT,
-        related_name="signed_off_on_stone_purchase_intake",
-    )
+    intake_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name="signed_off_on_stone_purchase_intake")
     release_by = models.ForeignKey(
-        User,
-        on_delete=models.PROTECT,
-        related_name="signed_off_on_stone_purchase_release",
-        null=True,
-        blank=True,
+        User, on_delete=models.PROTECT, related_name="signed_off_on_stone_purchase_release", null=True, blank=True
     )
     admin_url = "admin:purchases_receipt_change"
     close_url = "purchases:close_receipt"

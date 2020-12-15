@@ -25,34 +25,25 @@ class ReturnToVaultView(View):
         parcel = Parcel.objects.get(pk=pk)
         try:
             ParcelTransfer.can_create_transfer(
-                item=parcel,
-                from_user=request.user,
-                to_user=User.objects.get(username="vault"),
+                item=parcel, from_user=request.user, to_user=User.objects.get(username="vault")
             )
         except Exception as e:
             return HttpResponse(e)
 
         return render(
-            request,
-            "grading/return_to_vault_confirmation.html",
-            {"username": request.user.username, "item": parcel},
+            request, "grading/return_to_vault_confirmation.html", {"username": request.user.username, "item": parcel}
         )
 
     def post(self, request, pk, *args, **kwargs):
         parcel = Parcel.objects.get(pk=pk)
         try:
             ParcelTransfer.can_create_transfer(
-                item=parcel,
-                from_user=request.user,
-                to_user=User.objects.get(username="vault"),
+                item=parcel, from_user=request.user, to_user=User.objects.get(username="vault")
             )
         except Exception as e:
             return HttpResponse(e)
         ParcelTransfer.initiate_transfer(
-            item=parcel,
-            from_user=request.user,
-            to_user=User.objects.get(username="vault"),
-            created_by=request.user,
+            item=parcel, from_user=request.user, to_user=User.objects.get(username="vault"), created_by=request.user
         )
         return HttpResponseRedirect(reverse("admin:grading_parcel_change", args=[parcel.id]))
 
@@ -68,11 +59,7 @@ class ConfirmReceivedView(View):
 
         parcel_owner, status = parcel.current_location()
 
-        return render(
-            request,
-            "grading/confirm_received.html",
-            {"username": request.user.username, "item": parcel},
-        )
+        return render(request, "grading/confirm_received.html", {"username": request.user.username, "item": parcel})
 
     def post(self, request, pk, *args, **kwargs):
         parcel = Parcel.objects.get(pk=pk)
@@ -88,11 +75,7 @@ class ConfirmReceivedView(View):
 class CloseReceiptView(View):
     def get(self, request, pk, *args, **kwargs):
         receipt = Receipt.objects.get(pk=pk)
-        return render(
-            request,
-            "grading/close_receipt.html",
-            {"username": request.user.username, "receipt": receipt},
-        )
+        return render(request, "grading/close_receipt.html", {"username": request.user.username, "receipt": receipt})
 
     def post(self, request, pk, *args, **kwargs):
         receipt = Receipt.objects.get(pk=pk)
@@ -177,11 +160,7 @@ class UploadParcelCSVFile(View):
             try:
                 data_dict["grader_1"] = User.objects.get(username=data_dict["grader_1"])
             except User.DoesNotExist:
-                messages.add_message(
-                    request,
-                    messages.ERROR,
-                    f"Grader: {data_dict['grader_1']} Does not exist",
-                )
+                messages.add_message(request, messages.ERROR, f"Grader: {data_dict['grader_1']} Does not exist")
                 return HttpResponseRedirect(reverse("grading:upload_parcel_csv"))
 
             # Create Stones

@@ -14,20 +14,12 @@ vault_user = User.objects.get(username="vault")
 for parcel in Parcel.objects.all():
     if parcel.split_from is None:
         transfer = ParcelTransfer.objects.create(
-            item=parcel,
-            fresh=True,
-            from_user=admin_user,
-            to_user=vault_user,
-            created_by=admin_user,
+            item=parcel, fresh=True, from_user=admin_user, to_user=vault_user, created_by=admin_user
         )
         ParcelTransfer.confirm_received(parcel)
     else:
         transfer = ParcelTransfer.objects.create(
-            item=parcel,
-            fresh=True,
-            from_user=split_user,
-            to_user=vault_user,
-            created_by=admin_user,
+            item=parcel, fresh=True, from_user=split_user, to_user=vault_user, created_by=admin_user
         )
         ParcelTransfer.confirm_received(parcel)
 
@@ -61,10 +53,6 @@ for s_json in stones_json:
 
     # they were all created from splitting
     transfer = StoneTransfer.objects.create(
-        item=stone,
-        fresh=True,
-        from_user=split_user,
-        to_user=vault_user,
-        created_by=admin_user,
+        item=stone, fresh=True, from_user=split_user, to_user=vault_user, created_by=admin_user
     )
     StoneTransfer.confirm_received(stone)

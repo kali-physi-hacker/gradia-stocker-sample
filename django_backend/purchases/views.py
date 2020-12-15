@@ -13,9 +13,7 @@ class CloseReceiptView(View):
     def get(self, request, pk, *args, **kwargs):
         receipt = Receipt.objects.get(pk=pk)
         return render(
-            request,
-            "purchases/close_receipt.html",
-            {"username": request.user.username, "receipt": receipt},
+            request, "purchases/close_receipt.html", {"username": request.user.username, "receipt": receipt}
         )
 
     def post(self, request, pk, *args, **kwargs):

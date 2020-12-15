@@ -66,12 +66,7 @@ class ParcelRejectionAdmin(GradingParcelAdmin):
     model = Parcel
     form = ParcelRejectionForm
 
-    readonly_fields = [
-        "customer_parcel_code",
-        "receipt",
-        "total_carats",
-        "total_pieces",
-    ]
+    readonly_fields = ["customer_parcel_code", "receipt", "total_carats", "total_pieces"]
     fields = filter_out_gradia_stuff(GradingParcelAdmin.readonly_fields) + [
         "rejected_carats",
         "rejected_pieces",
@@ -83,12 +78,7 @@ class ParcelRejectionAdmin(GradingParcelAdmin):
     list_display_links = []
 
     def get_list_display(self, request):
-        return [
-            "customer_parcel_code",
-            "get_receipt_with_html_link",
-            "total_carats",
-            "total_pieces",
-        ]
+        return ["customer_parcel_code", "get_receipt_with_html_link", "total_carats", "total_pieces"]
 
     def has_change_permission(self, request, obj=None):
         return True

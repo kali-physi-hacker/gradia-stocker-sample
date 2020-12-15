@@ -1,19 +1,20 @@
+import csv
+import hashlib
+import os
+# import StringIO
+from datetime import datetime
+
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.utils import IntegrityError
 from django.urls import reverse
 from django.utils.html import format_html
 
 from customers.models import Entity
 from ownerships.models import ParcelTransfer, StoneTransfer
+
 from .helpers import get_stone_fields
-
-import os
-import csv
-
-# import StringIO
-from datetime import datetime
-from django.conf import settings
-from django.utils.timezone import utc
 
 
 def generate_csv(filename, dir_name, field_names, queryset):
@@ -85,11 +86,7 @@ class AbstractReceipt(models.Model):
     release_date = models.DateTimeField(null=True, blank=True)
     intake_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name="signed_off_on_stone_intake")
     release_by = models.ForeignKey(
-        User,
-        on_delete=models.PROTECT,
-        related_name="signed_off_on_stone_release",
-        null=True,
-        blank=True,
+        User, on_delete=models.PROTECT, related_name="signed_off_on_stone_release", null=True, blank=True
     )
 
     admin_url = "admin:grading_receipt_change"
@@ -280,13 +277,7 @@ class GeneralGrades:
     FAIR = "F"
     POOR = "P"
 
-    CHOICES = (
-        (EXCELLENT, "Excellent"),
-        (VERY_GOOD, "Very Good"),
-        (GOOD, "Good"),
-        (FAIR, "Fair"),
-        (POOR, "Poor"),
-    )
+    CHOICES = ((EXCELLENT, "Excellent"), (VERY_GOOD, "Very Good"), (GOOD, "Good"), (FAIR, "Fair"), (POOR, "Poor"))
 
 
 class FluorescenceGrades:
@@ -542,7 +533,61 @@ class Stone(models.Model):
     culet = models.CharField(choices=CuletGrades.CHOICES, max_length=2, null=True, blank=True)
     cut_grade = models.CharField(choices=GeneralGrades.CHOICES, max_length=4, null=True, blank=True)
     carat_weight = models.DecimalField(max_digits=4, decimal_places=3, null=True, blank=True)
+
     objects = StoneManager()
 
     def current_location(self):
         return StoneTransfer.get_current_location(self)
+
+    def __generate_id(self):
+        """
+        Generates a hashed id of the stone.
+        Format of string byte hashed:
+        internal_id, basic_final_color, basic_final_clarity, sheryl_cut,
+        culet_size, GIA_batch_code, GIA_returned_date, goldway_AI_code,
+        goldway_verification.invoice_number, gia_verification.invoice_number
+        :return:
+        """
+        payload = (
+            f" {self.internal_id}, {self.basic_final_color}, {self.basic_final_clarity},"
+            f" {self.sheryl_cut}, {self.culet_size}, {self.GIA_batch_code}"
+            f" {self.GIA_returned_date}, {self.goldway_AI_code}"
+        )
+
+        # This applies to triple verification. i.e It will not apply to basic
+        if self.goldway_verification is not None:
+            payload += f", {self.goldway_verification.invoice_number}"
+
+        if self.gia_verification is not None:
+            payload += f", {self.gia_verification.invoice_number}"
+
+        hashed = hashlib.blake2b(digest_size=4)
+        hashed.update(payload.encode("utf-8"))
+        return f"G{hashed.hexdigest()}"
+
+    def generate_basic_external_id(self):
+        """
+        Returns a basic ID. i.e ID with -B append to it
+        :return:
+        """
+        self.external_id = f"{self.__generate_id()}-B"
+        try:
+            self.save()
+        except IntegrityError:
+            # Set external_id to None
+            self.external_id = None
+
+            # Send an email to everyone
+            raise IntegrityError("External Id Already Exists")
+
+    def generate_triple_verified_external_id(self):
+        """
+        Returns an ID
+        :return:
+        """
+        self.external_id = self.__generate_id()
+        try:
+            self.save()
+        except IntegrityError:
+            # Send an email to everyone
+            raise IntegrityError("External Id Already Exists")
