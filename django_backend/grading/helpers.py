@@ -4,9 +4,7 @@ def get_stone_fields(model):
 
 
 def column_tuple_to_value_tuple_dict_map(column, values):
-    assert len(column) == len(
-        values
-    ), "Column tuple must be of the same length as Values"
+    assert len(column) == len(values), "Column tuple must be of the same length as Values"
 
     dict_map = {}
 

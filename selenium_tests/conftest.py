@@ -39,14 +39,8 @@ def download_file_dir():
 
 # function to take care of downloading file
 def enable_download_headless(browser, download_dir):
-    browser.command_executor._commands["send_command"] = (
-        "POST",
-        "/session/$sessionId/chromium/send_command",
-    )
-    params = {
-        "cmd": "Page.setDownloadBehavior",
-        "params": {"behavior": "allow", "downloadPath": download_dir},
-    }
+    browser.command_executor._commands["send_command"] = ("POST", "/session/$sessionId/chromium/send_command")
+    params = {"cmd": "Page.setDownloadBehavior", "params": {"behavior": "allow", "downloadPath": download_dir}}
     browser.execute("send_command", params)
 
 
@@ -90,9 +84,7 @@ def browser(live_server, settings, download_file_dir):
 @pytest.fixture
 def receipt(django_user_model, erp, admin_user):
     created_receipt = Receipt.objects.create(
-        entity=Entity.objects.create(
-            name="Van Klaren", address="addressy", phone="12345678", email="vk@vk.com"
-        ),
+        entity=Entity.objects.create(name="Van Klaren", address="addressy", phone="12345678", email="vk@vk.com"),
         code="VK-0001",
         intake_by=admin_user,
     )

@@ -42,9 +42,7 @@ class TestCSVGeneration(TestCase):
                 self.assertIn(field, reader.fieldnames)
             csv_list = list(reader)
         self.assertEqual(3, len(csv_list))
-        self.assertEqual(
-            str(self.stone3.data_entry_user), csv_list[0]["data_entry_user"]
-        )
+        self.assertEqual(str(self.stone3.data_entry_user), csv_list[0]["data_entry_user"])
         self.assertEqual(str(self.stone1.date_created), csv_list[2]["date_created"])
 
     def test_generated_to_goldway_csv(self):

@@ -86,9 +86,7 @@ def test_grader_can_download_master_report(browser, stones, grader, download_fil
     assert str(stones[2].date_created) in csv_list[2]["date_created"]
 
 
-def test_grader_can_download_goldway_transfer(
-    browser, stones, grader, download_file_dir
-):
+def test_grader_can_download_goldway_transfer(browser, stones, grader, download_file_dir):
 
     browser.login(grader.username, grader.raw_password)
     browser.go_to_stone_page()
