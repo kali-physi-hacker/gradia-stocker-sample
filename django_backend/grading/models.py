@@ -525,6 +525,9 @@ class Stone(models.Model):
         try:
             self.save()
         except IntegrityError:
+            # Set external_id to None
+            self.external_id = None
+
             # Send an email to everyone
             raise IntegrityError("External Id Already Exists")
 
