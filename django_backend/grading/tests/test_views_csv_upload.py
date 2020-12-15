@@ -2,7 +2,10 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
+import pandas as pd
+
 from grading.models import Parcel, Split, Stone
+
 
 User = get_user_model()
 
@@ -64,11 +67,22 @@ class TestCSVUpload(TestCase):
         Tests that basic csv upload generates id hashing
         :return:
         """
+        # Before Upload Check that all external IDs from CSV file is None
+        data = pd.read_csv(self.csv_file)
+        self.csv_file.close()
+        external_ids = pd.DataFrame(data, columns=("external_id",))
+
+        for external_id in external_ids.values:
+            self.assertTrue(pd.isna(external_id[0]))
+
+        # Reopen file and upload ===> Cursor reached end after above action
+        self.csv_file = open("grading/tests/fixtures/123456789.csv", "r")
         self.client.login(username="graderuser", password="Passw0rd!")
         self.client.post(self.basic_grading_url, {"file": self.csv_file})
 
-        stone = Stone.objects.all()[0]
-        self.assertIsNotNone(stone.external_id)
+        # Check that all uploaded stones have external_ids
+        for stone in Stone.objects.all():
+            self.assertIsNotNone(stone.external_id)
 
     def test_views_basic_grading_does_not_upload_and_returns_400_with_invalid_csv_file_field_values(
         self
