@@ -18,33 +18,17 @@ def go_to_from_admin_portal(browser, admin_page_url):
 
 
 def add_urls_helper_functions(browser):
-    browser.go_to_customer_page = partial(
-        go_to_from_admin_portal, browser, "/admin/customers/entity/"
-    )
-    browser.go_to_split_page = partial(
-        go_to_from_admin_portal, browser, "/admin/grading/split/"
-    )
-    browser.go_to_receipt_page = partial(
-        go_to_from_admin_portal, browser, "/admin/grading/receipt/"
-    )
-    browser.go_to_parcel_page = partial(
-        go_to_from_admin_portal, browser, "/admin/grading/parcel/"
-    )
-    browser.go_to_stone_page = partial(
-        go_to_from_admin_portal, browser, "/admin/grading/stone/"
-    )
+    browser.go_to_customer_page = partial(go_to_from_admin_portal, browser, "/admin/customers/entity/")
+    browser.go_to_split_page = partial(go_to_from_admin_portal, browser, "/admin/grading/split/")
+    browser.go_to_receipt_page = partial(go_to_from_admin_portal, browser, "/admin/grading/receipt/")
+    browser.go_to_parcel_page = partial(go_to_from_admin_portal, browser, "/admin/grading/parcel/")
+    browser.go_to_stone_page = partial(go_to_from_admin_portal, browser, "/admin/grading/stone/")
     browser.go_to_goldway_verification_page = partial(
         go_to_from_admin_portal, browser, "/admin/grading/goldwayverification/"
     )
     browser.go_to_gia_verification_page = partial(
         go_to_from_admin_portal, browser, "/admin/grading/giaverification/"
     )
-    browser.go_to_transfer_page = partial(
-        go_to_from_admin_portal, browser, "/admin/ownerships/parceltransfer/"
-    )
-    browser.go_to_stone_transfer_page = partial(
-        go_to_from_admin_portal, browser, "/admin/ownerships/stonetransfer/"
-    )
-    browser.go_to_purchases_page = partial(
-        go_to_from_admin_portal, browser, "/admin/purchases/"
-    )
+    browser.go_to_transfer_page = partial(go_to_from_admin_portal, browser, "/admin/ownerships/parceltransfer/")
+    browser.go_to_stone_transfer_page = partial(go_to_from_admin_portal, browser, "/admin/ownerships/stonetransfer/")
+    browser.go_to_purchases_page = partial(go_to_from_admin_portal, browser, "/admin/purchases/")

@@ -87,9 +87,7 @@ def test_grader_can_return_stones_that_belong_to_her_to_vault(browser, stones, g
     vault = User.objects.get(username="vault")
     for stone in stones:
         # Tanly the grader has some stones given to her by the vault
-        StoneTransfer.initiate_transfer(
-            item=stone, from_user=vault, to_user=grader, created_by=vault
-        )
+        StoneTransfer.initiate_transfer(item=stone, from_user=vault, to_user=grader, created_by=vault)
         # these stones have already been confirmed as received by Tanly
         StoneTransfer.confirm_received(stone)
 
@@ -157,9 +155,7 @@ def test_grader_can_confirm_received_stones(browser, stones, grader):
     vault = User.objects.get(username="vault")
     for stone in stones:
         # The vault transfer some stones to Tanly the Grader
-        StoneTransfer.initiate_transfer(
-            item=stone, from_user=vault, to_user=grader, created_by=vault
-        )
+        StoneTransfer.initiate_transfer(item=stone, from_user=vault, to_user=grader, created_by=vault)
 
     browser.login(grader.username, grader.raw_password)
     browser.go_to_stone_page()

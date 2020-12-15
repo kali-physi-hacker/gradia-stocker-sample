@@ -9,24 +9,13 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-        ("customers", "0001_initial"),
-        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-    ]
+    dependencies = [("customers", "0001_initial"), migrations.swappable_dependency(settings.AUTH_USER_MODEL)]
 
     operations = [
         migrations.CreateModel(
             name="GiaVerification",
             fields=[
-                (
-                    "id",
-                    models.AutoField(
-                        auto_created=True,
-                        primary_key=True,
-                        serialize=False,
-                        verbose_name="ID",
-                    ),
-                ),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
                 ("receipt_number", models.CharField(blank=True, max_length=10)),
                 ("invoice_number", models.CharField(blank=True, max_length=10)),
                 ("started", models.DateTimeField(auto_now_add=True)),
@@ -35,15 +24,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="GoldwayVerification",
             fields=[
-                (
-                    "id",
-                    models.AutoField(
-                        auto_created=True,
-                        primary_key=True,
-                        serialize=False,
-                        verbose_name="ID",
-                    ),
-                ),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
                 ("purchase_order", models.CharField(blank=True, max_length=10)),
                 ("invoice_number", models.CharField(blank=True, max_length=10)),
                 ("started", models.DateTimeField(auto_now_add=True)),
@@ -52,15 +33,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="Inclusion",
             fields=[
-                (
-                    "id",
-                    models.AutoField(
-                        auto_created=True,
-                        primary_key=True,
-                        serialize=False,
-                        verbose_name="ID",
-                    ),
-                ),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
                 (
                     "inclusion",
                     models.CharField(
@@ -94,15 +67,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="Parcel",
             fields=[
-                (
-                    "id",
-                    models.AutoField(
-                        auto_created=True,
-                        primary_key=True,
-                        serialize=False,
-                        verbose_name="ID",
-                    ),
-                ),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
                 ("customer_parcel_code", models.CharField(max_length=15)),
                 ("total_carats", models.DecimalField(decimal_places=3, max_digits=5)),
                 ("total_pieces", models.IntegerField()),
@@ -126,35 +91,18 @@ class Migration(migrations.Migration):
                 ("split_date", models.DateTimeField(auto_now_add=True)),
                 (
                     "split_by",
-                    models.ForeignKey(
-                        on_delete=django.db.models.deletion.PROTECT,
-                        to=settings.AUTH_USER_MODEL,
-                    ),
+                    models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to=settings.AUTH_USER_MODEL),
                 ),
             ],
         ),
         migrations.CreateModel(
             name="Receipt",
             fields=[
-                (
-                    "id",
-                    models.AutoField(
-                        auto_created=True,
-                        primary_key=True,
-                        serialize=False,
-                        verbose_name="ID",
-                    ),
-                ),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
                 ("code", models.CharField(max_length=15)),
                 ("intake_date", models.DateTimeField(auto_now_add=True)),
                 ("release_date", models.DateTimeField(blank=True, null=True)),
-                (
-                    "entity",
-                    models.ForeignKey(
-                        on_delete=django.db.models.deletion.PROTECT,
-                        to="customers.Entity",
-                    ),
-                ),
+                ("entity", models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to="customers.Entity")),
                 (
                     "intake_by",
                     models.ForeignKey(
@@ -179,33 +127,17 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="parcel",
             name="receipt",
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.PROTECT, to="grading.Receipt"
-            ),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to="grading.Receipt"),
         ),
         migrations.CreateModel(
             name="Stone",
             fields=[
-                (
-                    "id",
-                    models.AutoField(
-                        auto_created=True,
-                        primary_key=True,
-                        serialize=False,
-                        verbose_name="ID",
-                    ),
-                ),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
                 ("date_created", models.DateTimeField(auto_now_add=True)),
                 ("internal_id", models.IntegerField(unique=True)),
-                (
-                    "external_id",
-                    models.CharField(blank=True, max_length=11, null=True, unique=True),
-                ),
+                ("external_id", models.CharField(blank=True, max_length=11, null=True, unique=True)),
                 ("remarks", models.TextField(blank=True, null=True)),
-                (
-                    "diamond_description",
-                    models.CharField(blank=True, max_length=120, null=True),
-                ),
+                ("diamond_description", models.CharField(blank=True, max_length=120, null=True)),
                 ("basic_carat", models.DecimalField(decimal_places=3, max_digits=5)),
                 (
                     "basic_culet",
@@ -734,10 +666,7 @@ class Migration(migrations.Migration):
                         max_length=4,
                     ),
                 ),
-                (
-                    "table_off_center",
-                    models.DecimalField(decimal_places=1, max_digits=4),
-                ),
+                ("table_off_center", models.DecimalField(decimal_places=1, max_digits=4)),
                 (
                     "table_off_center_grade",
                     models.CharField(
@@ -751,10 +680,7 @@ class Migration(migrations.Migration):
                         max_length=4,
                     ),
                 ),
-                (
-                    "culet_off_center",
-                    models.DecimalField(decimal_places=1, max_digits=4),
-                ),
+                ("culet_off_center", models.DecimalField(decimal_places=1, max_digits=4)),
                 (
                     "culet_off_center_grade",
                     models.CharField(
@@ -768,10 +694,7 @@ class Migration(migrations.Migration):
                         max_length=4,
                     ),
                 ),
-                (
-                    "table_off_culet",
-                    models.DecimalField(decimal_places=1, max_digits=4),
-                ),
+                ("table_off_culet", models.DecimalField(decimal_places=1, max_digits=4)),
                 (
                     "table_off_culet_grade",
                     models.CharField(
@@ -799,10 +722,7 @@ class Migration(migrations.Migration):
                         max_length=4,
                     ),
                 ),
-                (
-                    "upper_half_angle",
-                    models.DecimalField(decimal_places=1, max_digits=4),
-                ),
+                ("upper_half_angle", models.DecimalField(decimal_places=1, max_digits=4)),
                 (
                     "upper_half_angle_grade",
                     models.CharField(
@@ -816,10 +736,7 @@ class Migration(migrations.Migration):
                         max_length=4,
                     ),
                 ),
-                (
-                    "lower_half_angle",
-                    models.DecimalField(decimal_places=1, max_digits=4),
-                ),
+                ("lower_half_angle", models.DecimalField(decimal_places=1, max_digits=4)),
                 (
                     "lower_half_angle_grade",
                     models.CharField(
@@ -984,39 +901,18 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                (
-                    "GW_carat",
-                    models.DecimalField(
-                        blank=True, decimal_places=3, max_digits=5, null=True
-                    ),
-                ),
-                (
-                    "post_GW_final_carat",
-                    models.DecimalField(
-                        blank=True, decimal_places=3, max_digits=5, null=True
-                    ),
-                ),
-                (
-                    "GW_repolish_carat",
-                    models.DecimalField(
-                        blank=True, decimal_places=3, max_digits=5, null=True
-                    ),
-                ),
+                ("GW_carat", models.DecimalField(blank=True, decimal_places=3, max_digits=5, null=True)),
+                ("post_GW_final_carat", models.DecimalField(blank=True, decimal_places=3, max_digits=5, null=True)),
+                ("GW_repolish_carat", models.DecimalField(blank=True, decimal_places=3, max_digits=5, null=True)),
                 ("date_to_GW", models.DateTimeField(blank=True, null=True)),
                 ("GW_returned_date", models.DateTimeField(blank=True, null=True)),
-                (
-                    "goldway_AI_code",
-                    models.CharField(blank=True, max_length=15, null=True),
-                ),
+                ("goldway_AI_code", models.CharField(blank=True, max_length=15, null=True)),
                 ("post_GW_rejection", models.TextField(blank=True, null=True)),
                 ("date_to_GIA", models.DateTimeField(blank=True, null=True)),
                 ("GIA_returned_date", models.DateTimeField(blank=True, null=True)),
                 ("GIA_batch_code", models.IntegerField(blank=True, null=True)),
                 ("post_GIA_rejection", models.TextField(blank=True, null=True)),
-                (
-                    "blockchain_ID_code",
-                    models.CharField(blank=True, max_length=15, null=True),
-                ),
+                ("blockchain_ID_code", models.CharField(blank=True, max_length=15, null=True)),
                 (
                     "color",
                     models.CharField(
@@ -1085,12 +981,7 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                (
-                    "carat_weight",
-                    models.DecimalField(
-                        blank=True, decimal_places=3, max_digits=4, null=True
-                    ),
-                ),
+                ("carat_weight", models.DecimalField(blank=True, decimal_places=3, max_digits=4, null=True)),
                 (
                     "data_entry_user",
                     models.ForeignKey(
@@ -1144,22 +1035,14 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("inclusions", models.ManyToManyField(to="grading.Inclusion")),
-                (
-                    "split_from",
-                    models.ForeignKey(
-                        on_delete=django.db.models.deletion.PROTECT, to="grading.Split"
-                    ),
-                ),
+                ("split_from", models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to="grading.Split")),
             ],
         ),
         migrations.AddField(
             model_name="parcel",
             name="split_from",
             field=models.ForeignKey(
-                blank=True,
-                null=True,
-                on_delete=django.db.models.deletion.PROTECT,
-                to="grading.Split",
+                blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to="grading.Split"
             ),
         ),
     ]

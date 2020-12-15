@@ -7,13 +7,9 @@ from grading.models import Parcel, Receipt
 from ownerships.models import ParcelTransfer, StoneTransfer
 
 
-def test_vault_manager_can_confirm_parcels_transferred_to_the_vault(
-    browser, admin_user, vault_manager
-):
+def test_vault_manager_can_confirm_parcels_transferred_to_the_vault(browser, admin_user, vault_manager):
     created_receipt = Receipt.objects.create(
-        entity=Entity.objects.create(
-            name="Van Klaren", address="addressy", phone="12345678", email="vk@vk.com"
-        ),
+        entity=Entity.objects.create(name="Van Klaren", address="addressy", phone="12345678", email="vk@vk.com"),
         code="VK-0001",
         intake_by=admin_user,
     )
@@ -27,10 +23,7 @@ def test_vault_manager_can_confirm_parcels_transferred_to_the_vault(
     )
     # the parcel is received by admin user and put into the vault
     ParcelTransfer.objects.create(
-        item=parcel,
-        from_user=admin_user,
-        to_user=User.objects.get(username="vault"),
-        created_by=admin_user,
+        item=parcel, from_user=admin_user, to_user=User.objects.get(username="vault"), created_by=admin_user
     )
 
     # as vaultmanager, Anthony can confirm that vault has received this parcel
@@ -53,9 +46,7 @@ def test_vault_manager_can_confirm_parcels_transferred_to_the_vault(
     browser.assert_body_contains_text(f"vault, confirmed")
 
 
-def test_vault_manager_can_split_parcels_to_smaller_parcels(
-    browser, receipt, vault_manager
-):
+def test_vault_manager_can_split_parcels_to_smaller_parcels(browser, receipt, vault_manager):
     # there is a parcel in the vault- it is too large
     parcel = receipt.parcel_set.first()
 
@@ -71,28 +62,20 @@ def test_vault_manager_can_split_parcels_to_smaller_parcels(
     # he adds one sub-parcel
     add_link = browser.find_element_by_link_text("Add another Parcel")
     add_link.click()
-    browser.find_element_by_name("parcel_set-0-gradia_parcel_code").send_keys(
-        "VK20200723-1A"
-    )
+    browser.find_element_by_name("parcel_set-0-gradia_parcel_code").send_keys("VK20200723-1A")
     browser.find_element_by_name("parcel_set-0-customer_parcel_code").send_keys("001")
     browser.find_element_by_name("parcel_set-0-total_carats").send_keys("1")
     browser.find_element_by_name("parcel_set-0-total_pieces").send_keys("1")
-    browser.find_element_by_name("parcel_set-0-reference_price_per_carat").send_keys(
-        "500"
-    )
+    browser.find_element_by_name("parcel_set-0-reference_price_per_carat").send_keys("500")
 
     # he adds another sub-parcel
     add_link = browser.find_element_by_link_text("Add another Parcel")
     add_link.click()
-    browser.find_element_by_name("parcel_set-1-gradia_parcel_code").send_keys(
-        "VK20200723-1B"
-    )
+    browser.find_element_by_name("parcel_set-1-gradia_parcel_code").send_keys("VK20200723-1B")
     browser.find_element_by_name("parcel_set-1-customer_parcel_code").send_keys("001")
     browser.find_element_by_name("parcel_set-1-total_carats").send_keys("1")
     browser.find_element_by_name("parcel_set-1-total_pieces").send_keys("1")
-    browser.find_element_by_name("parcel_set-1-reference_price_per_carat").send_keys(
-        "500"
-    )
+    browser.find_element_by_name("parcel_set-1-reference_price_per_carat").send_keys("500")
 
     # he saves
     browser.click_save()
@@ -118,9 +101,7 @@ def test_vault_manager_can_split_parcels_to_smaller_parcels(
     browser.assert_body_contains_text("vault, confirmed")
 
 
-def test_vault_manager_can_transfer_vault_parcels_to_others(
-    browser, receipt, vault_manager, grader
-):
+def test_vault_manager_can_transfer_vault_parcels_to_others(browser, receipt, vault_manager, grader):
     # there is a parcel in the vault
     parcel = receipt.parcel_set.first()
 
@@ -174,9 +155,7 @@ def test_vault_manager_can_confirm_received_stones(browser, stones, vault_manage
     browser.assert_body_contains_text(f"vault, confirmed")
 
 
-def test_vault_manager_can_initiate_transfer_of_stones_to_goldway(
-    browser, stones, vault_manager
-):
+def test_vault_manager_can_initiate_transfer_of_stones_to_goldway(browser, stones, vault_manager):
 
     # Anthony confirm received the stones first
     for stone in stones:
@@ -219,9 +198,7 @@ def test_vault_manager_can_initiate_transfer_of_stones_to_goldway(
     browser.assert_body_contains_text("2 stones")
 
 
-def test_vault_manager_can_initiate_stone_transfer_to_GIA(
-    browser, stones, vault_manager
-):
+def test_vault_manager_can_initiate_stone_transfer_to_GIA(browser, stones, vault_manager):
 
     # Anthony confirm received the stones first
     for stone in stones:

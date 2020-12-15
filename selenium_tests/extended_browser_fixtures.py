@@ -1,11 +1,7 @@
 import time
 from functools import partial
 
-from selenium.common.exceptions import (
-    ElementClickInterceptedException,
-    NoSuchElementException,
-    TimeoutException,
-)
+from selenium.common.exceptions import ElementClickInterceptedException, NoSuchElementException, TimeoutException
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -19,9 +15,7 @@ def assert_body_contains_text(browser, search_string):
     try:
         browser.find_element_by_xpath(f'//*[text()[contains(., "{search_string}")]]')
     except NoSuchElementException:
-        pytest.fail(
-            f"unable to find {search_string} in browser body:\n\n{browser.get_body_text()}"
-        )
+        pytest.fail(f"unable to find {search_string} in browser body:\n\n{browser.get_body_text()}")
 
 
 def login(browser, username, password):
@@ -61,9 +55,7 @@ def click_add(browser, should_disappear=True):
     if "shifted" in elem.get_attribute("class"):
         browser.find_element_by_id("toggle-nav-sidebar").click()
 
-    add_links = browser.find_elements_by_xpath(
-        "//a[contains(translate(., 'AD', 'ad'), 'add')]"
-    )
+    add_links = browser.find_elements_by_xpath("//a[contains(translate(., 'AD', 'ad'), 'add')]")
 
     for add_link in add_links:
         try:
@@ -74,9 +66,7 @@ def click_add(browser, should_disappear=True):
 
 
 def click_go(browser, elem=True):
-    add_link = browser.find_element_by_css_selector(
-        'button[title="Run the selected action"]'
-    )
+    add_link = browser.find_element_by_css_selector('button[title="Run the selected action"]')
     # when clicking inline add new row, elem stays
     browser.slowly_click(add_link, elem_should_disappear=elem)
 
