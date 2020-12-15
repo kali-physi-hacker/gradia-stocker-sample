@@ -95,7 +95,7 @@ class TestIDHashGeneration(TestCase):
         # Generate a basic external id some stone and clear back
         stone_1.generate_basic_external_id()
         stone_1_external_id = stone_1.external_id
-        stone_1.external_id = ""
+        stone_1.external_id = None
         stone_1.save()
 
         # Assign saved hashed ID to stone_2
@@ -106,4 +106,4 @@ class TestIDHashGeneration(TestCase):
             stone_1.generate_basic_external_id()
 
         # Making sure that stone_2 stone_1 have different value for external_id
-        self.assertNotEqual(stone_1, stone_2)
+        self.assertNotEqual(stone_1.external_id, stone_2.external_id)
