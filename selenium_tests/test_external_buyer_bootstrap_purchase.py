@@ -8,7 +8,9 @@ from purchases.models import Parcel, Receipt, Seller
 @pytest.fixture
 def purchases_receipt(django_user_model, admin_user):
     created_receipt = Receipt.objects.create(
-        entity=Seller.objects.create(name="Van Klaren", address="addressy", phone="12345678", email="vk@vk.com"),
+        entity=Seller.objects.create(
+            name="Van Klaren", address="addressy", phone="12345678", email="vk@vk.com"
+        ),
         code="VK-0001",
         intake_by=admin_user,
     )
@@ -70,14 +72,18 @@ def test_buyer_can_setup_new_sellers_and_take_in_a_bag_of_stones(browser, buyer)
     browser.find_element_by_name("parcel_set-0-customer_parcel_code").send_keys("001")
     browser.find_element_by_name("parcel_set-0-total_carats").send_keys("1")
     browser.find_element_by_name("parcel_set-0-total_pieces").send_keys("1")
-    browser.find_element_by_name("parcel_set-0-reference_price_per_carat").send_keys("500")
+    browser.find_element_by_name("parcel_set-0-reference_price_per_carat").send_keys(
+        "500"
+    )
 
     # he adds another parcel
     browser.click_add(should_disappear=False)
     browser.find_element_by_name("parcel_set-1-customer_parcel_code").send_keys("002")
     browser.find_element_by_name("parcel_set-1-total_carats").send_keys("2")
     browser.find_element_by_name("parcel_set-1-total_pieces").send_keys("2")
-    browser.find_element_by_name("parcel_set-1-reference_price_per_carat").send_keys("500")
+    browser.find_element_by_name("parcel_set-1-reference_price_per_carat").send_keys(
+        "500"
+    )
 
     # he saves
     browser.click_save()
@@ -107,7 +113,9 @@ def test_buyer_can_mark_rejected_stones(browser, buyer, purchases_receipt):
     browser.go_to_purchases_page()
     browser.slowly_click(browser.find_element_by_link_text("Parcels"))
     parcel1 = purchases_receipt.parcel_set.first()
-    browser.slowly_click(browser.find_element_by_link_text(parcel1.customer_parcel_code))
+    browser.slowly_click(
+        browser.find_element_by_link_text(parcel1.customer_parcel_code)
+    )
 
     # and enters the rejection info
     browser.find_element_by_name("rejected_carats").send_keys("2")
@@ -119,7 +127,9 @@ def test_buyer_can_mark_rejected_stones(browser, buyer, purchases_receipt):
     browser.go_to_purchases_page()
     browser.slowly_click(browser.find_element_by_link_text("Parcels"))
     parcel2 = purchases_receipt.parcel_set.last()
-    browser.slowly_click(browser.find_element_by_link_text(parcel2.customer_parcel_code))
+    browser.slowly_click(
+        browser.find_element_by_link_text(parcel2.customer_parcel_code)
+    )
 
     # and enters the rejection info
     browser.find_element_by_name("rejected_carats").send_keys("2")

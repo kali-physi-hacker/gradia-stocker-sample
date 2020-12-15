@@ -22,7 +22,9 @@ def test_upload_of_csv_parcel_file(browser, data_entry_clerk, stones):
 
     # Find Upload Input and add csv file path
     csv_upload_input = browser.find_element_by_name("file")
-    csv_upload_path = os.path.join(settings.BASE_DIR, "grading/tests/fixtures/parcel1.csv")
+    csv_upload_path = os.path.join(
+        settings.BASE_DIR, "grading/tests/fixtures/parcel1.csv"
+    )
     csv_upload_input.send_keys(csv_upload_path)
 
     # Find the upload button and click

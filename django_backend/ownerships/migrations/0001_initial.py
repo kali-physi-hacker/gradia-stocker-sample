@@ -9,13 +9,24 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [("grading", "0001_initial"), migrations.swappable_dependency(settings.AUTH_USER_MODEL)]
+    dependencies = [
+        ("grading", "0001_initial"),
+        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
+    ]
 
     operations = [
         migrations.CreateModel(
             name="StoneTransfer",
             fields=[
-                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
                 ("initiated_date", models.DateTimeField(auto_now_add=True)),
                 ("confirmed_date", models.DateTimeField(blank=True, null=True)),
                 ("fresh", models.BooleanField(default=True)),
@@ -36,7 +47,12 @@ class Migration(migrations.Migration):
                         to=settings.AUTH_USER_MODEL,
                     ),
                 ),
-                ("item", models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to="grading.Stone")),
+                (
+                    "item",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT, to="grading.Stone"
+                    ),
+                ),
                 (
                     "to_user",
                     models.ForeignKey(
@@ -50,7 +66,15 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="ParcelTransfer",
             fields=[
-                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
                 ("initiated_date", models.DateTimeField(auto_now_add=True)),
                 ("confirmed_date", models.DateTimeField(blank=True, null=True)),
                 ("fresh", models.BooleanField(default=True)),
@@ -71,7 +95,12 @@ class Migration(migrations.Migration):
                         to=settings.AUTH_USER_MODEL,
                     ),
                 ),
-                ("item", models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to="grading.Parcel")),
+                (
+                    "item",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT, to="grading.Parcel"
+                    ),
+                ),
                 (
                     "to_user",
                     models.ForeignKey(
@@ -85,13 +114,17 @@ class Migration(migrations.Migration):
         migrations.AddConstraint(
             model_name="stonetransfer",
             constraint=models.UniqueConstraint(
-                condition=models.Q(fresh=True), fields=("item",), name="only_one_fresh_transfer_per_stone"
+                condition=models.Q(fresh=True),
+                fields=("item",),
+                name="only_one_fresh_transfer_per_stone",
             ),
         ),
         migrations.AddConstraint(
             model_name="parceltransfer",
             constraint=models.UniqueConstraint(
-                condition=models.Q(fresh=True), fields=("item",), name="only_one_fresh_transfer_per_parcel"
+                condition=models.Q(fresh=True),
+                fields=("item",),
+                name="only_one_fresh_transfer_per_parcel",
             ),
         ),
     ]

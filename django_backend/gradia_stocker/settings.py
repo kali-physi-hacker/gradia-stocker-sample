@@ -96,7 +96,9 @@ DATABASES = {
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
+    },
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
@@ -134,7 +136,9 @@ LOGOUT_REDIRECT_URL = "/admin/"
 
 EMAIL_HOST = "smtp.sendgrid.net"
 EMAIL_HOST_USER = "apikey"
-EMAIL_HOST_PASSWORD = "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"
+EMAIL_HOST_PASSWORD = (
+    "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"
+)
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = "info@gradia.net"

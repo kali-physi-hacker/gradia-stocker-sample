@@ -1,6 +1,7 @@
 import csv
 import hashlib
 import os
+
 # import StringIO
 from datetime import datetime
 
@@ -36,21 +37,31 @@ def generate_csv(filename, dir_name, field_names, queryset):
 
 class StoneManager(models.Manager):
     def generate_id_csv(self, queryset):
-        filename = "Gradia_id_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
+        filename = (
+            "Gradia_id_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
+        )
         dir_name = settings.MEDIA_ROOT + "/csv_downloads/download_ids/"
         field_names = ["internal_id"]
 
         return generate_csv(filename, dir_name, field_names, queryset)
 
     def generate_master_report_csv(self, queryset):
-        filename = "Master_report_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
+        filename = (
+            "Master_report_"
+            + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S"))
+            + ".csv"
+        )
         dir_name = settings.MEDIA_ROOT + "/csv_downloads/master_reports/"
         field_names = get_stone_fields(Stone)
 
         return generate_csv(filename, dir_name, field_names, queryset)
 
     def generate_to_goldway_csv(self, queryset):
-        filename = "To_Goldway_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
+        filename = (
+            "To_Goldway_"
+            + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S"))
+            + ".csv"
+        )
         dir_name = settings.MEDIA_ROOT + "/csv_downloads/to_goldway/"
         field_names = ["date_to_GW", "internal_id", "basic_carat"]
 
@@ -58,7 +69,9 @@ class StoneManager(models.Manager):
 
 
 class Split(models.Model):
-    original_parcel = models.OneToOneField("Parcel", on_delete=models.PROTECT, primary_key=True)
+    original_parcel = models.OneToOneField(
+        "Parcel", on_delete=models.PROTECT, primary_key=True
+    )
 
     split_by = models.ForeignKey(User, on_delete=models.PROTECT)
     split_date = models.DateTimeField(auto_now_add=True)
@@ -84,9 +97,15 @@ class AbstractReceipt(models.Model):
     code = models.CharField(max_length=15)
     intake_date = models.DateTimeField(auto_now_add=True)
     release_date = models.DateTimeField(null=True, blank=True)
-    intake_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name="signed_off_on_stone_intake")
+    intake_by = models.ForeignKey(
+        User, on_delete=models.PROTECT, related_name="signed_off_on_stone_intake"
+    )
     release_by = models.ForeignKey(
-        User, on_delete=models.PROTECT, related_name="signed_off_on_stone_release", null=True, blank=True
+        User,
+        on_delete=models.PROTECT,
+        related_name="signed_off_on_stone_release",
+        null=True,
+        blank=True,
     )
 
     admin_url = "admin:grading_receipt_change"
@@ -156,7 +175,9 @@ class AbstractParcel(models.Model):
 
 
 class Parcel(AbstractParcel):
-    split_from = models.ForeignKey(Split, on_delete=models.PROTECT, blank=True, null=True)
+    split_from = models.ForeignKey(
+        Split, on_delete=models.PROTECT, blank=True, null=True
+    )
     gradia_parcel_code = models.CharField(max_length=15)
 
     def __str__(self):
@@ -277,7 +298,13 @@ class GeneralGrades:
     FAIR = "F"
     POOR = "P"
 
-    CHOICES = ((EXCELLENT, "Excellent"), (VERY_GOOD, "Very Good"), (GOOD, "Good"), (FAIR, "Fair"), (POOR, "Poor"))
+    CHOICES = (
+        (EXCELLENT, "Excellent"),
+        (VERY_GOOD, "Very Good"),
+        (GOOD, "Good"),
+        (FAIR, "Fair"),
+        (POOR, "Poor"),
+    )
 
 
 class FluorescenceGrades:
@@ -398,7 +425,9 @@ class Inclusion(models.Model):
 
 
 class Stone(models.Model):
-    data_entry_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="entered_data_for_stone")
+    data_entry_user = models.ForeignKey(
+        User, on_delete=models.PROTECT, related_name="entered_data_for_stone"
+    )
     date_created = models.DateTimeField(auto_now_add=True)
     internal_id = models.IntegerField(unique=True)
     external_id = models.CharField(max_length=11, unique=True, blank=True, null=True)
@@ -413,27 +442,47 @@ class Stone(models.Model):
     diamond_description = models.CharField(max_length=120, null=True, blank=True)
     basic_carat = models.DecimalField(max_digits=5, decimal_places=3)
     basic_culet = models.CharField(choices=CuletGrades.CHOICES, max_length=2)
-    basic_fluorescence = models.CharField(choices=FluorescenceGrades.CHOICES, max_length=4)
+    basic_fluorescence = models.CharField(
+        choices=FluorescenceGrades.CHOICES, max_length=4
+    )
     inclusions = models.ManyToManyField(Inclusion)
 
     # basic stuff that requires multiple graders
-    grader_1 = models.ForeignKey(User, on_delete=models.PROTECT, related_name="grader_1_for_stone")
-    grader_2 = models.ForeignKey(User, on_delete=models.PROTECT, related_name="grader_2_for_stone", null=True)
-    grader_3 = models.ForeignKey(User, on_delete=models.PROTECT, related_name="grader_3_for_stone", null=True)
+    grader_1 = models.ForeignKey(
+        User, on_delete=models.PROTECT, related_name="grader_1_for_stone"
+    )
+    grader_2 = models.ForeignKey(
+        User, on_delete=models.PROTECT, related_name="grader_2_for_stone", null=True
+    )
+    grader_3 = models.ForeignKey(
+        User, on_delete=models.PROTECT, related_name="grader_3_for_stone", null=True
+    )
 
     basic_color_1 = models.CharField(choices=ColorGrades.CHOICES, max_length=1)
-    basic_color_2 = models.CharField(choices=ColorGrades.CHOICES, max_length=1, null=True)
-    basic_color_3 = models.CharField(choices=ColorGrades.CHOICES, max_length=1, null=True)
+    basic_color_2 = models.CharField(
+        choices=ColorGrades.CHOICES, max_length=1, null=True
+    )
+    basic_color_3 = models.CharField(
+        choices=ColorGrades.CHOICES, max_length=1, null=True
+    )
     basic_final_color = models.CharField(choices=ColorGrades.CHOICES, max_length=1)
 
     basic_clarity_1 = models.CharField(choices=ClarityGrades.CHOICES, max_length=4)
-    basic_clarity_2 = models.CharField(choices=ClarityGrades.CHOICES, max_length=4, null=True)
-    basic_clarity_3 = models.CharField(choices=ClarityGrades.CHOICES, max_length=4, null=True)
+    basic_clarity_2 = models.CharField(
+        choices=ClarityGrades.CHOICES, max_length=4, null=True
+    )
+    basic_clarity_3 = models.CharField(
+        choices=ClarityGrades.CHOICES, max_length=4, null=True
+    )
     basic_final_clarity = models.CharField(choices=ClarityGrades.CHOICES, max_length=4)
 
     basic_polish_1 = models.CharField(choices=GeneralGrades.CHOICES, max_length=4)
-    basic_polish_2 = models.CharField(choices=GeneralGrades.CHOICES, max_length=4, null=True)
-    basic_polish_3 = models.CharField(choices=GeneralGrades.CHOICES, max_length=4, null=True)
+    basic_polish_2 = models.CharField(
+        choices=GeneralGrades.CHOICES, max_length=4, null=True
+    )
+    basic_polish_3 = models.CharField(
+        choices=GeneralGrades.CHOICES, max_length=4, null=True
+    )
     basic_final_polish = models.CharField(choices=GeneralGrades.CHOICES, max_length=4)
 
     # basic stuff that are sarine measurements, and calculated fields
@@ -475,35 +524,71 @@ class Stone(models.Model):
     table_edge_var = models.DecimalField(max_digits=4, decimal_places=1)
     table_edge_var_grade = models.CharField(choices=GeneralGrades.CHOICES, max_length=4)
     table_off_center = models.DecimalField(max_digits=4, decimal_places=1)
-    table_off_center_grade = models.CharField(choices=GeneralGrades.CHOICES, max_length=4)
+    table_off_center_grade = models.CharField(
+        choices=GeneralGrades.CHOICES, max_length=4
+    )
     culet_off_center = models.DecimalField(max_digits=4, decimal_places=1)
-    culet_off_center_grade = models.CharField(choices=GeneralGrades.CHOICES, max_length=4)
+    culet_off_center_grade = models.CharField(
+        choices=GeneralGrades.CHOICES, max_length=4
+    )
     table_off_culet = models.DecimalField(max_digits=4, decimal_places=1)
-    table_off_culet_grade = models.CharField(choices=GeneralGrades.CHOICES, max_length=4)
+    table_off_culet_grade = models.CharField(
+        choices=GeneralGrades.CHOICES, max_length=4
+    )
     star_angle = models.DecimalField(max_digits=4, decimal_places=1)
     star_angle_grade = models.CharField(choices=GeneralGrades.CHOICES, max_length=4)
     upper_half_angle = models.DecimalField(max_digits=4, decimal_places=1)
-    upper_half_angle_grade = models.CharField(choices=GeneralGrades.CHOICES, max_length=4)
+    upper_half_angle_grade = models.CharField(
+        choices=GeneralGrades.CHOICES, max_length=4
+    )
     lower_half_angle = models.DecimalField(max_digits=4, decimal_places=1)
-    lower_half_angle_grade = models.CharField(choices=GeneralGrades.CHOICES, max_length=4)
+    lower_half_angle_grade = models.CharField(
+        choices=GeneralGrades.CHOICES, max_length=4
+    )
 
     ########################################################################
     # GW results                                                           #
     ########################################################################
-    goldway_verification = models.ForeignKey(GoldwayVerification, on_delete=models.PROTECT, blank=True, null=True)
-    GW_color = models.CharField(choices=ColorGrades.CHOICES, max_length=1, null=True, blank=True)
-    post_GW_final_color = models.CharField(choices=ColorGrades.CHOICES, max_length=1, null=True, blank=True)
-    GW_clarity = models.CharField(choices=ClarityGrades.CHOICES, max_length=4, null=True, blank=True)
-    post_GW_final_clarity = models.CharField(choices=ClarityGrades.CHOICES, max_length=4, null=True, blank=True)
+    goldway_verification = models.ForeignKey(
+        GoldwayVerification, on_delete=models.PROTECT, blank=True, null=True
+    )
+    GW_color = models.CharField(
+        choices=ColorGrades.CHOICES, max_length=1, null=True, blank=True
+    )
+    post_GW_final_color = models.CharField(
+        choices=ColorGrades.CHOICES, max_length=1, null=True, blank=True
+    )
+    GW_clarity = models.CharField(
+        choices=ClarityGrades.CHOICES, max_length=4, null=True, blank=True
+    )
+    post_GW_final_clarity = models.CharField(
+        choices=ClarityGrades.CHOICES, max_length=4, null=True, blank=True
+    )
 
-    GW_fluo = models.CharField(choices=FluorescenceGrades.CHOICES, max_length=4, null=True, blank=True)
-    post_GW_fluo = models.CharField(choices=FluorescenceGrades.CHOICES, max_length=4, null=True, blank=True)
-    fluoresence = models.CharField(choices=FluorescenceGrades.CHOICES, max_length=4, null=True, blank=True)
-    GW_culet = models.CharField(choices=CuletGrades.CHOICES, max_length=2, null=True, blank=True)
-    post_GW_culet = models.CharField(choices=CuletGrades.CHOICES, max_length=2, null=True, blank=True)
-    GW_carat = models.DecimalField(max_digits=5, decimal_places=3, null=True, blank=True)
-    post_GW_final_carat = models.DecimalField(max_digits=5, decimal_places=3, null=True, blank=True)
-    GW_repolish_carat = models.DecimalField(max_digits=5, decimal_places=3, null=True, blank=True)
+    GW_fluo = models.CharField(
+        choices=FluorescenceGrades.CHOICES, max_length=4, null=True, blank=True
+    )
+    post_GW_fluo = models.CharField(
+        choices=FluorescenceGrades.CHOICES, max_length=4, null=True, blank=True
+    )
+    fluoresence = models.CharField(
+        choices=FluorescenceGrades.CHOICES, max_length=4, null=True, blank=True
+    )
+    GW_culet = models.CharField(
+        choices=CuletGrades.CHOICES, max_length=2, null=True, blank=True
+    )
+    post_GW_culet = models.CharField(
+        choices=CuletGrades.CHOICES, max_length=2, null=True, blank=True
+    )
+    GW_carat = models.DecimalField(
+        max_digits=5, decimal_places=3, null=True, blank=True
+    )
+    post_GW_final_carat = models.DecimalField(
+        max_digits=5, decimal_places=3, null=True, blank=True
+    )
+    GW_repolish_carat = models.DecimalField(
+        max_digits=5, decimal_places=3, null=True, blank=True
+    )
 
     date_to_GW = models.DateTimeField(null=True, blank=True)
     GW_returned_date = models.DateTimeField(null=True, blank=True)
@@ -514,7 +599,9 @@ class Stone(models.Model):
     # GIA results                                                          #
     ########################################################################
 
-    gia_verification = models.ForeignKey(GiaVerification, on_delete=models.PROTECT, blank=True, null=True)
+    gia_verification = models.ForeignKey(
+        GiaVerification, on_delete=models.PROTECT, blank=True, null=True
+    )
     date_to_GIA = models.DateTimeField(null=True, blank=True)
     GIA_returned_date = models.DateTimeField(null=True, blank=True)
     GIA_batch_code = models.IntegerField(null=True, blank=True)
@@ -529,11 +616,21 @@ class Stone(models.Model):
     # final results                                                   #
     ########################################################################
 
-    color = models.CharField(choices=ColorGrades.CHOICES, max_length=1, null=True, blank=True)
-    clarity = models.CharField(choices=ClarityGrades.CHOICES, max_length=4, null=True, blank=True)
-    culet = models.CharField(choices=CuletGrades.CHOICES, max_length=2, null=True, blank=True)
-    cut_grade = models.CharField(choices=GeneralGrades.CHOICES, max_length=4, null=True, blank=True)
-    carat_weight = models.DecimalField(max_digits=4, decimal_places=3, null=True, blank=True)
+    color = models.CharField(
+        choices=ColorGrades.CHOICES, max_length=1, null=True, blank=True
+    )
+    clarity = models.CharField(
+        choices=ClarityGrades.CHOICES, max_length=4, null=True, blank=True
+    )
+    culet = models.CharField(
+        choices=CuletGrades.CHOICES, max_length=2, null=True, blank=True
+    )
+    cut_grade = models.CharField(
+        choices=GeneralGrades.CHOICES, max_length=4, null=True, blank=True
+    )
+    carat_weight = models.DecimalField(
+        max_digits=4, decimal_places=3, null=True, blank=True
+    )
 
     objects = StoneManager()
 
