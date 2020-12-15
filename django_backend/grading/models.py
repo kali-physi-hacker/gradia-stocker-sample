@@ -1,13 +1,60 @@
+import csv
 import hashlib
+import os
+# import StringIO
+from datetime import datetime
 
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.utils import IntegrityError
 from django.urls import reverse
 from django.utils.html import format_html
-from django.db.utils import IntegrityError
 
 from customers.models import Entity
 from ownerships.models import ParcelTransfer, StoneTransfer
+
+from .helpers import get_stone_fields
+
+
+def generate_csv(filename, dir_name, field_names, queryset):
+    if not os.path.exists(dir_name):
+        os.makedirs(dir_name)
+    file_path = dir_name + filename
+    with open(file_path, "w") as file:
+        writer = csv.writer(file, delimiter=",")
+        writer.writerow(field_names)
+        for stone in reversed(queryset.all()):
+            values = []
+            for field in field_names:
+                value = getattr(stone, field)
+                values.append(value)
+            writer.writerow(values)
+
+    return file_path
+
+
+class StoneManager(models.Manager):
+    def generate_id_csv(self, queryset):
+        filename = "Gradia_id_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
+        dir_name = settings.MEDIA_ROOT + "/csv_downloads/download_ids/"
+        field_names = ["internal_id"]
+
+        return generate_csv(filename, dir_name, field_names, queryset)
+
+    def generate_master_report_csv(self, queryset):
+        filename = "Master_report_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
+        dir_name = settings.MEDIA_ROOT + "/csv_downloads/master_reports/"
+        field_names = get_stone_fields(Stone)
+
+        return generate_csv(filename, dir_name, field_names, queryset)
+
+    def generate_to_goldway_csv(self, queryset):
+        filename = "To_Goldway_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
+        dir_name = settings.MEDIA_ROOT + "/csv_downloads/to_goldway/"
+        field_names = ["date_to_GW", "internal_id", "basic_carat"]
+
+        return generate_csv(filename, dir_name, field_names, queryset)
 
 
 class Split(models.Model):
@@ -486,6 +533,8 @@ class Stone(models.Model):
     culet = models.CharField(choices=CuletGrades.CHOICES, max_length=2, null=True, blank=True)
     cut_grade = models.CharField(choices=GeneralGrades.CHOICES, max_length=4, null=True, blank=True)
     carat_weight = models.DecimalField(max_digits=4, decimal_places=3, null=True, blank=True)
+
+    objects = StoneManager()
 
     def current_location(self):
         return StoneTransfer.get_current_location(self)
