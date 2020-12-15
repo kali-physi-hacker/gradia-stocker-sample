@@ -26,8 +26,8 @@ class TestCSVGeneration(TestCase):
             self.assertIn("internal_id", reader.fieldnames)
             csv_list = list(reader)
         self.assertEqual(3, len(csv_list))
-        self.assertTrue(str(self.stone3.internal_id), csv_list[0]["internal_id"])
-        self.assertTrue(str(self.stone1.internal_id), csv_list[2]["internal_id"])
+        self.assertEqual(str(self.stone3.internal_id), csv_list[0]["internal_id"])
+        self.assertEqual(str(self.stone1.internal_id), csv_list[2]["internal_id"])
 
     def test_generated_master_report_csv(self):
 
@@ -42,8 +42,8 @@ class TestCSVGeneration(TestCase):
                 self.assertIn(field, reader.fieldnames)
             csv_list = list(reader)
         self.assertEqual(3, len(csv_list))
-        self.assertTrue(str(self.stone3.data_entry_user), csv_list[0]["data_entry_user"])
-        self.assertTrue(str(self.stone1.date_created), csv_list[2]["date_created"])
+        self.assertEqual(str(self.stone3.data_entry_user), csv_list[0]["data_entry_user"])
+        self.assertEqual(str(self.stone1.date_created), csv_list[2]["date_created"])
 
     def test_generated_to_goldway_csv(self):
 
@@ -56,5 +56,5 @@ class TestCSVGeneration(TestCase):
                 self.assertIn(field, reader.fieldnames)
             csv_list = list(reader)
         self.assertEqual(3, len(csv_list))
-        self.assertTrue(str(self.stone3.basic_carat), csv_list[0]["basic_carat"])
-        self.assertTrue(str(self.stone1.internal_id), csv_list[2]["internal_id"])
+        self.assertEqual(str(self.stone3.basic_carat), csv_list[0]["basic_carat"])
+        self.assertEqual(str(self.stone1.internal_id), csv_list[2]["internal_id"])
