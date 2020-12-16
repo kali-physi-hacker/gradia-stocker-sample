@@ -167,6 +167,10 @@ class UploadParcelCSVFile(View):
             stone = Stone.objects.create(**data_dict)
             stone.split_from = split
             stone.save()
+
+            # Generates basic id hash
+            stone.generate_basic_external_id()
+
             # Do a stone transfer
             StoneTransfer.objects.create(
                 item=stone,

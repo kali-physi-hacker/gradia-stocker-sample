@@ -21,9 +21,7 @@ class Migration(migrations.Migration):
                 ("phone", models.CharField(max_length=11)),
                 ("email", models.CharField(max_length=255)),
             ],
-            options={
-                "abstract": False,
-            },
+            options={"abstract": False},
         ),
         migrations.CreateModel(
             name="AuthorizedPersonnel",
@@ -37,8 +35,6 @@ class Migration(migrations.Migration):
                 ("remarks", models.TextField(blank=True)),
                 ("entity", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="customers.Entity")),
             ],
-            options={
-                "abstract": False,
-            },
+            options={"abstract": False},
         ),
     ]

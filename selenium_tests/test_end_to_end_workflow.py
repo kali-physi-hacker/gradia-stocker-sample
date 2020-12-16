@@ -7,12 +7,7 @@ from customer_page_mixin import create_customer_browser_mixin  # noqa
 
 
 def test_end_to_end_workflow(
-    browser,
-    create_customer_browser_mixin,
-    receptionist,
-    vault_manager,
-    grader,
-    data_entry_clerk,  # noqa
+    browser, create_customer_browser_mixin, receptionist, vault_manager, grader, data_entry_clerk  # noqa
 ):
 
     #################################################################

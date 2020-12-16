@@ -1,6 +1,7 @@
 import csv
 import hashlib
 import os
+
 # import StringIO
 from datetime import datetime
 
@@ -528,6 +529,7 @@ class Stone(models.Model):
     ########################################################################
     # final results                                                   #
     ########################################################################
+
     color = models.CharField(choices=ColorGrades.CHOICES, max_length=1, null=True, blank=True)
     clarity = models.CharField(choices=ClarityGrades.CHOICES, max_length=4, null=True, blank=True)
     culet = models.CharField(choices=CuletGrades.CHOICES, max_length=2, null=True, blank=True)
