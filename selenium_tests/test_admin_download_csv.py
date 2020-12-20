@@ -120,6 +120,7 @@ def test_grader_can_download_goldway_transfer(browser, stones, grader, download_
     assert str(stones[2].internal_id) in csv_list[2]["internal_id"]
     assert str(stones[0].basic_carat) in csv_list[0]["basic_carat"]
 
+
 def test_grader_can_download_GIA_transfer_csv(browser, stones, grader, download_file_dir):
 
     browser.login(grader.username, grader.raw_password)
@@ -154,6 +155,7 @@ def test_grader_can_download_GIA_transfer_csv(browser, stones, grader, download_
     assert str(stones[2].external_id) in csv_list[2]["external_id"]
     assert str(stones[0].carat_weight) in csv_list[0]["carat_weight"]
 
+
 def test_grader_can_download_basic_report_csv(browser, stones, grader, download_file_dir):
 
     browser.login(grader.username, grader.raw_password)
@@ -178,7 +180,29 @@ def test_grader_can_download_basic_report_csv(browser, stones, grader, download_
 
     browser.click_go(elem_should_disappear=False)
     sleep(5)
-    field_names = ["date_to_GIA", "external_id", "carat_weight", "color", "fluoresence", "culet", "inclusions", "cut_grade", "basic_final_polish", "symmetry_grade", "table_size", "crown_angle", "pavilion_angle", "star_length", "lower_half", "girdle_thick", "girdle_min", "girdle_max", "crown_height", "pavilion_depth", "total_depth"]
+    field_names = [
+        "date_to_GIA",
+        "external_id",
+        "carat_weight",
+        "color",
+        "fluoresence",
+        "culet",
+        "inclusions",
+        "cut_grade",
+        "basic_final_polish",
+        "symmetry_grade",
+        "table_size",
+        "crown_angle",
+        "pavilion_angle",
+        "star_length",
+        "lower_half",
+        "girdle_thick",
+        "girdle_min",
+        "girdle_max",
+        "crown_height",
+        "pavilion_depth",
+        "total_depth",
+    ]
     file_path = os.path.join((download_file_dir), os.listdir(download_file_dir)[0])
     with open(file_path, "r") as file:
         reader = csv.DictReader(file)
@@ -187,6 +211,7 @@ def test_grader_can_download_basic_report_csv(browser, stones, grader, download_
         csv_list = list(reader)
     assert str(stones[2].inclusions) in csv_list[2]["inclusions"]
     assert str(stones[0].girdle_min) in csv_list[0]["girdle_min"]
+
 
 def test_grader_can_download_triple_report_csv(browser, stones, grader, download_file_dir):
 
@@ -221,4 +246,3 @@ def test_grader_can_download_triple_report_csv(browser, stones, grader, download
         csv_list = list(reader)
     assert str(stones[2].color) in csv_list[2]["color"]
     assert str(stones[0].carat_weight) in csv_list[0]["carat_weight"]
-

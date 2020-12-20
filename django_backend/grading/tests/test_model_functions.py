@@ -27,7 +27,6 @@ class TestCSVGeneration(TestCase):
         self.stone3.carat_weight = "0.150"
         self.stone3.color = "G"
         self.stone3.save()
-        
 
     def test_generated_id_csv(self):
         """
@@ -88,7 +87,29 @@ class TestCSVGeneration(TestCase):
     def test_generated_basic_report_csv(self):
         queryset = Stone.objects.all()
         file_path = Stone.objects.generate_basic_report_csv(queryset=queryset)
-        field_names = ["date_to_GIA", "external_id", "carat_weight", "color", "fluoresence", "culet", "inclusions", "cut_grade", "basic_final_polish", "symmetry_grade", "table_size", "crown_angle", "pavilion_angle", "star_length", "lower_half", "girdle_thick", "girdle_min", "girdle_max", "crown_height", "pavilion_depth", "total_depth"]
+        field_names = [
+            "date_to_GIA",
+            "external_id",
+            "carat_weight",
+            "color",
+            "fluoresence",
+            "culet",
+            "inclusions",
+            "cut_grade",
+            "basic_final_polish",
+            "symmetry_grade",
+            "table_size",
+            "crown_angle",
+            "pavilion_angle",
+            "star_length",
+            "lower_half",
+            "girdle_thick",
+            "girdle_min",
+            "girdle_max",
+            "crown_height",
+            "pavilion_depth",
+            "total_depth",
+        ]
         with open(file_path, "r") as file:
             reader = csv.DictReader(file)
             for field in field_names:
@@ -109,4 +130,4 @@ class TestCSVGeneration(TestCase):
             csv_list = list(reader)
         self.assertTrue(len(csv_list) == 3)
         self.assertEqual(str(self.stone3.carat_weight), csv_list[0]["carat_weight"])
-        self.assertEqual(str(self.stone1.color), csv_list[2]["color"])                  
+        self.assertEqual(str(self.stone1.color), csv_list[2]["color"])
