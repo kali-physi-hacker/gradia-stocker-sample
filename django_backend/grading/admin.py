@@ -297,6 +297,9 @@ class StoneAdmin(admin.ModelAdmin):
         "download_ids",
         "download_to_goldway_csv",
         "download_master_reports",
+        "download_to_GIA_csv",
+        "download_to_basic_report_csv",
+        "download_to_triple_report_csv",
     ]
 
     def get_actions(self, request):
@@ -322,7 +325,34 @@ class StoneAdmin(admin.ModelAdmin):
             response["Content-Disposition"] = "attachment; filename=%s" % file_path
             return response
 
-    download_to_goldway_csv.short_description = "Download Goldway CV Trasfer"
+    download_to_goldway_csv.short_description = "Download Goldway CV Transfer"
+
+    def download_to_GIA_csv(self, request, queryset):
+        file_path = Stone.objects.generate_to_GIA_csv(queryset)
+        with open(file_path, mode="r") as file:
+            response = HttpResponse(file, content_type="text/csv")
+            response["Content-Disposition"] = "attachment; filename=%s" % file_path
+            return response
+
+    download_to_GIA_csv.short_description = "Download GIA CV Transfer"
+
+    def download_to_basic_report_csv(self, request, queryset):
+        file_path = Stone.objects.generate_basic_report_csv(queryset)
+        with open(file_path, mode="r") as file:
+            response = HttpResponse(file, content_type="text/csv")
+            response["Content-Disposition"] = "attachment; filename=%s" % file_path
+            return response
+
+    download_to_basic_report_csv.short_description = "Download Basic Report"
+
+    def download_to_triple_report_csv(self, request, queryset):
+        file_path = Stone.objects.generate_triple_report_csv(queryset)
+        with open(file_path, mode="r") as file:
+            response = HttpResponse(file, content_type="text/csv")
+            response["Content-Disposition"] = "attachment; filename=%s" % file_path
+            return response
+
+    download_to_triple_report_csv.short_description = "Download Triple Report"
 
     def download_master_reports(self, request, queryset):
         file_path = Stone.objects.generate_master_report_csv(queryset)

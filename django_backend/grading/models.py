@@ -54,6 +54,43 @@ class StoneManager(models.Manager):
         field_names = ["date_to_GW", "internal_id", "basic_carat"]
 
         return generate_csv(filename, dir_name, field_names, queryset)
+    
+    def generate_to_GIA_csv(self, queryset):
+        filename = (
+            "To_GIA_"
+            + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S"))
+            + ".csv"
+        )
+        dir_name = settings.MEDIA_ROOT + "/csv_downloads/to_GIA/"
+        field_names = ["date_to_GIA", "external_id", "carat_weight", "color"]
+
+        return generate_csv(filename, dir_name, field_names, queryset)
+    
+    def generate_basic_report_csv(self, queryset):
+        filename = (
+            "Basic_Report"
+            + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S"))
+            + ".csv"
+        )
+        dir_name = settings.MEDIA_ROOT + "/csv_downloads/Basic_Report/"
+        field_names = ["date_to_GIA", "external_id", "carat_weight", "color", "fluoresence", "culet", "inclusions", "cut_grade", "basic_final_polish", "symmetry_grade", "table_size", "crown_angle", "pavilion_angle", "star_length", "lower_half", "girdle_thick", "girdle_min", "girdle_max", "crown_height", "pavilion_depth", "total_depth"]
+
+        return generate_csv(filename, dir_name, field_names, queryset)
+    
+    def generate_triple_report_csv(self, queryset):
+        filename = (
+            "Triple_Report"
+            + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S"))
+            + ".csv"
+        )
+        dir_name = settings.MEDIA_ROOT + "/csv_downloads/Triple_Report/"
+        field_names = ["internal_id", "external_id", "carat_weight", "color", "clarity"]
+
+        return generate_csv(filename, dir_name, field_names, queryset)
+    
+    
+    
+    
 
 
 class Split(models.Model):
