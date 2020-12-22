@@ -6,6 +6,9 @@ workflows:
   backend:
     jobs:
       - python_install
+      - linting:
+          requires:
+            - python_install
       - django_checks:
           requires:
             - python_install
@@ -28,12 +31,19 @@ commands:
           python3 -m venv venv
           . venv/bin/activate
           pip install -r requirements39.txt
+  linting:
+    steps:
+    - run:
+        command: |
+          . ./venv/bin/activate
+          black --line-length 117 --check django_backend selenium_tests
   django_checks:
     steps:
     - run:
         command: |
           . ../venv/bin/activate
           python3 manage.py check
+          python3 manage.py collectstatic --settings=gradia_stocker.settings_dev
           python3 manage.py migrate --settings=gradia_stocker.settings_dev
         working_directory: django_backend
   django_unittests:
@@ -87,6 +97,17 @@ jobs:
         key: deps1-{{ .Branch }}-{{ checksum "requirements39.txt" }}
         paths:
         - "venv"
+  linting:
+    executor: python_environment
+    steps:
+    - attach_workspace:
+        at: ~/
+    - linting
+    - store_test_results:
+        path: reports/linting
+    - store_artifacts:
+        path: test-reports/
+        destination: python_app
   django_checks:
     executor: python_environment
     steps:
