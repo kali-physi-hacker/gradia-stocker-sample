@@ -25,7 +25,7 @@ SECRET_KEY = "52633epecmm==%kw1-ls&u7z48+x6on#a!41+1xsuv%!iv14i*"
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["gradialab.pythonanywhere.com"]
+ALLOWED_HOSTS = ["gradiaerp.pythonanywhere.com"]
 
 
 # Application definition
