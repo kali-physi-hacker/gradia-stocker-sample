@@ -20,7 +20,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "52633epecmm==%kw1-ls&u7z48+x6on#a!41+1xsuv%!iv14i*"
+SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -80,10 +80,10 @@ WSGI_APPLICATION = "gradia_stocker.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "HOST": "GradiaLab.mysql.pythonanywhere-services.com",
-        "NAME": "GradiaLab$default",
-        "USER": "GradiaLab",
-        "PASSWORD": "T&u)h!KA8Xt48E>D`M4=",
+        "HOST": os.environ.get("DB_HOST"),
+        "NAME": os.environ.get("DB_NAME"),
+        "USER": os.environ.get("DB_USER"),
+        "PASSWORD": os.environ.get("DB_PASSWORD"),
         "OPTIONS": {
             "init_command": "SET innodb_strict_mode=1",
             "sql_mode": "traditional",
