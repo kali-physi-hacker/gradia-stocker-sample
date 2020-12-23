@@ -42,7 +42,7 @@ commands:
     - run:
         command: |
           . ../venv/bin/activate
-          python3 manage.py check
+          python3 manage.py check --settings=gradia_stocker.settings_dev
           python3 manage.py collectstatic --settings=gradia_stocker.settings_dev
           python3 manage.py migrate --settings=gradia_stocker.settings_dev
         working_directory: django_backend
