@@ -9,6 +9,9 @@
     3. make sure screenrecorder can see browser + last couple lines of terminal
     4. after all is done, revert the changes `git checkout test_admin_page_grader.py conftest.py`
 	5. edit descriptive-name.txt and upload the mp4 and txt to the trello card
+- to upload initial data:
+    - `set -a; source ~/.env; set +a; ./manage.py shell`
+    - `%run data_migration/populate_from_pytest_fixtures.py`
 
 ### basics
 - special users: vault, split, admin
