@@ -1,8 +1,16 @@
 import pytest
 from customers.models import Entity
 from grading.models import (
-    ClarityGrades, ColorGrades, CuletGrades, FluorescenceGrades,
-    GeneralGrades, GirdleGrades, Parcel, Receipt, Split, Stone
+    ClarityGrades,
+    ColorGrades,
+    CuletGrades,
+    FluorescenceGrades,
+    GeneralGrades,
+    GirdleGrades,
+    Parcel,
+    Receipt,
+    Split,
+    Stone,
 )
 from ownerships.models import ParcelTransfer, StoneTransfer
 
