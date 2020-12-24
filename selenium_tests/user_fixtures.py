@@ -1,15 +1,57 @@
-from collections import namedtuple
-
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
 
 import pytest
 
-from grading.models import Entity, Receipt, Split
-from purchases.models import Seller
-from grading.models import Parcel
+
+@pytest.fixture
+def erp(django_user_model):
+    erp_setup(django_user_model)
 
 
+@pytest.fixture
+def grader(django_user_model, erp):
+    return user_setup(django_user_model, "grader")
+
+
+@pytest.fixture
+def receptionist(django_user_model, erp):
+    return user_setup(django_user_model, "receptionist")
+
+
+@pytest.fixture
+def buyer(django_user_model, erp):
+    return user_setup(django_user_model, "buyer")
+
+
+@pytest.fixture
+def data_entry_clerk(django_user_model, erp):
+    return user_setup(django_user_model, "data_entry")
+
+
+@pytest.fixture
+def vault_manager(django_user_model, erp):
+    return user_setup(django_user_model, "vault_manager")
+
+
+# have this separate non-fixture function
+# so that we can call it to setup non pytest data
+def user_setup(django_user_model, group_name):
+    email = group_name + "@test.com"
+    username = group_name
+    password = group_name + "password"
+
+    user = django_user_model.objects.create_user(username, email=email, password=password, is_staff=True)
+    group = Group.objects.get(name=group_name)
+    user.groups.add(group)
+
+    # add an extra field so we can later login with user.password
+    user.raw_password = password
+    return user
+
+
+# have this separate non-fixture function
+# so that we can call it to setup non pytest data
 def erp_setup(django_user_model):
     # for the erp to work, there are some users and group permissions that we need
     django_user_model.objects.create_user("vault")
@@ -123,78 +165,3 @@ def erp_setup(django_user_model):
             content_type=ContentType.objects.get(app_label="ownerships", model="parceltransfer"),
         ),
     )
-
-
-@pytest.fixture
-def erp(django_user_model):
-    # have this separate non-fixture function
-    # so that we can call it to setup
-    erp_setup(django_user_model)
-
-
-UserData = namedtuple("User", ["username", "password"])
-
-
-@pytest.fixture
-def grader(django_user_model, erp):
-    user_data = UserData(username="grader", password="graderpassword")
-    user = django_user_model.objects.create_user(
-        user_data.username, email=user_data.username, password=user_data.password, is_staff=True
-    )
-    grader_group = Group.objects.get(name="grader")
-    user.groups.add(grader_group)
-
-    user.raw_password = user_data.password
-    return user
-
-
-@pytest.fixture
-def receptionist(django_user_model, erp):
-    user_data = UserData(username="receptionist", password="receptionistpassword")
-    user = django_user_model.objects.create_user(
-        user_data.username, email=user_data.username, password=user_data.password, is_staff=True
-    )
-    receptionist_group = Group.objects.get(name="receptionist")
-    user.groups.add(receptionist_group)
-
-    user.raw_password = user_data.password
-    return user
-
-
-@pytest.fixture
-def buyer(django_user_model, erp):
-    user_data = UserData(username="buyer", password="buyerpassword")
-    user = django_user_model.objects.create_user(
-        user_data.username, email=user_data.username, password=user_data.password, is_staff=True
-    )
-    buyer_group = Group.objects.get(name="buyer")
-    user.groups.add(buyer_group)
-
-    user.raw_password = user_data.password
-    return user
-
-
-@pytest.fixture
-def data_entry_clerk(django_user_model, erp):
-    user_data = UserData(username="dataentry", password="dataentrypassword")
-    user = django_user_model.objects.create_user(
-        user_data.username, email=user_data.username, password=user_data.password, is_staff=True
-    )
-    data_entry_group = Group.objects.get(name="data_entry")
-    user.groups.add(data_entry_group)
-
-    user.raw_password = user_data.password
-    return user
-
-
-@pytest.fixture
-def vault_manager(django_user_model, erp):
-    user_data = UserData(username="vaultmanager", password="vaultmanagerpassword")
-    user = django_user_model.objects.create_user(
-        user_data.username, email=user_data.username, password=user_data.password, is_staff=True
-    )
-    vault_manager_group = Group.objects.get(name="vault_manager")
-    user.groups.add(vault_manager_group)
-
-    user.raw_password = user_data.password
-    return user

@@ -1,4 +1,5 @@
 import os
+
 from django.conf import settings
 
 
@@ -33,6 +34,6 @@ def test_upload_of_csv_parcel_file(browser, data_entry_clerk, stones):
     # split page will contain grader (graderuser according to fixtures),
     # and some other texts
 
-    browser.assert_body_contains_text("123456789")
-    browser.assert_body_contains_text("dataentry")
+    browser.assert_body_contains_text("123456789")  # this is an internal id from the uploaded csv
+    browser.assert_body_contains_text(data_entry_clerk.username)
     browser.assert_body_contains_text("Original parcel")
