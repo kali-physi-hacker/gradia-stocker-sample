@@ -11,10 +11,12 @@ from user_fixtures import erp_setup, user_setup  # isort:skip
 erp_setup(User)
 
 grader = user_setup(User, "grader")
-receptionist = user_setup(User, "receiptionist")
+receptionist = user_setup(User, "receptionist")
 buyer = user_setup(User, "buyer")
 data_entry = user_setup(User, "data_entry")
 vault_manager = user_setup(User, "vault_manager")
+
+admin = User.objects.create_superuser("admin", email="admin@test.com", password="adminpassword")
 
 receipt = receipt_setup(User, receptionist)
 stones_setup(User, receipt, data_entry, grader, receptionist)
