@@ -80,11 +80,7 @@ class AbstractItemTransfer(models.Model):
         last_transfer.save()
 
         created = cls.objects.create(
-            item=last_transfer.item,
-            from_user=from_user,
-            to_user=to_user,
-            remarks=remarks,
-            created_by=created_by,
+            item=last_transfer.item, from_user=from_user, to_user=to_user, remarks=remarks, created_by=created_by
         )
         return created
 
@@ -122,9 +118,7 @@ class ParcelTransfer(AbstractItemTransfer):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["item"],
-                condition=Q(fresh=True),
-                name="only_one_fresh_transfer_per_parcel",
+                fields=["item"], condition=Q(fresh=True), name="only_one_fresh_transfer_per_parcel"
             )
         ]
 
@@ -138,8 +132,6 @@ class StoneTransfer(AbstractItemTransfer):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["item"],
-                condition=Q(fresh=True),
-                name="only_one_fresh_transfer_per_stone",
+                fields=["item"], condition=Q(fresh=True), name="only_one_fresh_transfer_per_stone"
             )
         ]

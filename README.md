@@ -1,5 +1,18 @@
 [![CircleCI](https://circleci.com/gh/circleci/circleci-docs.svg?style=shield)](https://circleci.com/gh/gradia-exchange/GRADIA_stocker)
 
+### usage
+- to run tests:
+- to record a screencast:
+	1. change all comments to prints in your test file: `sed -i 's/^\(\W*\)# \(.\+\)$/\1print(""" \2 """); import time; time.sleep(1)/g' test_admin_page_grader.py`
+    2. disable headless in conftest: `sed -i 's/chrome_options.add_argument("--headless")/# chrome_options.add_argument("--headless")/' conftest.py`
+    2. run just your single test function: `pytest --capture=tee-sys -k test_grader_can_confirm_received_stones 3>&1 1>&2 2>&3  | tee descriptive-name.txt`
+    3. make sure screenrecorder can see browser + last couple lines of terminal
+    4. after all is done, revert the changes `git checkout test_admin_page_grader.py conftest.py`
+	5. edit descriptive-name.txt and upload the mp4 and txt to the trello card
+- to upload initial data:
+    - `set -a; source ~/.env; set +a; ./manage.py shell`
+    - `%run data_migration/populate_from_pytest_fixtures.py`
+
 ### basics
 - special users: vault, split, admin
 

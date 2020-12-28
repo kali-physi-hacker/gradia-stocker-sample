@@ -7,32 +7,10 @@ from .models import ParcelTransfer, StoneTransfer
 class ItemTransferAdmin(admin.ModelAdmin):
     model = None
 
-    readonly_fields = [
-        "from_user",
-        "created_by",
-        "initiated_date",
-        "confirmed_date",
-        "fresh",
-    ]
-    fields = [
-        "item",
-        "from_user",
-        "created_by",
-        "initiated_date",
-        "to_user",
-        "confirmed_date",
-        "remarks",
-        "fresh",
-    ]
+    readonly_fields = ["from_user", "created_by", "initiated_date", "confirmed_date", "fresh"]
+    fields = ["item", "from_user", "created_by", "initiated_date", "to_user", "confirmed_date", "remarks", "fresh"]
     list_display = fields
-    list_filter = [
-        "fresh",
-        "from_user",
-        "created_by",
-        "to_user",
-        "initiated_date",
-        "confirmed_date",
-    ]
+    list_filter = ["fresh", "from_user", "created_by", "to_user", "initiated_date", "confirmed_date"]
 
     def has_add_permission(self, request):
         if request.user.groups.filter(name="vault_manager").exists():

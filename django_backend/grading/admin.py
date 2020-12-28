@@ -180,12 +180,7 @@ class ParcelAdmin(admin.ModelAdmin):
         "most_recent_transfer",
     ]
 
-    search_fields = [
-        "gradia_parcel_code",
-        "customer_parcel_code",
-        "receipt__code",
-        "receipt__entity__name",
-    ]
+    search_fields = ["gradia_parcel_code", "customer_parcel_code", "receipt__code", "receipt__entity__name"]
     list_filter = [ParcelOwnerFilter]
     list_display_links = ["gradia_parcel_code"]
 
@@ -230,13 +225,7 @@ class ReceiptAdmin(admin.ModelAdmin):
     inlines = [ParcelInline]
 
     def get_list_display(self, request):
-        return [
-            "__str__",
-            "intake_date",
-            "release_date",
-            "closed_out",
-            self.model.get_action_html_link,
-        ]
+        return ["__str__", "intake_date", "release_date", "closed_out", self.model.get_action_html_link]
 
     def has_add_permission(self, request, obj=None):
         return True
