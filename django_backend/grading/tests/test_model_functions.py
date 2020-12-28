@@ -13,21 +13,6 @@ class TestCSVGeneration(TestCase):
         self.stone2 = Stone.objects.get(internal_id=2)
         self.stone3 = Stone.objects.get(internal_id=3)
 
-        self.stone1.external_id = "G00000001"
-        self.stone1.carat_weight = "0.090"
-        self.stone1.color = "F"
-        self.stone1.save()
-
-        self.stone2.external_id = "G00000002"
-        self.stone2.carat_weight = "0.100"
-        self.stone2.color = "E"
-        self.stone2.save()
-
-        self.stone3.external_id = "G00000003"
-        self.stone3.carat_weight = "0.150"
-        self.stone3.color = "G"
-        self.stone3.save()
-
     def test_generated_id_csv(self):
         """
         Send File and 200 response status if report id (gradia_ID)
@@ -70,6 +55,10 @@ class TestCSVGeneration(TestCase):
             reader = csv.DictReader(file)
             for field in field_names:
                 self.assertIn(field, reader.fieldnames)
+            csv_list = list(reader)
+        self.assertEqual(3, len(csv_list))
+        self.assertEqual(str(self.stone3.basic_carat), csv_list[0]["basic_carat"])
+        self.assertEqual(str(self.stone1.internal_id), csv_list[2]["internal_id"])
 
     def test_generated_to_GIA_csv(self):
         queryset = Stone.objects.all()
