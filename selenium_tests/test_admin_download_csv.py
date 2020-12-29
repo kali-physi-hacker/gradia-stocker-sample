@@ -209,7 +209,7 @@ def test_grader_can_download_basic_report_csv(browser, stones, grader, download_
         for field in field_names:
             assert field in reader.fieldnames
         csv_list = list(reader)
-    assert str(stones[2].inclusions) in csv_list[2]["inclusions"]
+    assert str(stones[2].pavilion_depth) in csv_list[2]["pavilion_depth"]
     assert str(stones[0].girdle_min) in csv_list[0]["girdle_min"]
 
 
