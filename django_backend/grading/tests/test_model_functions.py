@@ -10,6 +10,7 @@ class TestCSVGeneration(TestCase):
 
     def setUp(self):
         self.stone1 = Stone.objects.get(internal_id=1)
+        self.stone2 = Stone.objects.get(internal_id=2)
         self.stone3 = Stone.objects.get(internal_id=3)
 
     def test_generated_id_csv(self):
@@ -58,3 +59,64 @@ class TestCSVGeneration(TestCase):
         self.assertEqual(3, len(csv_list))
         self.assertEqual(str(self.stone3.basic_carat), csv_list[0]["basic_carat"])
         self.assertEqual(str(self.stone1.internal_id), csv_list[2]["internal_id"])
+
+    def test_generated_to_GIA_csv(self):
+        queryset = Stone.objects.all()
+        file_path = Stone.objects.generate_to_GIA_csv(queryset=queryset)
+        field_names = ["date_to_GIA", "external_id", "carat_weight", "color"]
+        with open(file_path, "r") as file:
+            reader = csv.DictReader(file)
+            for field in field_names:
+                self.assertIn(field, reader.fieldnames)
+            csv_list = list(reader)
+        self.assertTrue(len(csv_list) == 3)
+        self.assertEqual(str(self.stone3.external_id), csv_list[0]["external_id"])
+        self.assertEqual(str(self.stone1.carat_weight), csv_list[2]["carat_weight"])
+
+    def test_generated_basic_report_csv(self):
+        queryset = Stone.objects.all()
+        file_path = Stone.objects.generate_basic_report_csv(queryset=queryset)
+        field_names = [
+            "date_to_GIA",
+            "external_id",
+            "carat_weight",
+            "color",
+            "fluoresence",
+            "culet",
+            "inclusions",
+            "cut_grade",
+            "basic_final_polish",
+            "symmetry_grade",
+            "table_size",
+            "crown_angle",
+            "pavilion_angle",
+            "star_length",
+            "lower_half",
+            "girdle_thick",
+            "girdle_min",
+            "girdle_max",
+            "crown_height",
+            "pavilion_depth",
+            "total_depth",
+        ]
+        with open(file_path, "r") as file:
+            reader = csv.DictReader(file)
+            for field in field_names:
+                self.assertIn(field, reader.fieldnames)
+            csv_list = list(reader)
+        self.assertTrue(len(csv_list) == 3)
+        self.assertEqual(str(self.stone3.total_depth), csv_list[0]["total_depth"])
+        self.assertEqual(str(self.stone1.inclusions), csv_list[2]["inclusions"])
+
+    def test_generated_triple_report_csv(self):
+        queryset = Stone.objects.all()
+        file_path = Stone.objects.generate_triple_report_csv(queryset=queryset)
+        field_names = ["internal_id", "external_id", "carat_weight", "color", "clarity"]
+        with open(file_path, "r") as file:
+            reader = csv.DictReader(file)
+            for field in field_names:
+                self.assertIn(field, reader.fieldnames)
+            csv_list = list(reader)
+        self.assertTrue(len(csv_list) == 3)
+        self.assertEqual(str(self.stone3.carat_weight), csv_list[0]["carat_weight"])
+        self.assertEqual(str(self.stone1.color), csv_list[2]["color"])
