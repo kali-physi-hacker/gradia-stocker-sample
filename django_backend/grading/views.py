@@ -10,6 +10,7 @@ from django.urls import reverse
 from django.utils.timezone import utc
 from django.views import View
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from ownerships.models import ParcelTransfer, StoneTransfer
 
@@ -85,7 +86,18 @@ class CloseReceiptView(View):
         return HttpResponseRedirect(reverse("admin:grading_receipt_change", args=[receipt.id]))
 
 
-class UploadParcelCSVFile(View):
+# @ConradHo ---> Possible refactor here, to help make error messages better (improving user experience)
+def clean_basic_csv_upload_file(file_path):
+    """
+    Validate the file by checking the column field names if they're valid, validating the content of the
+    field values and return a tuple of True and the field values, else return False and None
+    :param file_path:
+    :return:
+    """
+    pass
+
+
+class UploadParcelCSVFile(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         """
         Page to return HTML for upload input field
@@ -108,10 +120,6 @@ class UploadParcelCSVFile(View):
         :return:
         """
         csv_file = request.FILES["file"]
-        # TODO: What is happening here ?
-        #  1. Get the gradia_parcel_code from the filename
-        #  2. Get the existing parcel (original) using the gradia_parcel_code)
-        #  2. Do the split if exists else return 404
 
         # Get parcel code name from file name
         gradia_parcel_code = os.path.splitext(csv_file.name)[0]
@@ -127,7 +135,10 @@ class UploadParcelCSVFile(View):
                 reverse("grading:upload_parcel_csv")
             )  # Return a redirect with an error message
 
-        split = Split.objects.get(original_parcel=parcel)
+        split = Split.objects.create(
+            original_parcel=parcel,
+            split_by=request.user
+        )
 
         csv_columns = get_field_names_snake_case(Stone)
 
