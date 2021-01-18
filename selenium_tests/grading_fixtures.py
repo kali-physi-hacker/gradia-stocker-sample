@@ -28,14 +28,30 @@ def receipt_setup(django_user_model, admin_user):
         code="VK-0001",
         intake_by=admin_user,
     )
+
+    created_receipt_2 = Receipt.objects.create(
+        entity=Entity.objects.create(name="Van Klaren", address="addressy", phone="12345678", email="vk@vk.com"),
+        code="VK-0002",
+        intake_by=admin_user,
+    )
+
     parcel = Parcel.objects.create(
         receipt=created_receipt,
-        gradia_parcel_code="parcel1",
+        gradia_parcel_code="123456789",
         customer_parcel_code="cust-parcel-1",
         total_carats=2,
         total_pieces=2,
         reference_price_per_carat=1,
     )
+    parcel_2 = Parcel.objects.create(
+        receipt=created_receipt_2,
+        gradia_parcel_code="parcel1",
+        customer_parcel_code="cust-parcel-2",
+        total_carats=6,
+        total_pieces=8,
+        reference_price_per_carat=3,
+    )
+
     # the parcel is received by admin user and put into the vault
     ParcelTransfer.objects.create(
         item=parcel,
@@ -43,9 +59,18 @@ def receipt_setup(django_user_model, admin_user):
         to_user=django_user_model.objects.get(username="vault"),
         created_by=admin_user,
     )
+
+    ParcelTransfer.objects.create(
+        item=parcel_2,
+        from_user=admin_user,
+        to_user=django_user_model.objects.get(username="vault"),
+        created_by=admin_user,
+    )
     # vault confirms it has received this parcel
     ParcelTransfer.confirm_received(parcel)
     created_receipt.parcel_set.add(parcel)
+    ParcelTransfer.confirm_received(parcel_2)
+    created_receipt.parcel_set.add(parcel_2)
     return created_receipt
 
 
@@ -57,7 +82,7 @@ def stones(django_user_model, receipt, data_entry_clerk, grader, receptionist):
 # have this separate non-fixture function
 # so that we can call it to setup non pytest data
 def stones_setup(django_user_model, receipt, data_entry_clerk, grader, receptionist):
-    parcel = receipt.parcel_set.first()
+    parcel = receipt.parcel_set.get(gradia_parcel_code="123456789")
     split = Split.objects.create(original_parcel=parcel, split_by=data_entry_clerk)
     stone_list = [
         Stone.objects.create(
