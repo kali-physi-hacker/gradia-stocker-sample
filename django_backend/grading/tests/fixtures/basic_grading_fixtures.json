@@ -6,7 +6,7 @@
       "password": "pbkdf2_sha256$180000$QEWXsDCN7uNC$l6sDhyYZgeYLlv9NeGX13/cylvLbl/RhnwL0qzsChbs=",
       "last_login": null,
       "is_superuser": false,
-      "username": "graderuser",
+      "username": "data_entry",
       "first_name": "",
       "last_name": "",
       "email": "",
@@ -50,15 +50,7 @@
       "total_pieces": 43,
       "reference_price_per_carat": 32,
       "split_from": null,
-      "gradia_parcel_code": "123456789"
-    }
-  },
-  {
-    "model": "grading.split",
-    "pk": 1,
-    "fields": {
-      "split_by": 2,
-      "split_date": "2020-12-04T06:32:36.845Z"
+      "gradia_parcel_code": "parcel1"
     }
   }
 ]
