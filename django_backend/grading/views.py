@@ -135,10 +135,7 @@ class UploadParcelCSVFile(LoginRequiredMixin, View):
                 reverse("grading:upload_parcel_csv")
             )  # Return a redirect with an error message
 
-        split = Split.objects.create(
-            original_parcel=parcel,
-            split_by=request.user
-        )
+        split = Split.objects.create(original_parcel=parcel, split_by=request.user)
 
         csv_columns = get_field_names_snake_case(Stone)
 
