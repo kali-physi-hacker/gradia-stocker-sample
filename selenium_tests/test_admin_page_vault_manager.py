@@ -125,7 +125,7 @@ def test_vault_manager_can_transfer_vault_parcels_to_others(browser, receipt, va
 
     # and now the parcel shows up as being with Gary
     browser.go_to_parcel_page()
-    browser.assert_body_contains_text("1 parcel")
+    browser.assert_body_contains_text("2 parcel")
     browser.assert_body_contains_text(f"{grader}, unconfirmed")
 
 
