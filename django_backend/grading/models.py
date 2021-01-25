@@ -77,7 +77,6 @@ class StoneManager(models.Manager):
             "inclusions",
             "cut_grade",
             "basic_final_polish",
-            "symmetry_grade",
             "table_size",
             "crown_angle",
             "pavilion_angle",
@@ -458,7 +457,7 @@ class Stone(models.Model):
     basic_carat = models.DecimalField(max_digits=5, decimal_places=3)
     basic_culet = models.CharField(choices=CuletGrades.CHOICES, max_length=2)
     basic_fluorescence = models.CharField(choices=FluorescenceGrades.CHOICES, max_length=4)
-    inclusions = models.ManyToManyField(Inclusion)
+    inclusions = models.ManyToManyField(Inclusion, related_name="inclusions")
 
     # basic stuff that requires multiple graders
     grader_1 = models.ForeignKey(User, on_delete=models.PROTECT, related_name="grader_1_for_stone")
@@ -493,9 +492,7 @@ class Stone(models.Model):
     sheryl_cut = models.CharField(choices=GeneralGrades.CHOICES, max_length=4)
     sarine_cut = models.CharField(choices=GeneralGrades.CHOICES, max_length=4)
     cut_grade_est_table = models.CharField(choices=GeneralGrades.CHOICES, max_length=4)
-    sheryl_symmetry = models.CharField(choices=GeneralGrades.CHOICES, max_length=4)
     sarine_symmetry = models.CharField(choices=GeneralGrades.CHOICES, max_length=4)
-    symmetry_grade = models.CharField(choices=GeneralGrades.CHOICES, max_length=4)
     roundness = models.DecimalField(max_digits=4, decimal_places=1)
     roundness_grade = models.CharField(choices=GeneralGrades.CHOICES, max_length=4)
     table_size = models.DecimalField(max_digits=4, decimal_places=1)
@@ -578,6 +575,8 @@ class Stone(models.Model):
     culet = models.CharField(choices=CuletGrades.CHOICES, max_length=2, null=True, blank=True)
     cut_grade = models.CharField(choices=GeneralGrades.CHOICES, max_length=4, null=True, blank=True)
     carat_weight = models.DecimalField(max_digits=4, decimal_places=3, null=True, blank=True)
+    final_sheryl_cut = models.CharField(choices=GeneralGrades.CHOICES, max_length=4, null=True, blank=True)
+    final_sarine_cut = models.CharField(choices=GeneralGrades.CHOICES, max_length=4, null=True, blank=True)
 
     objects = StoneManager()
 
