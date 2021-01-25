@@ -14,7 +14,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 from ownerships.models import ParcelTransfer, StoneTransfer
 
-from .models import Parcel, Receipt, Stone, Split, ParcelTransfer
+from .models import Parcel, Receipt, Stone, Split, ParcelTransfer, Inclusion
 
 from .helpers import column_tuple_to_value_tuple_dict_map, get_field_names_snake_case
 
@@ -156,7 +156,8 @@ class UploadParcelCSVFile(LoginRequiredMixin, View):
             data_dict["data_entry_user"] = request.user
 
             # Delete ID
-            del data_dict["ID"]
+            del data_dict["id"]
+            del data_dict["stonetransfer"]
 
             # Set the split_from value
             data_dict["split_from"] = split
@@ -171,9 +172,18 @@ class UploadParcelCSVFile(LoginRequiredMixin, View):
                 messages.add_message(request, messages.ERROR, f"Grader: {data_dict['grader_1']} Does not exist")
                 return HttpResponseRedirect(reverse("grading:upload_parcel_csv"))
 
+            try:
+                inclusions = Inclusion.objects.get(inclusion=data_dict["inclusions"])
+            except Inclusion.DoesNotExist:
+                messages.add_message(request, messages.ERROR, f"Inclusion: {inclusions} Does not exist")
+                return HttpResponseRedirect(reverse("grading:upload_parcel_csv"))
+
+            del data_dict["inclusions"]
+
             # Create Stones
             stone = Stone.objects.create(**data_dict)
             stone.split_from = split
+            stone.inclusions.add(inclusions)
             stone.save()
 
             # Generates basic id hash
