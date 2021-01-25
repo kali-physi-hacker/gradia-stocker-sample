@@ -1,0 +1,135 @@
+[
+  {
+    "model": "grading.inclusion",
+    "pk": 1,
+    "fields": {
+      "inclusion": "BR"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 2,
+    "fields": {
+      "inclusion": "CV"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 3,
+    "fields": {
+      "inclusion": "CH"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 4,
+    "fields": {
+      "inclusion": "CL"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 5,
+    "fields": {
+      "inclusion": "F"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 6,
+    "fields": {
+      "inclusion": "IC"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 7,
+    "fields": {
+      "inclusion": "IN"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 8,
+    "fields": {
+      "inclusion": "IG"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 9,
+    "fields": {
+      "inclusion": "ND"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 10,
+    "fields": {
+      "inclusion": "PP"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 11,
+    "fields": {
+      "inclusion": "AB"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 12,
+    "fields": {
+      "inclusion": "SC"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 13,
+    "fields": {
+      "inclusion": "NK"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 14,
+    "fields": {
+      "inclusion": "PL"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 15,
+    "fields": {
+      "inclusion": "PT"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 16,
+    "fields": {
+      "inclusion": "N"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 17,
+    "fields": {
+      "inclusion": "EF"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 18,
+    "fields": {
+      "inclusion": "SG"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 19,
+    "fields": {
+      "inclusion": "KN"
+    }
+  }
+]
