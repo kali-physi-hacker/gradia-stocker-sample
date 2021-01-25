@@ -86,7 +86,6 @@ class TestCSVGeneration(TestCase):
             "inclusions",
             "cut_grade",
             "basic_final_polish",
-            "symmetry_grade",
             "table_size",
             "crown_angle",
             "pavilion_angle",
