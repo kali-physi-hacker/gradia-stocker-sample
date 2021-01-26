@@ -12,7 +12,7 @@ from grading.models import (
     Split,
     Stone,
     Inclusions,
-    Inclusion
+    Inclusion,
 )
 from ownerships.models import ParcelTransfer, StoneTransfer
 
