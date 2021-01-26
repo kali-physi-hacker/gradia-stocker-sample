@@ -140,7 +140,7 @@ class UploadParcelCSVFile(LoginRequiredMixin, View):
         csv_columns = get_field_names_snake_case(Stone)
 
         csv_data = pd.read_csv(csv_file)
-        data_frame = pd.DataFrame(csv_data, columns=csv_columns)
+        data_frame = pd.DataFrame(csv_data, columns=Stone.basic_grading_fields)
 
         # Get parcel owner
         parcel_transfer = ParcelTransfer.most_recent_transfer(parcel)
@@ -152,12 +152,8 @@ class UploadParcelCSVFile(LoginRequiredMixin, View):
 
         # Map column_fields to values in a dictionary data structure
         for stone_entry in data_frame.values:
-            data_dict = column_tuple_to_value_tuple_dict_map(csv_columns, stone_entry)
+            data_dict = column_tuple_to_value_tuple_dict_map(Stone.basic_grading_fields, stone_entry)
             data_dict["data_entry_user"] = request.user
-
-            # Delete ID
-            del data_dict["id"]
-            del data_dict["stonetransfer"]
 
             # Set the split_from value
             data_dict["split_from"] = split
@@ -175,7 +171,7 @@ class UploadParcelCSVFile(LoginRequiredMixin, View):
             try:
                 inclusions = Inclusion.objects.get(inclusion=data_dict["inclusions"])
             except Inclusion.DoesNotExist:
-                messages.add_message(request, messages.ERROR, f"Inclusion: {inclusions} Does not exist")
+                messages.add_message(request, messages.ERROR, f"Inclusion: {data_dict['inclusions']} Does not exist")
                 return HttpResponseRedirect(reverse("grading:upload_parcel_csv"))
 
             del data_dict["inclusions"]
