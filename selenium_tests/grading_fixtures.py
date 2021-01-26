@@ -11,6 +11,8 @@ from grading.models import (
     Receipt,
     Split,
     Stone,
+    Inclusions,
+    Inclusion
 )
 from ownerships.models import ParcelTransfer, StoneTransfer
 
@@ -114,9 +116,7 @@ def stones_setup(django_user_model, receipt, data_entry_clerk, grader, reception
             sheryl_cut=GeneralGrades.EXCELLENT,
             sarine_cut=GeneralGrades.EXCELLENT,
             cut_grade_est_table=GeneralGrades.EXCELLENT,
-            sheryl_symmetry=GeneralGrades.GOOD,
             sarine_symmetry=GeneralGrades.GOOD,
-            symmetry_grade=GeneralGrades.GOOD,
             roundness=1,
             roundness_grade=GeneralGrades.GOOD,
             table_size=43,
@@ -181,9 +181,7 @@ def stones_setup(django_user_model, receipt, data_entry_clerk, grader, reception
             sheryl_cut=GeneralGrades.EXCELLENT,
             sarine_cut=GeneralGrades.EXCELLENT,
             cut_grade_est_table=GeneralGrades.EXCELLENT,
-            sheryl_symmetry=GeneralGrades.GOOD,
             sarine_symmetry=GeneralGrades.GOOD,
-            symmetry_grade=GeneralGrades.GOOD,
             roundness=1,
             roundness_grade=GeneralGrades.GOOD,
             table_size=43,
@@ -248,9 +246,7 @@ def stones_setup(django_user_model, receipt, data_entry_clerk, grader, reception
             sheryl_cut=GeneralGrades.EXCELLENT,
             sarine_cut=GeneralGrades.EXCELLENT,
             cut_grade_est_table=GeneralGrades.EXCELLENT,
-            sheryl_symmetry=GeneralGrades.GOOD,
             sarine_symmetry=GeneralGrades.GOOD,
-            symmetry_grade=GeneralGrades.GOOD,
             roundness=1,
             roundness_grade=GeneralGrades.GOOD,
             table_size=43,
@@ -295,3 +291,12 @@ def stones_setup(django_user_model, receipt, data_entry_clerk, grader, reception
             created_by=receptionist,
         )
     return stone_list
+
+
+@pytest.fixture
+def inclusions():
+    inclusions = (choice[0] for choice in Inclusions.CHOICES)
+
+    for inclusion in inclusions:
+        Inclusion.objects.create(inclusion=inclusion)
+    return inclusions
