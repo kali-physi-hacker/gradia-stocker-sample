@@ -5,19 +5,27 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('grading', '0003_auto_20210125_0926'),
-    ]
+    dependencies = [("grading", "0003_auto_20210125_0926")]
 
     operations = [
         migrations.AlterField(
-            model_name='stone',
-            name='final_sarine_cut',
-            field=models.CharField(blank=True, choices=[('EX', 'Excellent'), ('VG', 'Very Good'), ('GOOD', 'Good'), ('F', 'Fair'), ('P', 'Poor')], max_length=4, null=True),
+            model_name="stone",
+            name="final_sarine_cut",
+            field=models.CharField(
+                blank=True,
+                choices=[("EX", "Excellent"), ("VG", "Very Good"), ("GOOD", "Good"), ("F", "Fair"), ("P", "Poor")],
+                max_length=4,
+                null=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='stone',
-            name='final_sheryl_cut',
-            field=models.CharField(blank=True, choices=[('EX', 'Excellent'), ('VG', 'Very Good'), ('GOOD', 'Good'), ('F', 'Fair'), ('P', 'Poor')], max_length=4, null=True),
+            model_name="stone",
+            name="final_sheryl_cut",
+            field=models.CharField(
+                blank=True,
+                choices=[("EX", "Excellent"), ("VG", "Very Good"), ("GOOD", "Good"), ("F", "Fair"), ("P", "Poor")],
+                max_length=4,
+                null=True,
+            ),
         ),
     ]

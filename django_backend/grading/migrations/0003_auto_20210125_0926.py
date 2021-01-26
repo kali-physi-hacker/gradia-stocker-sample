@@ -5,14 +5,12 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('grading', '0002_auto_20210125_0913'),
-    ]
+    dependencies = [("grading", "0002_auto_20210125_0913")]
 
     operations = [
         migrations.AlterField(
-            model_name='stone',
-            name='inclusions',
-            field=models.ManyToManyField(related_name='inclusions', to='grading.Inclusion'),
-        ),
+            model_name="stone",
+            name="inclusions",
+            field=models.ManyToManyField(related_name="inclusions", to="grading.Inclusion"),
+        )
     ]

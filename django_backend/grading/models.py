@@ -213,9 +213,9 @@ class Parcel(AbstractParcel):
                         f"<a href='{reverse('grading:return_to_vault', args=[self.id])}'>Return to Vault</a>"
                     )
             if (
-                    transfer.in_transit()
-                    and transfer.to_user.username == "vault"
-                    and user.groups.filter(name="vault_manager").exists()
+                transfer.in_transit()
+                and transfer.to_user.username == "vault"
+                and user.groups.filter(name="vault_manager").exists()
             ):
                 return format_html(
                     f"<a href='{reverse('grading:confirm_received', args=[self.id])}'>Confirm Stones for Vault</a>"
@@ -630,7 +630,7 @@ class Stone(models.Model):
         "upper_half_angle",
         "upper_half_angle_grade",
         "lower_half_angle",
-        "lower_half_angle_grade"
+        "lower_half_angle_grade",
     )
 
     def current_location(self):
