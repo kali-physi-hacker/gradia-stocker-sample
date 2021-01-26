@@ -76,28 +76,8 @@ class TestCSVGeneration(TestCase):
     def test_generated_basic_report_csv(self):
         queryset = Stone.objects.all()
         file_path = Stone.objects.generate_basic_report_csv(queryset=queryset)
-        field_names = [
-            "date_to_GIA",
-            "external_id",
-            "carat_weight",
-            "color",
-            "fluoresence",
-            "culet",
-            "inclusions",
-            "cut_grade",
-            "basic_final_polish",
-            "table_size",
-            "crown_angle",
-            "pavilion_angle",
-            "star_length",
-            "lower_half",
-            "girdle_thick",
-            "girdle_min",
-            "girdle_max",
-            "crown_height",
-            "pavilion_depth",
-            "total_depth",
-        ]
+        field_names = Stone.basic_grading_fields
+
         with open(file_path, "r") as file:
             reader = csv.DictReader(file)
             for field in field_names:
