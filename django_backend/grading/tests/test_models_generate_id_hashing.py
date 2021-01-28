@@ -7,7 +7,11 @@ from grading.models import Stone
 
 
 class TestIDHashGeneration(TestCase):
-    fixtures = ("grading/tests/fixtures/basic_grading_fixtures.json", "grading/tests/fixtures/default_users.json")
+    fixtures = (
+        "grading/tests/fixtures/basic_grading_fixtures.json",
+        "grading/tests/fixtures/default_users.json",
+        "grading/fixtures/inclusions.json",
+    )
 
     def setUp(self):
 

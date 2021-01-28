@@ -67,29 +67,8 @@ class StoneManager(models.Manager):
     def generate_basic_report_csv(self, queryset):
         filename = "Basic_Report" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
         dir_name = settings.MEDIA_ROOT + "/csv_downloads/Basic_Report/"
-        field_names = [
-            "date_to_GIA",
-            "external_id",
-            "carat_weight",
-            "color",
-            "fluoresence",
-            "culet",
-            "inclusions",
-            "cut_grade",
-            "basic_final_polish",
-            "symmetry_grade",
-            "table_size",
-            "crown_angle",
-            "pavilion_angle",
-            "star_length",
-            "lower_half",
-            "girdle_thick",
-            "girdle_min",
-            "girdle_max",
-            "crown_height",
-            "pavilion_depth",
-            "total_depth",
-        ]
+
+        field_names = Stone.basic_grading_fields
 
         return generate_csv(filename, dir_name, field_names, queryset)
 
@@ -458,7 +437,7 @@ class Stone(models.Model):
     basic_carat = models.DecimalField(max_digits=5, decimal_places=3)
     basic_culet = models.CharField(choices=CuletGrades.CHOICES, max_length=2)
     basic_fluorescence = models.CharField(choices=FluorescenceGrades.CHOICES, max_length=4)
-    inclusions = models.ManyToManyField(Inclusion)
+    inclusions = models.ManyToManyField(Inclusion, related_name="inclusions")
 
     # basic stuff that requires multiple graders
     grader_1 = models.ForeignKey(User, on_delete=models.PROTECT, related_name="grader_1_for_stone")
@@ -493,9 +472,7 @@ class Stone(models.Model):
     sheryl_cut = models.CharField(choices=GeneralGrades.CHOICES, max_length=4)
     sarine_cut = models.CharField(choices=GeneralGrades.CHOICES, max_length=4)
     cut_grade_est_table = models.CharField(choices=GeneralGrades.CHOICES, max_length=4)
-    sheryl_symmetry = models.CharField(choices=GeneralGrades.CHOICES, max_length=4)
     sarine_symmetry = models.CharField(choices=GeneralGrades.CHOICES, max_length=4)
-    symmetry_grade = models.CharField(choices=GeneralGrades.CHOICES, max_length=4)
     roundness = models.DecimalField(max_digits=4, decimal_places=1)
     roundness_grade = models.CharField(choices=GeneralGrades.CHOICES, max_length=4)
     table_size = models.DecimalField(max_digits=4, decimal_places=1)
@@ -578,8 +555,83 @@ class Stone(models.Model):
     culet = models.CharField(choices=CuletGrades.CHOICES, max_length=2, null=True, blank=True)
     cut_grade = models.CharField(choices=GeneralGrades.CHOICES, max_length=4, null=True, blank=True)
     carat_weight = models.DecimalField(max_digits=4, decimal_places=3, null=True, blank=True)
+    final_sheryl_cut = models.CharField(choices=GeneralGrades.CHOICES, max_length=4, null=True, blank=True)
+    final_sarine_cut = models.CharField(choices=GeneralGrades.CHOICES, max_length=4, null=True, blank=True)
 
     objects = StoneManager()
+
+    basic_grading_fields = (
+        "internal_id",
+        "diamond_description",
+        "external_id",
+        "grader_1",
+        "basic_carat",
+        "basic_color_1",
+        "basic_color_2",
+        "basic_color_3",
+        "basic_final_color",
+        "basic_clarity_1",
+        "basic_clarity_2",
+        "basic_clarity_3",
+        "basic_final_clarity",
+        "basic_fluorescence",
+        "basic_culet",
+        "inclusions",
+        "remarks",
+        "basic_polish_1",
+        "basic_polish_2",
+        "basic_polish_3",
+        "basic_final_polish",
+        "diameter_min",
+        "diameter_max",
+        "height",
+        "crown_angle",
+        "pavilion_angle",
+        "star_length",
+        "lower_half",
+        "girdle_thick",
+        "girdle_min",
+        "girdle_max",
+        "culet_size",
+        "crown_height",
+        "pavilion_depth",
+        "total_depth",
+        "table_size",
+        "table_size_grade",
+        "crown_angle_grade",
+        "pavilion_angle_grade",
+        "star_length_grade",
+        "lower_half_grade",
+        "girdle_thick_grade",
+        "girdle_grade",
+        "crown_height_grade",
+        "total_depth_grade",
+        "sheryl_cut",
+        "final_sheryl_cut",
+        "cut_grade_est_table",
+        "final_sarine_cut",
+        "sarine_cut",
+        "sarine_symmetry",
+        "roundness",
+        "roundness_grade",
+        "pavilion_depth_grade",
+        "misalignment",
+        "misalignment_grade",
+        "table_edge_var",
+        "table_edge_var_grade",
+        "table_off_center",
+        "table_off_center_grade",
+        "culet_off_center",
+        "culet_off_center_grade",
+        "table_off_culet",
+        "table_off_culet_grade",
+        "star_angle",
+        "star_angle_grade",
+        "upper_half_angle",
+        "upper_half_angle_grade",
+        "lower_half_angle",
+        "lower_half_angle_grade",
+    )
 
     def current_location(self):
         return StoneTransfer.get_current_location(self)

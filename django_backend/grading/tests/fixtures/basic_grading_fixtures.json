@@ -52,13 +52,5 @@
       "split_from": null,
       "gradia_parcel_code": "123456789"
     }
-  },
-  {
-    "model": "grading.split",
-    "pk": 1,
-    "fields": {
-      "split_by": 2,
-      "split_date": "2020-12-04T06:32:36.845Z"
-    }
   }
 ]

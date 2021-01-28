@@ -20,6 +20,5 @@ def get_field_names_snake_case(model):
     :param model:
     :return:
     """
-    fields = (field.verbose_name for field in model._meta.fields)
-    fields_snake_case = tuple("_".join(field.split(" ")) for field in fields)
-    return fields_snake_case
+    fields = list(field.name for field in model._meta.get_fields())
+    return fields

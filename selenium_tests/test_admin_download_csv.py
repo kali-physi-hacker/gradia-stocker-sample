@@ -180,29 +180,29 @@ def test_grader_can_download_basic_report_csv(browser, stones, grader, download_
 
     browser.click_go(elem_should_disappear=False)
     sleep(5)
-    field_names = [
-        "date_to_GIA",
-        "external_id",
-        "carat_weight",
-        "color",
-        "fluoresence",
-        "culet",
-        "inclusions",
-        "cut_grade",
-        "basic_final_polish",
-        "symmetry_grade",
-        "table_size",
-        "crown_angle",
-        "pavilion_angle",
-        "star_length",
-        "lower_half",
-        "girdle_thick",
-        "girdle_min",
-        "girdle_max",
-        "crown_height",
-        "pavilion_depth",
-        "total_depth",
-    ]
+    field_names = Stone.basic_grading_fields
+    # field_names = [
+    #     "date_to_GIA",
+    #     "external_id",
+    #     "carat_weight",
+    #     "color",
+    #     "fluoresence",
+    #     "culet",
+    #     "inclusions",
+    #     "cut_grade",
+    #     "basic_final_polish",
+    #     "table_size",
+    #     "crown_angle",
+    #     "pavilion_angle",
+    #     "star_length",
+    #     "lower_half",
+    #     "girdle_thick",
+    #     "girdle_min",
+    #     "girdle_max",
+    #     "crown_height",
+    #     "pavilion_depth",
+    #     "total_depth",
+    # ]
     file_path = os.path.join((download_file_dir), os.listdir(download_file_dir)[0])
     with open(file_path, "r") as file:
         reader = csv.DictReader(file)

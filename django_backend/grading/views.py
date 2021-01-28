@@ -10,10 +10,11 @@ from django.urls import reverse
 from django.utils.timezone import utc
 from django.views import View
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from ownerships.models import ParcelTransfer, StoneTransfer
 
-from .models import Parcel, Receipt, Stone, Split, ParcelTransfer
+from .models import Parcel, Receipt, Stone, Split, ParcelTransfer, Inclusion
 
 from .helpers import column_tuple_to_value_tuple_dict_map, get_field_names_snake_case
 
@@ -85,7 +86,18 @@ class CloseReceiptView(View):
         return HttpResponseRedirect(reverse("admin:grading_receipt_change", args=[receipt.id]))
 
 
-class UploadParcelCSVFile(View):
+# @ConradHo ---> Possible refactor here, to help make error messages better (improving user experience)
+def clean_basic_csv_upload_file(file_path):
+    """
+    Validate the file by checking the column field names if they're valid, validating the content of the
+    field values and return a tuple of True and the field values, else return False and None
+    :param file_path:
+    :return:
+    """
+    pass
+
+
+class UploadParcelCSVFile(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         """
         Page to return HTML for upload input field
@@ -108,10 +120,6 @@ class UploadParcelCSVFile(View):
         :return:
         """
         csv_file = request.FILES["file"]
-        # TODO: What is happening here ?
-        #  1. Get the gradia_parcel_code from the filename
-        #  2. Get the existing parcel (original) using the gradia_parcel_code)
-        #  2. Do the split if exists else return 404
 
         # Get parcel code name from file name
         gradia_parcel_code = os.path.splitext(csv_file.name)[0]
@@ -127,12 +135,12 @@ class UploadParcelCSVFile(View):
                 reverse("grading:upload_parcel_csv")
             )  # Return a redirect with an error message
 
-        split = Split.objects.get(original_parcel=parcel)
+        split = Split.objects.create(original_parcel=parcel, split_by=request.user)
 
         csv_columns = get_field_names_snake_case(Stone)
 
         csv_data = pd.read_csv(csv_file)
-        data_frame = pd.DataFrame(csv_data, columns=csv_columns)
+        data_frame = pd.DataFrame(csv_data, columns=Stone.basic_grading_fields)
 
         # Get parcel owner
         parcel_transfer = ParcelTransfer.most_recent_transfer(parcel)
@@ -144,11 +152,8 @@ class UploadParcelCSVFile(View):
 
         # Map column_fields to values in a dictionary data structure
         for stone_entry in data_frame.values:
-            data_dict = column_tuple_to_value_tuple_dict_map(csv_columns, stone_entry)
+            data_dict = column_tuple_to_value_tuple_dict_map(Stone.basic_grading_fields, stone_entry)
             data_dict["data_entry_user"] = request.user
-
-            # Delete ID
-            del data_dict["ID"]
 
             # Set the split_from value
             data_dict["split_from"] = split
@@ -163,9 +168,18 @@ class UploadParcelCSVFile(View):
                 messages.add_message(request, messages.ERROR, f"Grader: {data_dict['grader_1']} Does not exist")
                 return HttpResponseRedirect(reverse("grading:upload_parcel_csv"))
 
+            try:
+                inclusions = Inclusion.objects.get(inclusion=data_dict["inclusions"])
+            except Inclusion.DoesNotExist:
+                messages.add_message(request, messages.ERROR, f"Inclusion: {data_dict['inclusions']} Does not exist")
+                return HttpResponseRedirect(reverse("grading:upload_parcel_csv"))
+
+            del data_dict["inclusions"]
+
             # Create Stones
             stone = Stone.objects.create(**data_dict)
             stone.split_from = split
+            stone.inclusions.add(inclusions)
             stone.save()
 
             # Generates basic id hash

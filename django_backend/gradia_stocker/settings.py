@@ -127,7 +127,7 @@ MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), "media")
 # for the compiled assets from the frontend
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "frontend_static_files")]
 
-LOGIN_URL = "/accounts/login/"
+LOGIN_URL = "/admin/login/"
 LOGIN_REDIRECT_URL = "/admin/"
 LOGOUT_REDIRECT_URL = "/admin/"
 
