@@ -13,9 +13,7 @@ User = get_user_model()
 class TestCSVUpload(TestCase):
 
     fixtures = (
-        "grading/tests/fixtures/basic_grading_fixtures.json",
-        "grading/tests/fixtures/default_users.json",
-        "grading/fixtures/inclusions.json",
+        "grading/fixtures/test_data.json",
     )
 
     def setUp(self):
@@ -32,13 +30,15 @@ class TestCSVUpload(TestCase):
 
         self.parcel = Parcel.objects.get(gradia_parcel_code=self.gradia_parcel_code)
 
+        # delete the already existing stone
+        Stone.objects.first().delete()
+
     def test_views_basic_grading_uploads_with_valid_in_csv_file_fields_and_returns_201(self):
-        self.client.login(username="graderuser", password="Passw0rd!")
+        self.client.login(username="gary", password="password")
         response = self.client.post(self.basic_grading_url, {"file": self.csv_file})
         self.assertEqual(response.status_code, 302)
-
         stones = Stone.objects.all()
-        self.assertEqual(len(stones), 19)
+        self.assertEqual(len(stones), 14)
 
         split = Split.objects.get(original_parcel=self.parcel)
 
@@ -72,7 +72,7 @@ class TestCSVUpload(TestCase):
 
         # Reopen file and upload ===> Cursor reached end after above action
         self.csv_file = open("grading/tests/fixtures/123456789.csv", "r")
-        self.client.login(username="graderuser", password="Passw0rd!")
+        self.client.login(username="gary", password="password")
         self.client.post(self.basic_grading_url, {"file": self.csv_file})
 
         # Check that all uploaded stones have external_ids
