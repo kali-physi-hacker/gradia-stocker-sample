@@ -180,7 +180,9 @@ class UploadBasicParcelCSVFile(LoginRequiredMixin, View):
                     inclusion = Inclusion.objects.get(inclusion=inclusion)
                     inclusions.append(inclusion)
                 except Inclusion.DoesNotExist:
-                    messages.add_message(request, messages.ERROR, f"Inclusion: {data_dict['basic_inclusions']} Does not exist")
+                    messages.add_message(
+                        request, messages.ERROR, f"Inclusion: {data_dict['basic_inclusions']} Does not exist"
+                    )
                     return HttpResponseRedirect(reverse("grading:upload_parcel_csv"))
 
             del data_dict["basic_inclusions"]

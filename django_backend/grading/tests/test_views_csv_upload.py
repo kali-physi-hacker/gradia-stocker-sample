@@ -12,9 +12,7 @@ User = get_user_model()
 
 class TestCSVUpload(TestCase):
 
-    fixtures = (
-        "grading/fixtures/test_data.json",
-    )
+    fixtures = ("grading/fixtures/test_data.json",)
 
     def setUp(self):
         # receipt_number = "012345689"

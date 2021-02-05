@@ -7,9 +7,7 @@ from grading.models import Stone
 
 
 class TestIDHashGeneration(TestCase):
-    fixtures = (
-        "data_migration/test_data.json",
-    )
+    fixtures = ("data_migration/test_data.json",)
 
     def setUp(self):
 

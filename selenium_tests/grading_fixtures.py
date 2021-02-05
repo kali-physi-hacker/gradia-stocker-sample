@@ -360,8 +360,7 @@ def stones_setup(django_user_model, receipt, data_entry_clerk, grader, reception
             upper_half_angle_grade=GeneralGrades.GOOD,
             lower_half_angle=1,
             lower_half_angle_grade=GeneralGrades.GOOD,
-        )
-
+        ),
     ]
     for s in stone_list:
         StoneTransfer.objects.create(

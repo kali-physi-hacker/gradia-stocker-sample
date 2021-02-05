@@ -214,9 +214,9 @@ class Parcel(AbstractParcel):
                         f"<a href='{reverse('grading:return_to_vault', args=[self.id])}'>Return to Vault</a>"
                     )
             if (
-                    transfer.in_transit()
-                    and transfer.to_user.username == "vault"
-                    and user.groups.filter(name="vault_manager").exists()
+                transfer.in_transit()
+                and transfer.to_user.username == "vault"
+                and user.groups.filter(name="vault_manager").exists()
             ):
                 return format_html(
                     f"<a href='{reverse('grading:confirm_received', args=[self.id])}'>Confirm Stones for Vault</a>"
@@ -450,8 +450,12 @@ class BasicGradingMixin(models.Model):
     diamond_description = models.CharField(max_length=120, null=True, blank=True)
 
     grader_1 = models.ForeignKey(User, on_delete=models.PROTECT, related_name="grader_1_for_stone")
-    grader_2 = models.ForeignKey(User, on_delete=models.PROTECT, related_name="grader_2_for_stone", blank=True, null=True)
-    grader_3 = models.ForeignKey(User, on_delete=models.PROTECT, related_name="grader_3_for_stone", blank=True, null=True)
+    grader_2 = models.ForeignKey(
+        User, on_delete=models.PROTECT, related_name="grader_2_for_stone", blank=True, null=True
+    )
+    grader_3 = models.ForeignKey(
+        User, on_delete=models.PROTECT, related_name="grader_3_for_stone", blank=True, null=True
+    )
 
     basic_carat = models.DecimalField(max_digits=5, decimal_places=3)
 
