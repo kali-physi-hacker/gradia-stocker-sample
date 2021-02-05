@@ -1,14 +1,9 @@
-import os
-import csv
 from datetime import datetime
 
 from django.contrib import admin
-from django.conf import settings
 from django.contrib.auth.models import User
-from django.http import HttpResponse
 from django.utils.timezone import utc
 from django.http import HttpResponse
-from django.urls import path
 
 from ownerships.models import ParcelTransfer, StoneTransfer
 
@@ -270,11 +265,11 @@ class StoneAdmin(admin.ModelAdmin):
         return [
             "external_id",
             "current_location",
-            "carat_weight",
-            "color",
-            "clarity",
-            "fluoresence",
-            "culet",
+            # "carat_weight",
+            "basic_final_color",
+            "basic_final_clarity",
+            "basic_fluorescence",
+            "basic_culet",
             "split_from",
         ]
 
