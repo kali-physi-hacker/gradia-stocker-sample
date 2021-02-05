@@ -6,7 +6,25 @@
       "password": "pbkdf2_sha256$180000$QEWXsDCN7uNC$l6sDhyYZgeYLlv9NeGX13/cylvLbl/RhnwL0qzsChbs=",
       "last_login": null,
       "is_superuser": false,
-      "username": "graderuser",
+      "username": "tanly",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2020-12-04T06:00:35.918Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 2,
+    "fields": {
+      "password": "pbkdf2_sha256$180000$QEWXsDCN7uNC$l6sDhyYZgeYLlv9NeGX13/cylvLbl/RhnwL0qzsChbs=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "gary",
       "first_name": "",
       "last_name": "",
       "email": "",

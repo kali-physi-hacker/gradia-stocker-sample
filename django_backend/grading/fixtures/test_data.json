@@ -1,136 +1,507 @@
 [
-    {
-        "model": "grading.stone",
-        "pk": 1,
-        "fields": {
-            "data_entry_user": "data_entry_clerk",
-            "internal_id": "1",
-            "split_from": "split",
-            "basic_carat": 4,
-            "basic_culet": "VERY_SMALL",
-            "basic_fluorescence": "M",
-            "grader_1": 1,
-            "basic_color_1": "D",
-            "basic_final_color": "D",
-            "basic_clarity_1": "IF",
-            "basic_final_clarity": "IF",
-            "basic_polish_1": "GOOD",
-            "basic_final_polish": "GOOD",
-            "diameter_min": 10,
-            "diameter_max": 12,
-            "height": 14,
-            "girdle_min": "THIN",
-            "girdle_max": "THIN",
-            "girdle_grade": "THIN",
-            "culet_size": "M",
-            "total_depth": 43,
-            "total_depth_grade": "EX",
-            "sheryl_cut": "EX",
-            "sarine_cut": "EX",
-            "cut_grade_est_table": "EX",
-            "sarine_symmetry": "GOOD",
-            "symmetry_grade": "GOOD",
-            "roundness": 1,
-            "roundness_grade": "GOOD",
-            "table_size": 43,
-            "table_size_grade": "GOOD",
-            "crown_angle": 23,
-            "crown_angle_grade": "GOOD",
-            "pavilion_angle": 54,
-            "pavilion_angle_grade": "GOOD",
-            "star_length": 24,
-            "star_length_grade": "GOOD",
-            "lower_half": 94,
-            "lower_half_grade": "GOOD",
-            "girdle_thick": 1,
-            "girdle_thick_grade": "GOOD",
-            "crown_height": 53,
-            "crown_height_grade": "GOOD",
-            "pavilion_depth": 23,
-            "pavilion_depth_grade": "GOOD",
-            "misalignment": 1,
-            "misalignment_grade": "GOOD",
-            "table_edge_var": 1,
-            "table_edge_var_grade": "GOOD",
-            "table_off_center": 1,
-            "table_off_center_grade": "GOOD",
-            "culet_off_center": 1,
-            "culet_off_center_grade": "GOOD",
-            "table_off_culet": 1,
-            "table_off_culet_grade": "GOOD",
-            "star_angle": 1,
-            "star_angle_grade": "GOOD",
-            "upper_half_angle": 1,
-            "upper_half_angle_grade": "GOOD",
-            "lower_half_angle": 1,
-            "lower_half_angle_grade": "GOOD"
-        }
-    },
-    {
-        "model": "grading.stone",
-        "pk": 2,
-        "fields": {
-            "data_entry_user": "data_entry_clerk",
-            "internal_id": "stoneid2",
-            "split_from": "split",
-            "basic_carat": 4,
-            "basic_culet": "VERY_SMALL",
-            "basic_fluorescence": "M",
-            "grader_1": 1,
-            "basic_color_1": "D",
-            "basic_final_color": "D",
-            "basic_clarity_1": "IF",
-            "basic_final_clarity": "IF",
-            "basic_polish_1": "GOOD",
-            "basic_final_polish": "GOOD",
-            "diameter_min": 10,
-            "diameter_max": 12,
-            "height": 14,
-            "girdle_min": "THIN",
-            "girdle_max": "THIN",
-            "girdle_grade": "THIN",
-            "culet_size": "M",
-            "total_depth": 43,
-            "total_depth_grade": "EX",
-            "sheryl_cut": "EX",
-            "sarine_cut": "EX",
-            "cut_grade_est_table": "EX",
-            "sarine_symmetry": "GOOD",
-            "symmetry_grade": "GOOD",
-            "roundness": 1,
-            "roundness_grade": "GOOD",
-            "table_size": 43,
-            "table_size_grade": "GOOD",
-            "crown_angle": 23,
-            "crown_angle_grade": "GOOD",
-            "pavilion_angle": 54,
-            "pavilion_angle_grade": "GOOD",
-            "star_length": 24,
-            "star_length_grade": "GOOD",
-            "lower_half": 94,
-            "lower_half_grade": "GOOD",
-            "girdle_thick": 1,
-            "girdle_thick_grade": "GOOD",
-            "crown_height": 53,
-            "crown_height_grade": "GOOD",
-            "pavilion_depth": 23,
-            "pavilion_depth_grade": "GOOD",
-            "misalignment": 1,
-            "misalignment_grade": "GOOD",
-            "table_edge_var": 1,
-            "table_edge_var_grade": "GOOD",
-            "table_off_center": 1,
-            "table_off_center_grade": "GOOD",
-            "culet_off_center": 1,
-            "culet_off_center_grade": "GOOD",
-            "table_off_culet": 1,
-            "table_off_culet_grade": "GOOD",
-            "star_angle": 1,
-            "star_angle_grade": "GOOD",
-            "upper_half_angle": 1,
-            "upper_half_angle_grade": "GOOD",
-            "lower_half_angle": 1,
-            "lower_half_angle_grade": "GOOD"
-        }
+  {
+    "model": "auth.user",
+    "pk": 1,
+    "fields": {
+      "password": "pbkdf2_sha256$216000$yRVyAZiHvROn$BHTrsb91lUIz/P7SN9IlO7NG+131fusOB/l9cFD2/ZY=",
+      "last_login": "2021-02-04T19:13:27.822Z",
+      "is_superuser": true,
+      "username": "admin",
+      "first_name": "",
+      "last_name": "",
+      "email": "admin@email.com",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2021-02-04T19:13:01.166Z",
+      "groups": [],
+      "user_permissions": []
     }
+  },
+  {
+    "model": "auth.user",
+    "pk": 2,
+    "fields": {
+      "password": "pbkdf2_sha256$216000$0tcuOOWKU8N8$WwRoGqjsDoRFUmOGTZtsgafSE0igLvHuoh8B0/Dt0lg=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "test_grader_user",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2021-02-04T19:15:50.812Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 3,
+    "fields": {
+      "password": "pbkdf2_sha256$216000$c8hsuoCCDB3a$aYp7q+GwA10yKgiYwDb/RS7/U31WadMGLBdU75hZRf4=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "vault",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2021-02-04T19:24:52.046Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 4,
+    "fields": {
+      "password": "pbkdf2_sha256$216000$iQSUR3qNHdm3$fqOSh1HEYY2NTIZUL5oNgFJ+vSod9hktx9dAcIOHd+E=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "tanly",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2020-12-04T06:00:35.918Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 5,
+    "fields": {
+      "password": "pbkdf2_sha256$216000$iQSUR3qNHdm3$fqOSh1HEYY2NTIZUL5oNgFJ+vSod9hktx9dAcIOHd+E=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "gary",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2020-12-04T06:00:35.918Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 6,
+    "fields": {
+      "password": "pbkdf2_sha256$216000$iQSUR3qNHdm3$fqOSh1HEYY2NTIZUL5oNgFJ+vSod9hktx9dAcIOHd+E=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "split",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2020-12-04T06:00:35.918Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "customers.entity",
+    "pk": 1,
+    "fields": {
+      "name": "Entity 1",
+      "address": "no address",
+      "remarks": "",
+      "phone": "0123456789",
+      "email": "test@email.com"
+    }
+  },
+  {
+    "model": "customers.entity",
+    "pk": 2,
+    "fields": {
+      "name": "Entity 2",
+      "address": "no address",
+      "remarks": "",
+      "phone": "0123456789",
+      "email": "test@email.com"
+    }
+  },
+  {
+    "model": "customers.entity",
+    "pk": 3,
+    "fields": {
+      "name": "Entity 3",
+      "address": "no address",
+      "remarks": "",
+      "phone": "0123456789",
+      "email": "test@email.com"
+    }
+  },
+  {
+    "model": "customers.authorizedpersonnel",
+    "pk": 1,
+    "fields": {
+      "entity": 1,
+      "position": "Tester",
+      "name": "Test Name",
+      "email": "tester@email.com",
+      "mobile": "0123456789",
+      "hkid": "noting her",
+      "remarks": ""
+    }
+  },
+  {
+    "model": "grading.split",
+    "pk": 1,
+    "fields": {
+      "original_parcel": 1,
+      "split_by": 3,
+      "split_date": "2021-02-04T19:28:05.614Z"
+    }
+  },
+  {
+    "model": "grading.receipt",
+    "pk": 1,
+    "fields": {
+      "entity": 1,
+      "code": "Vk01",
+      "intake_date": "2021-02-04T19:27:38.070Z",
+      "release_date": "2021-02-04T19:27:32Z",
+      "intake_by": 3,
+      "release_by": null
+    }
+  },
+  {
+    "model": "grading.receipt",
+    "pk": 2,
+    "fields": {
+      "entity": 2,
+      "code": "Vk02",
+      "intake_date": "2021-02-04T19:27:38.070Z",
+      "release_date": "2021-02-04T19:27:32Z",
+      "intake_by": 3,
+      "release_by": null
+    }
+  },
+  {
+    "model": "grading.receipt",
+    "pk": 3,
+    "fields": {
+      "entity": 3,
+      "code": "Vk03",
+      "intake_date": "2021-02-04T19:27:38.070Z",
+      "release_date": "2021-02-04T19:27:32Z",
+      "intake_by": 3,
+      "release_by": null
+    }
+  },
+  {
+    "model": "grading.parcel",
+    "pk": 1,
+    "fields": {
+      "receipt": 1,
+      "customer_parcel_code": "VK01",
+      "total_carats": "50.000",
+      "total_pieces": 50,
+      "reference_price_per_carat": 5,
+      "split_from": null,
+      "gradia_parcel_code": "987654321"
+    }
+  },
+  {
+    "model": "grading.parcel",
+    "pk": 2,
+    "fields": {
+      "receipt": 1,
+      "customer_parcel_code": "VK01",
+      "total_carats": "50.000",
+      "total_pieces": 50,
+      "reference_price_per_carat": 5,
+      "split_from": null,
+      "gradia_parcel_code": "123456789"
+    }
+  },
+  {
+    "model": "grading.stone",
+    "pk": 1,
+    "fields": {
+      "internal_id": 100,
+      "diamond_description": null,
+      "grader_1": 2,
+      "grader_2": null,
+      "grader_3": null,
+      "basic_color_1": "E",
+      "basic_color_2": "D",
+      "basic_color_3": "G",
+      "basic_clarity_1": "VVS2",
+      "basic_clarity_2": "VS2",
+      "basic_clarity_3": "IF",
+      "basic_culet": "N",
+      "basic_polish_1": "GD",
+      "basic_polish_2": "EX",
+      "basic_polish_3": "F",
+      "basic_final_polish": "EX",
+      "basic_carat": "0.09",
+      "diameter_min": "2.30",
+      "diameter_max": "2.39",
+      "height": "1.76",
+      "table_size": "56.4",
+      "crown_angle": "60.30",
+      "pavilion_angle": "40.39",
+      "star_length": "43.2",
+      "lower_half": "64.3",
+      "girdle_thick": "4.20",
+      "girdle_min": "3.50",
+      "girdle_max": "4.30",
+      "culet_size": "0.52",
+      "crown_height": "14.32",
+      "pavilion_depth": "45.30",
+      "total_depth": "50.40",
+      "table_size_pct": 43,
+      "table_size_pct_grade": "VG",
+      "crown_angle_degree": "23.0",
+      "crown_angle_degree_grade": "GD",
+      "pavilion_angle_degree": "23.0",
+      "pavilion_angle_degree_grade": "GD",
+      "star_length_degree": 43,
+      "star_length_degree_grade": "VG",
+      "lower_half_pct": 21,
+      "lower_half_pct_grade": "VG",
+      "girdle_thick_pct": "25.0",
+      "girdle_thick_pct_grade": "GD",
+      "girdle_min_description": "F",
+      "girdle_max_description": "VTN",
+      "girdle_grade": "GD",
+      "culet_size_description": "N/XL",
+      "crown_height_pct": "45.0",
+      "crown_height_pct_grade": "GD",
+      "pavilion_depth_pct": "34.0",
+      "total_depth_pct": "44.0",
+      "total_depth_pct_grade": "P",
+      "star_length_pct": 23,
+      "star_length_pct_grade": "GD",
+      "parameter_cut_grade": "GD",
+      "est_table_cut_grade": "EX",
+      "gradia_cut": "P",
+      "final_gradia_cut": "GD",
+      "final_sarine_cut": "GD",
+      "sarine_cut": "VG",
+      "sarine_symmetry": "P",
+      "roundness": "53.0",
+      "roundness_grade": "F",
+      "table_size_dev": "23.0",
+      "table_size_dev_grade": "P",
+      "crown_angle_dev": "32.0",
+      "crown_angle_dev_grade": "EX",
+      "pavilion_angle_dev": "73.0",
+      "pavilion_angle_dev_grade": "GD",
+      "star_length_dev": "23.0",
+      "star_length_dev_grade": "VG",
+      "lower_half_dev": "39.0",
+      "lower_half_dev_grade": "VG",
+      "girdle_thick_dev": "32.0",
+      "girdle_thick_dev_grade": "VG",
+      "crown_height_dev": "20.0",
+      "crown_height_dev_grade": "VG",
+      "pavilion_depth_dev": "39.0",
+      "pavilion_depth_dev_grade": "GD",
+      "misalignment": "39.0",
+      "misalignment_grade": "GD",
+      "table_edge_var": "95.4",
+      "table_edge_var_grade": "GD",
+      "table_off_center": "50.1",
+      "table_off_center_grade": "VG",
+      "culet_off_center": "39.0",
+      "culet_off_center_grade": "VG",
+      "table_off_culet": "43.0",
+      "table_off_culet_grade": "VG",
+      "star_angle": "50.2",
+      "star_angle_grade": "GD",
+      "upper_half_angle": "23.4",
+      "upper_half_angle_grade": "GD",
+      "lower_half_angle": "40.4",
+      "lower_half_angle_grade": "F",
+      "gia_returned_date": "2021-02-04T19:28:20Z",
+      "external_id": null,
+      "post_gw_final_carat": null,
+      "basic_final_color": "G",
+      "post_gw_final_color": "G",
+      "gia_color": "F",
+      "post_gia_final_color": "D",
+      "gia_material_testing": null,
+      "data_entry_user": 2,
+      "split_from": 1
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 1,
+    "fields": {
+      "inclusion": "Br"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 2,
+    "fields": {
+      "inclusion": "Cv"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 3,
+    "fields": {
+      "inclusion": "Ch"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 4,
+    "fields": {
+      "inclusion": "Clv"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 5,
+    "fields": {
+      "inclusion": "Cld"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 6,
+    "fields": {
+      "inclusion": "Xtl"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 7,
+    "fields": {
+      "inclusion": "Ftr"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 8,
+    "fields": {
+      "inclusion": "GrCnt"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 9,
+    "fields": {
+      "inclusion": "IndN"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 10,
+    "fields": {
+      "inclusion": "IntGr"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 11,
+    "fields": {
+      "inclusion": "K"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 12,
+    "fields": {
+      "inclusion": "LDH"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 13,
+    "fields": {
+      "inclusion": "Ndl"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 14,
+    "fields": {
+      "inclusion": "Pp"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 15,
+    "fields": {
+      "inclusion": "W"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 16,
+    "fields": {
+      "inclusion": "Abr"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 17,
+    "fields": {
+      "inclusion": "N"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 18,
+    "fields": {
+      "inclusion": "Nk"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 19,
+    "fields": {
+      "inclusion": "Pit"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 20,
+    "fields": {
+      "inclusion": "PL"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 21,
+    "fields": {
+      "inclusion": "Brn"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 22,
+    "fields": {
+      "inclusion": "S"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 23,
+    "fields": {
+      "inclusion": "SGr"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 24,
+    "fields": {
+      "inclusion": "EF"
+    }
+  }
 ]
