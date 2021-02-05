@@ -8,9 +8,7 @@ from grading.models import Stone
 
 class TestIDHashGeneration(TestCase):
     fixtures = (
-        "grading/tests/fixtures/basic_grading_fixtures.json",
-        "grading/tests/fixtures/default_users.json",
-        "grading/fixtures/inclusions.json",
+        "data_migration/test_data.json",
     )
 
     def setUp(self):
@@ -40,10 +38,6 @@ class TestIDHashGeneration(TestCase):
         Tests that the basic generated id is saved to stone (DB)
         :return:
         """
-        # If there were a last updated field? We could use that
-        # But for now,
-        # 1. Check that external_id is not empty and the available one is of the
-        # correct format
 
         stone = self.stones[0]
         stone.generate_basic_external_id()
@@ -111,3 +105,9 @@ class TestIDHashGeneration(TestCase):
 
         # Making sure that stone_2 stone_1 have different value for external_id
         self.assertNotEqual(stone_1.external_id, stone_2.external_id)
+
+    def test_basic_hashing_hashes_with_the_correct_payload(self):
+        pass
+
+    def test_triple_hashing_hashes_with_the_correct_payload(self):
+        pass
