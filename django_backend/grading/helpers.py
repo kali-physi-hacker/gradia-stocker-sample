@@ -22,3 +22,13 @@ def get_field_names_snake_case(model):
     """
     fields = list(field.name for field in model._meta.get_fields())
     return fields
+
+
+def get_model_fields(mixin):
+    """
+    Return a tuple of strings of model field names
+    :param mixin:
+    :return:
+    """
+    fields = [field.name for field in mixin._meta.get_fields()]
+    return fields
