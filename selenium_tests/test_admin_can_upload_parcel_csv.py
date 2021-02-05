@@ -9,7 +9,7 @@ def test_upload_of_csv_parcel_file(browser, data_entry_clerk, stones, inclusions
     :param browser:
     :return:
     """
-
+    # import pdb; pdb.set_trace()
     # TODO: Refactor Tests (CSV Upload file) to conform to parcel ==> original owner
     browser.login(data_entry_clerk.username, data_entry_clerk.raw_password)
 
@@ -34,6 +34,6 @@ def test_upload_of_csv_parcel_file(browser, data_entry_clerk, stones, inclusions
     # split page will contain grader (graderuser according to fixtures),
     # and some other texts
 
-    browser.assert_body_contains_text("123456789")  # this is an internal id from the uploaded csv
+    browser.assert_body_contains_text("parcel1")  # this is the gradia_parcel_code
     browser.assert_body_contains_text(data_entry_clerk.username)
     browser.assert_body_contains_text("Original parcel")
