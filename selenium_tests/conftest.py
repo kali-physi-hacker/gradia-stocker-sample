@@ -37,7 +37,7 @@ def browser(live_server, settings, download_file_dir):
     # ignores everything, and we don't serve the translation files
     settings.DEBUG = True
     chrome_options = webdriver.ChromeOptions()
-    # chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--headless")
     chrome_options.add_argument("--disable-gpu")
     # change the <path_to_download_default_directory> to whatever your default download folder is located
     chrome_options.add_experimental_option(
