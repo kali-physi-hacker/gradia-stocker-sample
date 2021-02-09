@@ -14,9 +14,9 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 from ownerships.models import ParcelTransfer, StoneTransfer
 
-from .models import Parcel, Receipt, Stone, Split, ParcelTransfer, Inclusion
+from .models import Parcel, Receipt, Stone, Split, ParcelTransfer, Inclusion, BasicGradingMixin
 
-from .helpers import column_tuple_to_value_tuple_dict_map, get_field_names_snake_case
+from .helpers import column_tuple_to_value_tuple_dict_map, get_model_fields
 
 from .forms import CSVImportForm
 
@@ -97,7 +97,10 @@ def clean_basic_csv_upload_file(file_path):
     pass
 
 
-class UploadParcelCSVFile(LoginRequiredMixin, View):
+class UploadBasicParcelCSVFile(LoginRequiredMixin, View):
+    fields = get_model_fields(BasicGradingMixin)
+    fields.append("internal_id")
+
     def get(self, request, *args, **kwargs):
         """
         Page to return HTML for upload input field
@@ -137,10 +140,8 @@ class UploadParcelCSVFile(LoginRequiredMixin, View):
 
         split = Split.objects.create(original_parcel=parcel, split_by=request.user)
 
-        csv_columns = get_field_names_snake_case(Stone)
-
         csv_data = pd.read_csv(csv_file)
-        data_frame = pd.DataFrame(csv_data, columns=Stone.basic_grading_fields)
+        data_frame = pd.DataFrame(csv_data, columns=self.fields)
 
         # Get parcel owner
         parcel_transfer = ParcelTransfer.most_recent_transfer(parcel)
@@ -152,7 +153,7 @@ class UploadParcelCSVFile(LoginRequiredMixin, View):
 
         # Map column_fields to values in a dictionary data structure
         for stone_entry in data_frame.values:
-            data_dict = column_tuple_to_value_tuple_dict_map(Stone.basic_grading_fields, stone_entry)
+            data_dict = column_tuple_to_value_tuple_dict_map(self.fields, stone_entry)
             data_dict["data_entry_user"] = request.user
 
             # Set the split_from value
@@ -168,18 +169,29 @@ class UploadParcelCSVFile(LoginRequiredMixin, View):
                 messages.add_message(request, messages.ERROR, f"Grader: {data_dict['grader_1']} Does not exist")
                 return HttpResponseRedirect(reverse("grading:upload_parcel_csv"))
 
-            try:
-                inclusions = Inclusion.objects.get(inclusion=data_dict["inclusions"])
-            except Inclusion.DoesNotExist:
-                messages.add_message(request, messages.ERROR, f"Inclusion: {data_dict['inclusions']} Does not exist")
-                return HttpResponseRedirect(reverse("grading:upload_parcel_csv"))
+            data_dict["grader_2"] = User.objects.filter(username=data_dict["grader_2"]).first()
+            data_dict["grader_3"] = User.objects.filter(username=data_dict["grader_3"]).first()
 
-            del data_dict["inclusions"]
+            # Process inclusions here
+            inclusion_name_list = data_dict["basic_inclusions"].split(", ")
+            inclusions = []
+            for inclusion in inclusion_name_list:
+                try:
+                    inclusion = Inclusion.objects.get(inclusion=inclusion)
+                    inclusions.append(inclusion)
+                except Inclusion.DoesNotExist:
+                    messages.add_message(
+                        request, messages.ERROR, f"Inclusion: {data_dict['basic_inclusions']} Does not exist"
+                    )
+                    return HttpResponseRedirect(reverse("grading:upload_parcel_csv"))
+
+            del data_dict["basic_inclusions"]
 
             # Create Stones
             stone = Stone.objects.create(**data_dict)
             stone.split_from = split
-            stone.inclusions.add(inclusions)
+            for inclusion in inclusions:
+                stone.basic_inclusions.add(inclusion.pk)
             stone.save()
 
             # Generates basic id hash
@@ -193,6 +205,7 @@ class UploadParcelCSVFile(LoginRequiredMixin, View):
                 to_user=parcel_owner,
                 confirmed_date=datetime.utcnow().replace(tzinfo=utc),
             )
+
         return HttpResponseRedirect(reverse("admin:grading_split_change", args=(split.pk,)))
 
 

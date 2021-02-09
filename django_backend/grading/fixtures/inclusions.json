@@ -3,133 +3,168 @@
     "model": "grading.inclusion",
     "pk": 1,
     "fields": {
-      "inclusion": "BR"
+      "inclusion": "Br"
     }
   },
   {
     "model": "grading.inclusion",
     "pk": 2,
     "fields": {
-      "inclusion": "CV"
+      "inclusion": "Cv"
     }
   },
   {
     "model": "grading.inclusion",
     "pk": 3,
     "fields": {
-      "inclusion": "CH"
+      "inclusion": "Ch"
     }
   },
   {
     "model": "grading.inclusion",
     "pk": 4,
     "fields": {
-      "inclusion": "CL"
+      "inclusion": "Clv"
     }
   },
   {
     "model": "grading.inclusion",
     "pk": 5,
     "fields": {
-      "inclusion": "F"
+      "inclusion": "Cld"
     }
   },
   {
     "model": "grading.inclusion",
     "pk": 6,
     "fields": {
-      "inclusion": "IC"
+      "inclusion": "Xtl"
     }
   },
   {
     "model": "grading.inclusion",
     "pk": 7,
     "fields": {
-      "inclusion": "IN"
+      "inclusion": "Ftr"
     }
   },
   {
     "model": "grading.inclusion",
     "pk": 8,
     "fields": {
-      "inclusion": "IG"
+      "inclusion": "GrCnt"
     }
   },
   {
     "model": "grading.inclusion",
     "pk": 9,
     "fields": {
-      "inclusion": "ND"
+      "inclusion": "IndN"
     }
   },
   {
     "model": "grading.inclusion",
     "pk": 10,
     "fields": {
-      "inclusion": "PP"
+      "inclusion": "IntGr"
     }
   },
   {
     "model": "grading.inclusion",
     "pk": 11,
     "fields": {
-      "inclusion": "AB"
+      "inclusion": "K"
     }
   },
   {
     "model": "grading.inclusion",
     "pk": 12,
     "fields": {
-      "inclusion": "SC"
+      "inclusion": "LDH"
     }
   },
   {
     "model": "grading.inclusion",
     "pk": 13,
     "fields": {
-      "inclusion": "NK"
+      "inclusion": "Ndl"
     }
   },
   {
     "model": "grading.inclusion",
     "pk": 14,
     "fields": {
-      "inclusion": "PL"
+      "inclusion": "Pp"
     }
   },
   {
     "model": "grading.inclusion",
     "pk": 15,
     "fields": {
-      "inclusion": "PT"
+      "inclusion": "W"
     }
   },
   {
     "model": "grading.inclusion",
     "pk": 16,
     "fields": {
-      "inclusion": "N"
+      "inclusion": "Abr"
     }
   },
   {
     "model": "grading.inclusion",
     "pk": 17,
     "fields": {
-      "inclusion": "EF"
+      "inclusion": "N"
     }
   },
   {
     "model": "grading.inclusion",
     "pk": 18,
     "fields": {
-      "inclusion": "SG"
+      "inclusion": "Nk"
     }
   },
   {
     "model": "grading.inclusion",
     "pk": 19,
     "fields": {
-      "inclusion": "KN"
+      "inclusion": "Pit"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 20,
+    "fields": {
+      "inclusion": "PL"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 21,
+    "fields": {
+      "inclusion": "Brn"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 22,
+    "fields": {
+      "inclusion": "S"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 23,
+    "fields": {
+      "inclusion": "SGr"
+    }
+  },
+  {
+    "model": "grading.inclusion",
+    "pk": 24,
+    "fields": {
+      "inclusion": "EF"
     }
   }
 ]
