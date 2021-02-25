@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "grading",
     "ownerships",
     "purchases",
+    "stonegrading",
 ]
 
 MIDDLEWARE = [
