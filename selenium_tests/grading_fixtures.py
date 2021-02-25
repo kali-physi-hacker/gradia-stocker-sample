@@ -11,10 +11,11 @@ from grading.models import (
     Receipt,
     Split,
     Stone,
-    Inclusions,
-    Inclusion,
 )
 from ownerships.models import ParcelTransfer, StoneTransfer
+
+from stonegrading.models import Inclusion
+from stonegrading.grades import Inclusions
 
 
 @pytest.fixture
