@@ -14,9 +14,11 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 from ownerships.models import ParcelTransfer, StoneTransfer
 
-from .models import Parcel, Receipt, Stone, Split, ParcelTransfer, Inclusion, BasicGradingMixin
+from .models import Parcel, Receipt, Stone, Split, ParcelTransfer, BasicGradingMixin
 
 from .helpers import column_tuple_to_value_tuple_dict_map, get_model_fields
+
+from stonegrading.models import Inclusion
 
 from .forms import CSVImportForm
 
