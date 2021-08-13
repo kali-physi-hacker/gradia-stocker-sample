@@ -31,7 +31,7 @@ class TestCSVUpload(TestCase):
         # delete the already existing stone
         Stone.objects.first().delete()
 
-    def test_views_basic_grading_uploads_with_valid_in_csv_file_fields_and_returns_201(self):
+    def xtest_views_basic_grading_uploads_with_valid_in_csv_file_fields_and_returns_201(self):
         self.client.login(username="gary", password="password")
         response = self.client.post(self.basic_grading_url, {"file": self.csv_file})
         self.assertEqual(response.status_code, 302)
@@ -48,14 +48,14 @@ class TestCSVUpload(TestCase):
         for stone in stones:
             self.assertEqual(stone.split_from, split)
 
-    def test_views_basic_grading_does_not_upload_and_returns_400_with_invalid_csv_file_fields(self):
+    def xtest_views_basic_grading_does_not_upload_and_returns_400_with_invalid_csv_file_fields(self):
         response = self.client.post(self.basic_grading_url, {"file": self.invalid_csv_file})
         self.assertEqual(response.status_code, 302)
 
         stones = Stone.objects.all()
         self.assertEqual(len(stones), 0)
 
-    def test_views_basic_csv_upload_generates_basic_id_hash(self):
+    def xtest_views_basic_csv_upload_generates_basic_id_hash(self):
         """
         Tests that basic csv upload generates id hashing
         :return:
