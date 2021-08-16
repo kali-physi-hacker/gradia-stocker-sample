@@ -11,7 +11,6 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('stonegrading', '0004_delete_giagradingadjustmixin'),
         ('customers', '0001_initial'),
     ]
 
