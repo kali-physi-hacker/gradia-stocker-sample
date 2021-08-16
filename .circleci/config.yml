@@ -36,7 +36,7 @@ commands:
     - run:
         command: |
           . ./venv/bin/activate
-          black --line-length 117 --check django_backend selenium_tests
+          black --line-length 117 --exclude '^.*\b(migrations)\b.*$' --check django_backend selenium_tests
   django_checks:
     steps:
     - run:
