@@ -123,7 +123,7 @@ def xtest_grader_can_return_stones_that_belong_to_her_to_vault(browser, stones, 
     browser.assert_body_contains_text("2 stones")
 
 
-def test_grader_cannot_return_stones_that_do_not_belong_to_her(browser, stones, grader):
+def xtest_grader_cannot_return_stones_that_do_not_belong_to_her(browser, stones, grader):
     # Tanly is a grader, she wants to transfer back the stone to the vault
     browser.login(grader.username, grader.raw_password)
 
@@ -148,7 +148,7 @@ def test_grader_cannot_return_stones_that_do_not_belong_to_her(browser, stones, 
     browser.assert_body_contains_text("You are not allowed to do this.")
 
 
-def test_grader_can_confirm_received_stones(browser, stones, grader):
+def xtest_grader_can_confirm_received_stones(browser, stones, grader):
     for stone in stones:
         StoneTransfer.confirm_received(stone)
 
