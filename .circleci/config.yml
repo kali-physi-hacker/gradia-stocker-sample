@@ -87,14 +87,14 @@ jobs:
     steps:
     - steps: <<parameters.before_install>>
     - restore_cache:
-        key: deps1-{{ .Branch }}-{{ checksum "requirements39.txt" }}
+        key: deps1-{{ .Branch }}-{{ checksum "-requirements39.txt" }}
     - python_install
     - persist_to_workspace:
         paths:
         - project
         root: ~/
     - save_cache:
-        key: deps1-{{ .Branch }}-{{ checksum "requirements39.txt" }}
+        key: deps1-{{ .Branch }}-{{ checksum "-requirements39.txt" }}
         paths:
         - "venv"
   linting:
