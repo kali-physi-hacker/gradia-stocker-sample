@@ -13,7 +13,15 @@ from django.db.utils import IntegrityError
 from django.urls import reverse
 from django.utils.html import format_html
 
-from stonegrading.mixins import BasicGradingMixin, GIAGradingMixin, GWAIGradingMixin, PostGWGradingMixin
+from stonegrading.mixins import (
+    BasicGradingMixin,
+    GIAGradingMixin,
+    GIAGradingAdjustMixin,
+    GWGradingMixin,
+    GWGradingAdjustMixin,
+    AutoGradeMixin,
+    SarineGradingMixin,
+)
 from stonegrading.grades import (
     ColorGrades,
     CuletGrades,
@@ -275,7 +283,15 @@ class GiaVerification(models.Model):
 #         return self.inclusion
 
 
-class Stone(GIAGradingMixin, PostGWGradingMixin, GWAIGradingMixin, BasicGradingMixin):
+class Stone(
+    SarineGradingMixin,
+    BasicGradingMixin,
+    GIAGradingMixin,
+    GIAGradingAdjustMixin,
+    GWGradingMixin,
+    GWGradingAdjustMixin,
+    AutoGradeMixin,
+):
     data_entry_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="entered_data_for_stone")
     split_from = models.ForeignKey(Split, on_delete=models.PROTECT)
     gia_verification = models.ForeignKey(GiaVerification, on_delete=models.PROTECT, blank=True, null=True)
@@ -300,8 +316,8 @@ class Stone(GIAGradingMixin, PostGWGradingMixin, GWAIGradingMixin, BasicGradingM
         """
         # This is still undergoing refactoring because of the whole Stone refactoring stuff
         payload = (
-            f" {self.internal_id}, {self.basic_final_color}, {self.basic_final_clarity},"
-            f" {self.sarine_cut}, {self.culet_size}"
+            f" {self.internal_id}, {self.basic_color_final}, {self.basic_clarity_final},"
+            f" {self.sarine_cut_pre_polish_symmetry}, {self.culet_size}"
         )
 
         hashed = hashlib.blake2b(digest_size=4)
