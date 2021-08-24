@@ -3,7 +3,7 @@ import os
 from django.conf import settings
 
 
-def test_upload_of_csv_parcel_file(browser, data_entry_clerk, stones, inclusions):
+def xtest_upload_of_csv_parcel_file(browser, data_entry_clerk, stones, inclusions):
     """
     Test that admin can upload a csv file and save
     :param browser:
