@@ -13,14 +13,21 @@ from django.db.utils import IntegrityError
 from django.urls import reverse
 from django.utils.html import format_html
 
+
+"""
+class A
+C3 linear algorithm 
+mro  ==> Method Resolution Order
+"""
+
 from stonegrading.mixins import (
     BasicGradingMixin,
     GIAGradingMixin,
     GIAGradingAdjustMixin,
-    GWGradingMixin,
     GWGradingAdjustMixin,
-    AutoGradeMixin,
+    GWGradingMixin,
     SarineGradingMixin,
+    AutoGradeMixin,
 )
 from stonegrading.grades import (
     ColorGrades,
@@ -286,10 +293,10 @@ class GiaVerification(models.Model):
 class Stone(
     SarineGradingMixin,
     BasicGradingMixin,
-    GIAGradingMixin,
-    GIAGradingAdjustMixin,
     GWGradingMixin,
     GWGradingAdjustMixin,
+    GIAGradingMixin,
+    GIAGradingAdjustMixin,
     AutoGradeMixin,
 ):
     data_entry_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="entered_data_for_stone")

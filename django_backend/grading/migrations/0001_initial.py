@@ -10,9 +10,9 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('stonegrading', '0001_initial'),
-        ('customers', '0001_initial'),
+        ('stonegrading', '0004_alter_inclusion_inclusion'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
+        ('customers', '0001_initial'),
     ]
 
     operations = [
