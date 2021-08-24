@@ -146,8 +146,6 @@ class SarineUploadView(LoginRequiredMixin, View):
 
         split = Split.objects.create(original_parcel=parcel, split_by=request.user)
 
-        SarineGradingMixin._meta.get_field("internal_id").get_internal_type()
-
         csv_data = pd.read_csv(csv_file)
         data_frame = pd.DataFrame(csv_data, columns=self.fields)
 

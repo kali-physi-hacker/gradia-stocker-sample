@@ -20,7 +20,6 @@ C3 linear algorithm
 mro  ==> Method Resolution Order
 """
 
-
 from stonegrading.mixins import (
     BasicGradingMixin,
     GIAGradingMixin,
@@ -324,8 +323,8 @@ class Stone(
         """
         # This is still undergoing refactoring because of the whole Stone refactoring stuff
         payload = (
-            f" {self.internal_id}, {self.basic_final_color}, {self.basic_final_clarity},"
-            f" {self.sarine_cut}, {self.culet_size}"
+            f" {self.internal_id}, {self.basic_color_final}, {self.basic_clarity_final},"
+            f" {self.sarine_cut_pre_polish_symmetry}, {self.culet_size}"
         )
 
         hashed = hashlib.blake2b(digest_size=4)

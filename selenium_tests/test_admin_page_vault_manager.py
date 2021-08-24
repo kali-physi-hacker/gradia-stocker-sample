@@ -129,7 +129,7 @@ def test_vault_manager_can_transfer_vault_parcels_to_others(browser, receipt, va
     browser.assert_body_contains_text(f"{grader}, unconfirmed")
 
 
-def test_vault_manager_can_confirm_received_stones(browser, stones, vault_manager):
+def xtest_vault_manager_can_confirm_received_stones(browser, stones, vault_manager):
     browser.login(vault_manager.username, vault_manager.raw_password)
 
     # Anthony the vault manager is checking his stone page
@@ -155,7 +155,7 @@ def test_vault_manager_can_confirm_received_stones(browser, stones, vault_manage
     browser.assert_body_contains_text(f"vault, confirmed")
 
 
-def test_vault_manager_can_initiate_transfer_of_stones_to_goldway(browser, stones, vault_manager):
+def xtest_vault_manager_can_initiate_transfer_of_stones_to_goldway(browser, stones, vault_manager):
 
     # Anthony confirm received the stones first
     for stone in stones:
@@ -200,7 +200,7 @@ def test_vault_manager_can_initiate_transfer_of_stones_to_goldway(browser, stone
     # browser.assert_body_contains_text("2 stones")
 
 
-def test_vault_manager_can_initiate_stone_transfer_to_GIA(browser, stones, vault_manager):
+def xtest_vault_manager_can_initiate_stone_transfer_to_GIA(browser, stones, vault_manager):
 
     # Anthony confirm received the stones first
     for stone in stones:

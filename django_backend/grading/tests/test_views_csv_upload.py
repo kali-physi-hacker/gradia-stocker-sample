@@ -51,6 +51,7 @@ class TestCSVUpload(TestCase):
         Tests that sarine data can be uploaded successfully if the csv file is valid
         :return:
         """
+        Stone.objects.all().delete()
         self.client.login(username="gary", password="password")
         response = self.client.post(self.sarine_data_upload_url, {"file": self.sarine_upload_csv_file})
         self.assertEqual(response.status_code, 302)
