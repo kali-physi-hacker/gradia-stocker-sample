@@ -11,7 +11,13 @@ from skimage.draw import disk, line_aa
 from skimage.feature import canny
 from skimage.io import imread
 from skimage.transform import (
-    hough_circle, hough_circle_peaks, hough_line, hough_line_peaks, probabilistic_hough_line, resize, rotate
+    hough_circle,
+    hough_circle_peaks,
+    hough_line,
+    hough_line_peaks,
+    probabilistic_hough_line,
+    resize,
+    rotate,
 )
 
 RED = (0.8, 0.1, 0.1)
