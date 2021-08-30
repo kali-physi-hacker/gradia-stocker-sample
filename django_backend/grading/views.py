@@ -100,6 +100,13 @@ def clean_basic_csv_upload_file(file_path):
     pass
 
 
+class AllUploadView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        template = "grading/all-uploads-to.html"
+        context = {}
+        return render(request, template, context)
+
+
 class SarineUploadView(LoginRequiredMixin, View):
     fields = [field.name for field in SarineGradingMixin._meta.get_fields()] + ["internal_id"]
 
@@ -141,7 +148,7 @@ class SarineUploadView(LoginRequiredMixin, View):
         if parcel is None:
             messages.add_message(request, messages.ERROR, "Parcel name does not exist")
             return HttpResponseRedirect(
-                reverse("grading:upload_parcel_csv")
+                reverse("grading:sarine_data_upload_url")
             )  # Return a redirect with an error message
 
         split = Split.objects.create(original_parcel=parcel, split_by=request.user)

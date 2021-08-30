@@ -1,6 +1,8 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
+from django.contrib import messages
+from django.contrib.messages.api import get_messages
 
 import pandas as pd
 
@@ -19,19 +21,14 @@ class TestCSVUpload(TestCase):
 
         self.basic_grading_url = reverse("grading:upload_parcel_csv")
         self.sarine_data_upload_url = reverse("grading:sarine_data_upload_url")
-        # self.GW_url = reverse("GW", args=(receipt_number,))
-        # self.post_GW_checks_url = reverse("post_GW_checks", args=(receipt_number,))
-        # self.GIA_url = reverse("GIA", args=(receipt_number,))
 
         self.sarine_upload_csv_file = open("grading/tests/fixtures/sarine-01.csv", "r")
         self.gradia_parcel_code = "sarine-01"
-        self.invalid_csv_file = open("grading/tests/fixtures/invalid.csv", "r")
+        self.invalid_csv_file = open("grading/tests/fixtures/no-parcel.csv", "r")
 
         self.parcel = Parcel.objects.get(gradia_parcel_code=self.gradia_parcel_code)
 
         self.grader = {"username": "gary", "password": "password"}
-        # delete the already existing stone
-        # Stone.objects.first().delete()
 
     def test_sarine_data_upload_get_page(self):
         """
@@ -52,13 +49,32 @@ class TestCSVUpload(TestCase):
         :return:
         """
         Stone.objects.all().delete()
-        self.client.login(username="gary", password="password")
+        self.client.login(**self.grader)
         response = self.client.post(self.sarine_data_upload_url, {"file": self.sarine_upload_csv_file})
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Stone.objects.count(), 3)
 
+    def test_sarine_data_upload_fails_if_invalid_csv_filename(self):
+        """
+        Tests that sarine data upload endpoint errors if invalid csv file
+        Format: ==> We're expecting that csv filename to be equal to gradia_parcel_code
+        returns:
+        """
+        self.client.login(**self.grader)
+        response = self.client.post(reverse("grading:sarine_data_upload_url"), {"file": self.invalid_csv_file})
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("grading:sarine_data_upload_url"))
+        request = response.wsgi_request
+        django_messages = get_messages(request)
+        self.assertEqual(len(django_messages), 1)
+        for message in django_messages:
+            self.assertEqual(str(message), "Parcel name does not exist")
+
+    def xtest_sarine_data_upload_fails_field_names_missing(self):
+        pass
+
     def xtest_views_basic_grading_uploads_with_valid_in_csv_file_fields_and_returns_201(self):
-        self.client.login(username="gary", password="password")
+        self.client.login(**self.grader)
         response = self.client.post(self.basic_grading_url, {"file": self.csv_file})
         self.assertEqual(response.status_code, 302)
         stones = Stone.objects.all()
