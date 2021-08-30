@@ -225,6 +225,19 @@
     }
   },
   {
+    "model": "grading.parcel",
+    "pk": 3,
+    "fields": {
+      "receipt": 1,
+      "customer_parcel_code": "VK03",
+      "total_carats": "50.000",
+      "total_pieces": 50,
+      "reference_price_per_carat": 5,
+      "split_from": null,
+      "gradia_parcel_code": "sarine-01-spaces"
+    }
+  },
+  {
     "model": "grading.stone",
     "pk": 1,
     "fields": {
