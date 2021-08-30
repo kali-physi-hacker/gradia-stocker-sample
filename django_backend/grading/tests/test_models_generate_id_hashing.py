@@ -13,7 +13,7 @@ class TestIDHashGeneration(TestCase):
 
         # Create some stone entries
         basic_grading_url = reverse("grading:upload_parcel_csv")
-        csv_file = open("grading/tests/fixtures/123456789.csv", "r")
+        csv_file = open("grading/tests/fixtures/sarine-01.csv", "r")
         self.client.login(username="graderuser", password="Passw0rd!")
         self.client.post(basic_grading_url, {"file": csv_file})
 
