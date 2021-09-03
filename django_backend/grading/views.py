@@ -139,9 +139,7 @@ class SarineUploadView(LoginRequiredMixin, View):
         form = SarineUploadForm(user=request.user, data={}, files=request.FILES)
         if not form.is_valid():
             # get the csv errors and return them to some template as context variables and render as error page
-            import pdb
-
-            pdb.set_trace()
+            HttpResponseRedirect(reverse("grading:sarine_data_upload_url"))
 
         stones = form.save()
         split_id = stones[0].split_from.pk
