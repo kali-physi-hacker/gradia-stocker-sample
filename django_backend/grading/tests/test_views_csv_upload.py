@@ -17,8 +17,6 @@ class TestCSVUpload(TestCase):
     fixtures = ("grading/fixtures/test_data.json",)
 
     def setUp(self):
-        # receipt_number = "012345689"
-
         self.basic_grading_url = reverse("grading:upload_parcel_csv")
         self.sarine_data_upload_url = reverse("grading:sarine_data_upload_url")
 
@@ -54,7 +52,7 @@ class TestCSVUpload(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Stone.objects.count(), 3)
 
-    def test_sarine_data_upload_fails_if_invalid_csv_filename(self):
+    def xtest_sarine_data_upload_fails_if_invalid_csv_filename(self):
         """
         Tests that sarine data upload endpoint errors if invalid csv file
         Format: ==> We're expecting that csv filename to be equal to gradia_parcel_code
@@ -71,7 +69,9 @@ class TestCSVUpload(TestCase):
             self.assertEqual(str(message), "Parcel name does not exist")
 
     def xtest_sarine_data_upload_fails_field_names_missing(self):
-        pass
+        self.client.login(**self.grader)
+        response = self.client.post(reverse("grading:sarine_data_upload_url"), {"file": self.invalid_csv_file})
+        self.assertEqual(response.status_code, 302)
 
     def xtest_views_basic_grading_uploads_with_valid_in_csv_file_fields_and_returns_201(self):
         self.client.login(**self.grader)

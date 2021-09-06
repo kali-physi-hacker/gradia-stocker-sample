@@ -15,6 +15,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from ownerships.models import ParcelTransfer, StoneTransfer
 
 from .models import Parcel, Receipt, Stone, Split, ParcelTransfer, BasicGradingMixin
+from .forms import SarineUploadForm
 
 from .helpers import column_tuple_to_value_tuple_dict_map, get_model_fields
 
@@ -135,59 +136,15 @@ class SarineUploadView(LoginRequiredMixin, View):
         :param kwargs:
         :return:
         """
-        csv_file = request.FILES["file"]
+        form = SarineUploadForm(user=request.user, data={}, files=request.FILES)
+        if not form.is_valid():
+            # get the csv errors and return them to some template as context variables and render as error page
+            HttpResponseRedirect(reverse("grading:sarine_data_upload_url"))
 
-        # Get parcel code name from file name
-        gradia_parcel_code = os.path.splitext(csv_file.name)[0]
+        stones = form.save()
+        split_id = stones[0].split_from.pk
 
-        try:
-            parcel = Parcel.objects.get(gradia_parcel_code=gradia_parcel_code)
-        except Parcel.DoesNotExist:
-            parcel = None
-
-        if parcel is None:
-            messages.add_message(request, messages.ERROR, "Parcel name does not exist")
-            return HttpResponseRedirect(
-                reverse("grading:sarine_data_upload_url")
-            )  # Return a redirect with an error message
-
-        split = Split.objects.create(original_parcel=parcel, split_by=request.user)
-
-        csv_data = pd.read_csv(csv_file)
-        data_frame = pd.DataFrame(csv_data, columns=self.fields)
-
-        # Get parcel owner
-        parcel_transfer = ParcelTransfer.most_recent_transfer(parcel)
-
-        if parcel_transfer is None:
-            parcel_owner = User.objects.get(username="split")
-        else:
-            parcel_owner = parcel_transfer.from_user
-
-        for stone_entry in data_frame.values:
-            data_dict = column_tuple_to_value_tuple_dict_map(self.fields, stone_entry)
-            data_dict["data_entry_user"] = request.user
-
-            # Set the split_from value
-            data_dict["split_from"] = split
-            for data in data_dict:
-                if pd.isna(data_dict[data]):
-                    data_dict[data] = None
-
-            stone = Stone.objects.create(**data_dict)
-            stone.split_from = split
-            stone.save()
-
-            # Do a stone transfer
-            StoneTransfer.objects.create(
-                item=stone,
-                from_user=User.objects.get(username="split"),
-                created_by=request.user,
-                to_user=parcel_owner,
-                confirmed_date=datetime.utcnow().replace(tzinfo=utc),
-            )
-
-        return HttpResponseRedirect(reverse("admin:grading_split_change", args=(split.pk,)))
+        return HttpResponseRedirect(reverse("admin:grading_split_change", args=(split_id,)))
 
 
 class UploadBasicParcelCSVFile(LoginRequiredMixin, View):
