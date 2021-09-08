@@ -10,4 +10,5 @@ urlpatterns = [
     path("upload/all/", views.AllUploadView.as_view(), name="upload_all"),
     path("upload/sarine/", views.SarineUploadView.as_view(), name="sarine_data_upload_url"),
     path("upload/", views.UploadBasicParcelCSVFile.as_view(), name="upload_parcel_csv"),
+    path("upload/errors/", views.errors_page, name="errors_page"),
 ]
