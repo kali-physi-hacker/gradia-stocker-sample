@@ -140,15 +140,14 @@ class SarineUploadView(LoginRequiredMixin, View):
         if not form.is_valid():
             # get the csv errors and return them to some template as context variables and render as error page
             HttpResponseRedirect(reverse("grading:sarine_data_upload_url"))
-
         stones = form.save()
         split_id = stones[0].split_from.pk
 
         return HttpResponseRedirect(reverse("admin:grading_split_change", args=(split_id,)))
 
 
-class UploadBasicParcelCSVFile(LoginRequiredMixin, View):
-    fields = get_model_fields(BasicGradingMixin)
+class BasicGradingUploadView(LoginRequiredMixin, View):
+    fields = [field.name for field in BasicGradingMixin._meta.get_fields()]
     fields.append("internal_id")
 
     def get(self, request, *args, **kwargs):
@@ -159,10 +158,48 @@ class UploadBasicParcelCSVFile(LoginRequiredMixin, View):
         :param kwargs:
         :return:
         """
-        context = {"form": CSVImportForm()}
+        context = {"template_title": "Upload a csv file containing basic grading data"}
         if "errors" in kwargs:
             context["errors"] = kwargs["errors"]
         return render(request, "grading/upload.html", context)
+
+    def _process_graders(self, data_dict):
+        """
+        Return the basic graders or None. Eg. {"basic_grader_1"}
+        """
+        # Will change this implementation later for a better way of giving error messages
+        graders = {"basic_grader_1": None, "basic_grader_2": None, "basic_grader_3": None}
+
+        for grader in graders:
+            try:
+                graders[grader] = User.objects.get(username=data_dict[grader])
+            except User.DoesNotExist:
+                pass
+
+        return graders
+
+    # Simple table for displaying the errors == form.errors = {"height": []}
+
+    def _process_inclusions(self, data_dict):
+        basic_inclusions = {
+            "basic_inclusions_1": None,
+            "basic_inclusions_2": None,
+            "basic_inclusions_3": None,
+            "basic_inclusions_final": None,
+        }
+
+        for inclusion in basic_inclusions:
+            inclusion_list = data_dict[inclusion].replace(" ", "").split(",")
+            inclusion_instances = []
+            for inclusion_name in inclusion_list:
+                try:
+                    inclusion_instances.append(Inclusion.objects.get(inclusion=inclusion_name))
+                except Inclusion.DoesNotExist:
+                    basic_inclusions[inclusion] = None
+                    break
+            basic_inclusions[inclusion] = inclusion_instances
+
+        return basic_inclusions
 
     def post(self, request, *args, **kwargs):
         """
@@ -174,89 +211,83 @@ class UploadBasicParcelCSVFile(LoginRequiredMixin, View):
         """
         csv_file = request.FILES["file"]
 
-        # Get parcel code name from file name
-        gradia_parcel_code = os.path.splitext(csv_file.name)[0]
-
-        try:
-            parcel = Parcel.objects.get(gradia_parcel_code=gradia_parcel_code)
-        except Parcel.DoesNotExist:
-            parcel = None
-
-        if parcel is None:
-            messages.add_message(request, messages.ERROR, "Parcel name does not exist")
-            return HttpResponseRedirect(
-                reverse("grading:upload_parcel_csv")
-            )  # Return a redirect with an error message
-
-        split = Split.objects.create(original_parcel=parcel, split_by=request.user)
-
         csv_data = pd.read_csv(csv_file)
         data_frame = pd.DataFrame(csv_data, columns=self.fields)
-
-        # Get parcel owner
-        parcel_transfer = ParcelTransfer.most_recent_transfer(parcel)
-
-        if parcel_transfer is None:
-            parcel_owner = User.objects.get(username="split")
-        else:
-            parcel_owner = parcel_transfer.from_user
 
         # Map column_fields to values in a dictionary data structure
         for stone_entry in data_frame.values:
             data_dict = column_tuple_to_value_tuple_dict_map(self.fields, stone_entry)
             data_dict["data_entry_user"] = request.user
 
-            # Set the split_from value
-            data_dict["split_from"] = split
             for data in data_dict:
                 if pd.isna(data_dict[data]):
                     data_dict[data] = None
 
-            # Will change this implementation later for a better way of giving error messages
-            try:
-                data_dict["grader_1"] = User.objects.get(username=data_dict["grader_1"])
-            except User.DoesNotExist:
-                messages.add_message(request, messages.ERROR, f"Grader: {data_dict['grader_1']} Does not exist")
-                return HttpResponseRedirect(reverse("grading:upload_parcel_csv"))
+            users = self._process_graders(data_dict)
 
-            data_dict["grader_2"] = User.objects.filter(username=data_dict["grader_2"]).first()
-            data_dict["grader_3"] = User.objects.filter(username=data_dict["grader_3"]).first()
+            if users["basic_grader_1"] is None:
+                messages.add_message(request, messages.ERROR, f"User: {data_dict['basic_grader_1']} does not exist")
+                return HttpResponseRedirect(reverse("grading:basic_grading_data_upload_url"))
 
-            # Process inclusions here
-            inclusion_name_list = data_dict["basic_inclusions"].split(", ")
-            inclusions = []
-            for inclusion in inclusion_name_list:
-                try:
-                    inclusion = Inclusion.objects.get(inclusion=inclusion)
-                    inclusions.append(inclusion)
-                except Inclusion.DoesNotExist:
-                    messages.add_message(
-                        request, messages.ERROR, f"Inclusion: {data_dict['basic_inclusions']} Does not exist"
-                    )
-                    return HttpResponseRedirect(reverse("grading:upload_parcel_csv"))
+            data_dict.update(users)
 
-            del data_dict["basic_inclusions"]
+            inclusions = self._process_inclusions(data_dict)
 
-            # Create Stones
-            stone = Stone.objects.create(**data_dict)
-            stone.split_from = split
+            if inclusions["basic_inclusions_1"] is None:
+                messages.add_message(
+                    request, messages.ERROR, f"Inclusion: {data_dict[inclusion]} does not exist or is empty"
+                )
+                return HttpResponseRedirect(reverse("grading:basic_grading_data_upload_url"))
+
+            if inclusions["basic_inclusions_final"] is None:
+                messages.add_message(
+                    request, messages.ERROR, f"Inclusion: {data_dict[inclusion]} does not exist or is empty"
+                )
+                return HttpResponseRedirect(reverse("grading:basic_grading_data_upload_url"))
+
+            stone = Stone.objects.get(internal_id=data_dict["internal_id"])
+
             for inclusion in inclusions:
-                stone.basic_inclusions.add(inclusion.pk)
+                for single_inclusion_instance in inclusions.get(inclusion):
+                    stone_inclusion = getattr(stone, inclusion)
+                    stone_inclusion.add(single_inclusion_instance)
+                    # exec(f"stone.{inclusion}.add({_inclusion})")
+
+            fields_without_inclusions = [field.name for field in BasicGradingMixin._meta.get_fields()]
+            fields_without_inclusions.remove("basic_inclusions_1")
+            fields_without_inclusions.remove("basic_inclusions_2")
+            fields_without_inclusions.remove("basic_inclusions_3")
+            fields_without_inclusions.remove("basic_inclusions_final")
+
+            # grab and update stone object
+            for field in fields_without_inclusions:
+                setattr(stone, field, data_dict[field])
+                # exec(f"stone.{field} = data_dict[{field}]")
+
+            # hash and assign gradia ID
+
             stone.save()
 
-            # Generates basic id hash
-            stone.generate_basic_external_id()
+            # Create Stones
+            # stone = Stone.objects.create(**data_dict)
+            # stone.split_from = split
+            # for inclusion in inclusions:
+            #     stone.basic_inclusions.add(inclusion.pk)
+            # stone.save()
 
-            # Do a stone transfer
-            StoneTransfer.objects.create(
-                item=stone,
-                from_user=User.objects.get(username="split"),
-                created_by=request.user,
-                to_user=parcel_owner,
-                confirmed_date=datetime.utcnow().replace(tzinfo=utc),
-            )
+            # # Generates basic id hash
+            # stone.generate_basic_external_id()
 
-        return HttpResponseRedirect(reverse("admin:grading_split_change", args=(split.pk,)))
+            # # Do a stone transfer
+            # StoneTransfer.objects.create(
+            #     item=stone,
+            #     from_user=User.objects.get(username="split"),
+            #     created_by=request.user,
+            #     to_user=parcel_owner,
+            #     confirmed_date=datetime.utcnow().replace(tzinfo=utc),
+            # )
+
+        return HttpResponseRedirect(reverse("grading:basic_grading_data_upload_url"))
 
 
 """

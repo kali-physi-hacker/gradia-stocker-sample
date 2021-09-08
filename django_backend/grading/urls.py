@@ -9,5 +9,5 @@ urlpatterns = [
     path("close_receipt/<int:pk>/", views.CloseReceiptView.as_view(), name="close_receipt"),
     path("upload/all/", views.AllUploadView.as_view(), name="upload_all"),
     path("upload/sarine/", views.SarineUploadView.as_view(), name="sarine_data_upload_url"),
-    path("upload/", views.UploadBasicParcelCSVFile.as_view(), name="upload_parcel_csv"),
+    path("upload/basic_grading/", views.BasicGradingUploadView.as_view(), name="basic_grading_data_upload_url"),
 ]

@@ -4,7 +4,10 @@ from django.urls import reverse
 from django.contrib import messages
 from django.contrib.messages.api import get_messages
 
+from stonegrading.models import Inclusion
+
 import pandas as pd
+from grading.views import BasicGradingUploadView
 
 from grading.models import Parcel, Split, Stone
 
@@ -17,16 +20,23 @@ class TestCSVUpload(TestCase):
     fixtures = ("grading/fixtures/test_data.json",)
 
     def setUp(self):
-        self.basic_grading_url = reverse("grading:upload_parcel_csv")
         self.sarine_data_upload_url = reverse("grading:sarine_data_upload_url")
+        self.basic_grading_data_upload_url = reverse("grading:basic_grading_data_upload_url")
 
         self.sarine_upload_csv_file = open("grading/tests/fixtures/sarine-01.csv", "r")
         self.gradia_parcel_code = "sarine-01"
         self.invalid_csv_file = open("grading/tests/fixtures/no-parcel.csv", "r")
 
+        self.basic_grading_upload_csv_file = open("grading/tests/fixtures/basic_grading_csv_demo.csv", "r")
+
         self.parcel = Parcel.objects.get(gradia_parcel_code=self.gradia_parcel_code)
 
         self.grader = {"username": "gary", "password": "password"}
+
+    def setup_sarine_data(self):
+        Stone.objects.all().delete()
+        self.client.login(**self.grader)
+        response = self.client.post(self.sarine_data_upload_url, {"file": self.sarine_upload_csv_file})
 
     def test_sarine_data_upload_get_page(self):
         """
@@ -73,47 +83,84 @@ class TestCSVUpload(TestCase):
         response = self.client.post(reverse("grading:sarine_data_upload_url"), {"file": self.invalid_csv_file})
         self.assertEqual(response.status_code, 302)
 
-    def xtest_views_basic_grading_uploads_with_valid_in_csv_file_fields_and_returns_201(self):
+    def test_basic_grading_data_upload_get_page(self):
+        """
+        Tests that basic grading upload get page returns 200
+        :return:
+        """
+        template_title = "Upload a csv file containing basic grading data"
         self.client.login(**self.grader)
-        response = self.client.post(self.basic_grading_url, {"file": self.csv_file})
+        response = self.client.get(reverse("grading:basic_grading_data_upload_url"))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(template_title, response.content.decode())
+        button = '<input type="submit" value="Upload CSV" class="default" name="_upload"/>'
+        self.assertIn(button, response.content.decode())
+
+    def test_basic_grading_data_upload_success_if_valid_csv(self):
+        """
+        Tests that basic grading data can be uploaded successfully if the csv file is valid
+        :return:
+        """
+        Stone.objects.all().delete()
+        self.setup_sarine_data()
+        self.client.login(**self.grader)
+        response = self.client.post(self.basic_grading_data_upload_url, {"file": self.basic_grading_upload_csv_file})
         self.assertEqual(response.status_code, 302)
-        stones = Stone.objects.all()
-        self.assertEqual(len(stones), 14)
+        stone_1 = Stone.objects.get(internal_id=1)
+        # float() because django will return a Decimal of 0.090
+        self.assertEqual(float(stone_1.basic_carat), 0.09)
 
-        split = Split.objects.get(original_parcel=self.parcel)
+    def test_basic_grading_view_process_users(self):
+        graders = {"basic_grader_1": "gary", "basic_grader_2": None, "basic_grader_3": None}
+        result = BasicGradingUploadView._process_graders(self=None, data_dict=graders)
+        self.assertEqual(result["basic_grader_1"], User.objects.get(username="gary"))
 
-        # This is a python idiom and a generator is returned which is
-        # a performance gain over a native loop
-        # truth = all(stone.split_from == split for stone in stones)
-        # self.assertTrue(truth)
+        graders = {"basic_grader_1": "Not-Exist-User", "basic_grader_2": None, "basic_grader_3": None}
+        result = BasicGradingUploadView._process_graders(self=None, data_dict=graders)
+        self.assertEqual(result["basic_grader_1"], None)
 
-        for stone in stones:
-            self.assertEqual(stone.split_from, split)
+    def test_basic_grading_view_process_inclusions(self):
+        """
+        Tests that _process_inclusions returns desired inclusion dictionary object
+        """
+        inclusions = {
+            "basic_inclusions_1": "Br, Cv, Ch",
+            "basic_inclusions_2": "Clv, Cld, Xtl",
+            "basic_inclusions_3": "Clv, Cv, Br",
+            "basic_inclusions_final": "Br, Cv, Ch",
+        }
+        basic_inclusions_1 = [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Br", "Cv", "Ch")]
+        basic_inclusions_2 = [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Clv", "Cld", "Xtl")]
+        basic_inclusions_3 = [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Clv", "Cv", "Br")]
+        basic_inclusions_final = [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Br", "Cv", "Ch")]
 
-    def xtest_views_basic_grading_does_not_upload_and_returns_400_with_invalid_csv_file_fields(self):
-        response = self.client.post(self.basic_grading_url, {"file": self.invalid_csv_file})
-        self.assertEqual(response.status_code, 302)
+        processed_inclusions = BasicGradingUploadView._process_inclusions(self=None, data_dict=inclusions)
 
-        stones = Stone.objects.all()
-        self.assertEqual(len(stones), 0)
+        self.assertEqual(basic_inclusions_1, processed_inclusions["basic_inclusions_1"])
+        self.assertEqual(basic_inclusions_2, processed_inclusions["basic_inclusions_2"])
+        self.assertEqual(basic_inclusions_3, processed_inclusions["basic_inclusions_3"])
+        self.assertEqual(basic_inclusions_final, processed_inclusions["basic_inclusions_final"])
 
     def xtest_views_basic_csv_upload_generates_basic_id_hash(self):
         """
         Tests that basic csv upload generates id hashing
         :return:
         """
-        # Before Upload Check that all external IDs from CSV file is None
-        data = pd.read_csv(self.csv_file)
-        self.csv_file.close()
-        external_ids = pd.DataFrame(data, columns=("external_id",))
+        # upload sarine file
+        Stone.objects.all().delete()
+        self.setup_sarine_data()
 
-        for external_id in external_ids.values:
-            self.assertTrue(pd.isna(external_id[0]))
+        # Before Upload Check that all external IDs from CSV file is None (not in use because no such column)
+        # basic_grading_data = pd.read_csv(self.basic_grading_upload_csv_file)
+        # self.basic_grading_upload_csv_file.close()
+        # external_ids = pd.DataFrame(basic_grading_data, columns=("external_id",))
 
-        # Reopen file and upload ===> Cursor reached end after above action
-        self.csv_file = open("grading/tests/fixtures/123456789.csv", "r")
-        self.client.login(username="gary", password="password")
-        self.client.post(self.basic_grading_url, {"file": self.csv_file})
+        # for external_id in external_ids.values:
+        #     self.assertTrue(pd.isna(external_id[0]))
+
+        # uploads basic grading csv
+        self.client.login(**self.grader)
+        self.client.post(self.basic_grading_data_upload_url, {"file": self.basic_grading_upload_csv_file})
 
         # Check that all uploaded stones have external_ids
         for stone in Stone.objects.all():

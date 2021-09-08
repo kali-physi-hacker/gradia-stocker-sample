@@ -108,6 +108,24 @@
     }
   },
   {
+    "model": "auth.user",
+    "pk": 7,
+    "fields": {
+      "password": "pbkdf2_sha256$216000$iQSUR3qNHdm3$fqOSh1HEYY2NTIZUL5oNgFJ+vSod9hktx9dAcIOHd+E=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "kary",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2020-12-04T06:00:35.918Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
     "model": "customers.entity",
     "pk": 1,
     "fields": {
