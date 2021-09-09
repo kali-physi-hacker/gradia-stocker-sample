@@ -7,11 +7,11 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 from django.utils.timezone import utc
 
-from stonegrading.mixins import SarineGradingMixin
+from stonegrading.mixins import SarineGradingMixin, BasicGradingMixin
 
 from ownerships.models import ParcelTransfer, StoneTransfer
 
-from .models import Parcel, Receipt, Stone, Split, BasicGradingMixin
+from .models import Parcel, Receipt, Stone, Split
 
 
 User = get_user_model()
@@ -268,5 +268,154 @@ class SarineUploadForm(forms.Form):
         return stones
 
 
+class BasicFormData(forms.ModelForm):
+    class Meta:
+        model = BasicGradingMixin
+        fields = "__all__"
+
+    def clean(self):
+        """"""
+        # clean basic_girdle_min_grade_final
+        for data in stone_data:
+            data["basic_girdle_min_grade_final"] = (
+                data["basic_girdle_min_grade_final"].upper()
+                if type(data["basic_girdle_min_grade_final"]) == str
+                else data["basic_girdle_min_grade_final"]
+            )
+
+        # clean inclusion
+        self.__process_inclusions()
+
+        # clean graders
+        self.__process_csv_graders()
+
+
 class BasicUploadForm(forms.Form):
-    carat = forms.CharField()
+    file = forms.FileField()
+
+    parcel = None
+    __csv_errors = None
+    __cleaned_stone_data = None
+    __stone_data = []
+
+    @property
+    def csv_errors(self):
+        """
+        Return the errors of the csv content, similar to forms.errors
+        :return:
+        """
+        if self.__csv_errors is None:
+            raise Exception("You need to call form.is_valid() first")
+
+        return self.__csv_errors
+
+    @property
+    def cleaned_stone_data(self):
+        """
+        Returns a list of stones if there are no validation issues
+        :return:
+        """
+        if self.__cleaned_stone_data is None:
+            return []
+
+        return self.__cleaned_stone_data
+
+    @property
+    def stone_data(self):
+        return self.__stone_data
+
+    def __to_db_name(self, data):
+        """
+        Change from display name to db name
+        :return:
+        """
+        data = data.copy()
+
+        # cleaning for grades
+        fields = (
+            "basic_diamond_description",
+            "basic_girdle_condition_*",
+        )
+
+    def __process_graders(self, data_dict):
+        """"""
+        pass
+
+    def __process_csv_content(self, csv_file):
+        """
+        Process and clean the content of the csv file and return a list of stone (which are dictionaries)
+        :param csv_file:
+        :return:
+        """
+        csv_data = pd.read_csv(csv_file)
+        data_frame = csv_data.rename(str.strip, axis="columns")
+        data_frame = pd.DataFrame(data_frame, columns=sarine_fields)
+        stone_data = [dict(zip(sarine_fields, data)) for data in data_frame.values]
+
+        for data in stone_data:
+            for column in data:
+                if pd.isna(data[column]):
+                    data[column] = None
+
+        stone_data = [self.__to_db_name(data) for data in stone_data]
+
+        self.__stone_data = stone_data
+        return stone_data
+
+    def __build_error_dict(self, data):
+        """
+        Create a form instance and return form errors if it exists
+        :param data:
+        :return:
+        """
+        errors = {}
+        for row, _dt in enumerate(data):
+            form = BasicFormData(_dt)
+            if not form.is_valid():
+                errors[row] = form.errors
+
+        return errors
+
+    def clean(self):
+        """
+        Clean the csv file and check for some errors
+        :return:
+        """
+        cleaned_data = super(BasicUploadForm, self).clean()
+
+        file = cleaned_data["file"]
+        stone_data = self.__process_csv_content(file)
+
+        form_errors = self.__build_error_dict(stone_data)
+
+        if form_errors:
+            self.__csv_errors = form_errors
+            raise ValidationError({"file": "CSV File Validation Error"})
+
+        self.__csv_errors = {}
+        return stone_data
+
+    def save(self):
+        """
+        Update current stone and return a list of stones
+        :return:
+        """
+
+        # ignore girdle_min_grade
+
+        stones = []
+
+        for stone_data in self.cleaned_data:
+            stone = Stone.objects.get(internal_id=stone_data["internal_id"])
+            for field, value in stone_data.items():
+                setattr(stone, field, value)
+
+            inclusions = self.__inclusions
+            for inclusion in inclusions:
+                stone.inclusion.add(inclusion)
+
+            stone.save()
+
+            stones.append(stone)
+
+        return stones

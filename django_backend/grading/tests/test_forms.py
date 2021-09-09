@@ -3,7 +3,7 @@ from decimal import Decimal
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
-from grading.forms import SarineUploadForm
+from grading.forms import SarineUploadForm, BasicUploadForm
 from grading.models import Stone
 
 User = get_user_model()
@@ -325,6 +325,261 @@ class SarineUploadFormTest(TestCase):
             data={},
             files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())},
             user=self.gary_user,
+        )
+        self.assertTrue(form.is_valid())
+        form.save()
+
+        stones = Stone.objects.all()
+        self.assertEqual(len(stones), 3)
+
+        fields = self.expected_stones[0].keys()
+
+        for actual_stone, expected_stone in zip(stones, self.expected_stones):
+            for field in fields:
+                raw_actual_value = getattr(actual_stone, field)
+                actual_value = float(raw_actual_value) if type(raw_actual_value) == Decimal else raw_actual_value
+                expected_value = expected_stone[field]
+                self.assertEqual(actual_value, expected_value)
+
+
+class BasicUploadFormTest(TestCase):
+    fixtures = ("grading/fixtures/test_data.json",)
+
+    def setUp(self):
+        self.sarine_csv_file = open("grading/tests/fixtures/sarine-01.csv", "rb")
+        self.csv_file = open("grading/tests/fixtures/basic-01.csv", "rb")
+        self.csv_file_spaces = open("grading/tests/fixtures/basic-01-spaces.csv", "rb")
+        self.csv_file_missing_header = open("grading/tests/fixtures/basic-01-h.csv", "rb")
+        self.csv_file_invalid_types = open("grading/tests/fixtures/basic-01-type.csv", "rb")
+
+        self.gary_user = User.objects.get(username="gary")
+
+        self.expected_stones = [
+            {
+                "internal_id": 1,
+                "basic_diamond_description": "Natural",
+                "basic_grader_1": "Gary",
+                "basic_grader_2": "Kary",
+                "basic_grader_3": "Sheryl",
+                "basic_carat": 0.09,
+                "basic_color_1": "F+",
+                "basic_color_2": "F",
+                "basic_color_3": "F+",
+                "basic_color_final": "F",
+                "basic_clarity_1": "SI1",
+                "basic_clarity_2": "SI1",
+                "basic_clarity_3": "SI1+",
+                "basic_clarity_final": "SI1",
+                "basic_fluorescence_1": "N",
+                "basic_fluorescence_2": "N",
+                "basic_fluorescence_3": "N",
+                "basic_fluorescence_final": "N",
+                "basic_culet_1": "N",
+                "basic_culet_2": "N",
+                "basic_culet_3": "N",
+                "basic_culet_final": "N",
+                "basic_culet_characteristic_1": "N",
+                "basic_culet_characteristic_2": "N",
+                "basic_culet_characteristic_3": "N",
+                "basic_culet_characteristic_final": "N",
+                "basic_girdle_condition_1": "Faceted",
+                "basic_girdle_condition_2": "Faceted",
+                "basic_girdle_condition_3": "Faceted",
+                "basic_girdle_condition_final": "Faceted",
+                "basic_inclusions_1": "Cld, Xtl",
+                "basic_inclusions_2": "Cld, Xtl, IndN",
+                "basic_inclusions_3": "Cld, IndN",
+                "basic_inclusions_final": "Cld, IndN",
+                "basic_polish_1": "GD",
+                "basic_polish_2": "GD",
+                "basic_polish_3": "VG",
+                "basic_polish_final": "VG",
+                "girdle_min_grade": "STK",
+                "basic_girdle_min_grade_final": "STK",
+                "basic_remarks": "",
+            },
+            {
+                "internal_id": 5,
+                "basic_diamond_description": "Natural",
+                "basic_grader_1": "Gary",
+                "basic_grader_2": "Kary",
+                "basic_grader_3": "Sheryl",
+                "basic_carat": 0.09,
+                "basic_color_1": "F",
+                "basic_color_2": "F",
+                "basic_color_3": "F+",
+                "basic_color_final": "F",
+                "basic_clarity_1": "VS2",
+                "basic_clarity_2": "VS2",
+                "basic_clarity_3": "VS1",
+                "basic_clarity_final": "VS1",
+                "basic_fluorescence_1": "N",
+                "basic_fluorescence_2": "N",
+                "basic_fluorescence_3": "N",
+                "basic_fluorescence_final": "N",
+                "basic_culet_1": "N",
+                "basic_culet_2": "N",
+                "basic_culet_3": "N",
+                "basic_culet_final": "N",
+                "basic_culet_characteristic_1": "N",
+                "basic_culet_characteristic_2": "N",
+                "basic_culet_characteristic_3": "N",
+                "basic_culet_characteristic_final": "N",
+                "basic_girdle_condition_1": "Faceted",
+                "basic_girdle_condition_2": "Faceted",
+                "basic_girdle_condition_3": "Faceted",
+                "basic_girdle_condition_final": "Faceted",
+                "basic_inclusions_1": "Xtl, Ftr",
+                "basic_inclusions_2": "Xtl",
+                "basic_inclusions_3": "Cld",
+                "basic_inclusions_final": "Cld",
+                "basic_polish_1": "GD",
+                "basic_polish_2": "GD",
+                "basic_polish_3": "VG",
+                "basic_polish_final": "VG",
+                "girdle_min_grade": "MED",
+                "basic_girdle_min_grade_final": "MED",
+                "basic_remarks": "",
+            },
+            {
+                "internal_id": 6,
+                "basic_diamond_description": "Natural",
+                "basic_grader_1": "Gary",
+                "basic_grader_2": "Kary",
+                "basic_grader_3": "Sheryl",
+                "basic_carat": 0.09,
+                "basic_color_1": "F",
+                "basic_color_2": "F",
+                "basic_color_3": "F",
+                "basic_color_final": "F",
+                "basic_clarity_1": "VS2",
+                "basic_clarity_2": "VS2",
+                "basic_clarity_3": "VS1",
+                "basic_clarity_final": "VS1",
+                "basic_fluorescence_1": "N",
+                "basic_fluorescence_2": "N",
+                "basic_fluorescence_3": "N",
+                "basic_fluorescence_final": "N",
+                "basic_culet_1": "N",
+                "basic_culet_2": "N",
+                "basic_culet_3": "N",
+                "basic_culet_final": "N",
+                "basic_culet_characteristic_1": "N",
+                "basic_culet_characteristic_2": "N",
+                "basic_culet_characteristic_3": "N",
+                "basic_culet_characteristic_final": "N",
+                "basic_girdle_condition_1": "Faceted",
+                "basic_girdle_condition_2": "Faceted",
+                "basic_girdle_condition_3": "Faceted",
+                "basic_girdle_condition_final": "Faceted",
+                "basic_inclusions_1": "Xtl, Cld, IndN",
+                "basic_inclusions_2": "Xtl, Cld",
+                "basic_inclusions_3": "Cld, Xtl",
+                "basic_inclusions_final": "Cld, Xtl",
+                "basic_polish_1": "EX",
+                "basic_polish_2": "EX",
+                "basic_polish_3": "EX",
+                "basic_polish_final": "EX",
+                "girdle_min_grade": "STK",
+                "basic_girdle_min_grade_final": "STK",
+                "basic_remarks": "",
+            },
+        ]
+
+    def sarine_data_setup(self):
+        form = SarineUploadForm(
+            data={},
+            files={"file": SimpleUploadedFile(self.sarine_csv_file.name, self.sarine_csv_file.read())},
+            user=self.gary_user,
+        )
+
+    def test_csv_file_is_valid(self):
+        """
+        Tests the following:
+        1. correct field types
+        2. missing required fields
+        3. the stone data is updated after the upload
+        """
+        # upload sarine first
+        self.sarine_data_setup()
+
+        # No column spaces
+        form = BasicUploadForm(
+            data={},
+            files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())},
+        )
+        self.assertTrue(form.is_valid())
+
+        # With column spaces
+        form = BasicUploadForm(
+            data={},
+            files={"file": SimpleUploadedFile(self.csv_file_spaces.name, self.csv_file_spaces.read())},
+        )
+        self.assertTrue(form.is_valid())
+
+    def test_form_invalid_for_missing_column_name(self):
+        """
+        Tests that form errors if required column names are missing
+        :return:
+        """
+        form = BasicUploadForm(
+            data={},
+            files={
+                "file": SimpleUploadedFile(self.csv_file_missing_header.name, self.csv_file_missing_header.read())
+            },
+        )
+        self.assertFalse(form.is_valid())
+        for error_key in form.csv_errors:
+            self.assertEqual(form.csv_errors[error_key].get("basic_polish_1")[0], "This field is required.")
+            self.assertEqual(
+                form.csv_errors[error_key].get("basic_diamond_description")[0], "This field is required."
+            )
+
+    def test_form_invalid_type(self):
+        """
+        Tests that csv file content (value) has mismatch type with the expected type
+        :return:
+        """
+        form = BasicUploadForm(
+            data={},
+            files={"file": SimpleUploadedFile(self.csv_file_invalid_types.name, self.csv_file_invalid_types.read())},
+        )
+        self.assertFalse(form.is_valid())
+        self.assertEqual(form.errors["file"][0], "CSV File Validation Error")
+        # For this type of error we're expecting a dictionary of the columns being keys and the rows with the errors being the value
+        import pdb
+
+        pdb.set_trace()
+        self.assertEqual(form.csv_errors[0]["pavilion_angle"][0], "Enter a number.")
+        self.assertEqual(form.csv_errors[1]["girdle_max_number"][0], "Enter a number.")
+        self.assertEqual(form.csv_errors[2]["height"][0], "Enter a number.")
+
+    def test_form_validated_return_data(self):
+        """
+        Tests that form.cleaned_data returns a list of dictionaries of stone data
+        returns:
+        """
+        form = BasicUploadForm(
+            data={},
+            files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())},
+        )
+        self.assertTrue(form.is_valid())
+        data = form.cleaned_data
+        self.assertEqual(type(data), list)
+        self.assertEqual(len(data), 3)
+        for actual_stone, expected_stone in zip(form.cleaned_data, self.expected_stones):
+            self.assertEqual(actual_stone, expected_stone)
+
+    def test_form_save_creates_stones(self):
+        """
+        Tests that form.save() creates stone instances in the db
+        :return:
+        """
+        Stone.objects.all().delete()
+
+        form = BasicUploadForm(
+            data={},
+            files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())},
         )
         self.assertTrue(form.is_valid())
         form.save()

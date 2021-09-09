@@ -251,7 +251,6 @@ class BasicGradingUploadView(LoginRequiredMixin, View):
                 for single_inclusion_instance in inclusions.get(inclusion):
                     stone_inclusion = getattr(stone, inclusion)
                     stone_inclusion.add(single_inclusion_instance)
-                    # exec(f"stone.{inclusion}.add({_inclusion})")
 
             fields_without_inclusions = [field.name for field in BasicGradingMixin._meta.get_fields()]
             fields_without_inclusions.remove("basic_inclusions_1")

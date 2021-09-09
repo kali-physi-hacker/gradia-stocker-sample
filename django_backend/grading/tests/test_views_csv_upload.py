@@ -27,7 +27,7 @@ class TestCSVUpload(TestCase):
         self.gradia_parcel_code = "sarine-01"
         self.invalid_csv_file = open("grading/tests/fixtures/no-parcel.csv", "r")
 
-        self.basic_grading_upload_csv_file = open("grading/tests/fixtures/basic_grading_csv_demo.csv", "r")
+        self.basic_grading_upload_csv_file = open("grading/tests/fixtures/basic-01.csv", "r")
 
         self.parcel = Parcel.objects.get(gradia_parcel_code=self.gradia_parcel_code)
 
