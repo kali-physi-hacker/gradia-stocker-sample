@@ -487,6 +487,7 @@ class BasicUploadFormTest(TestCase):
         ]
 
     def sarine_data_setup(self):
+        Stone.objects.all().delete()
         form = SarineUploadForm(
             data={},
             files={"file": SimpleUploadedFile(self.sarine_csv_file.name, self.sarine_csv_file.read())},
@@ -522,6 +523,8 @@ class BasicUploadFormTest(TestCase):
         Tests that form errors if required column names are missing
         :return:
         """
+        self.sarine_data_setup()
+
         form = BasicUploadForm(
             data={},
             files={
@@ -540,6 +543,8 @@ class BasicUploadFormTest(TestCase):
         Tests that csv file content (value) has mismatch type with the expected type
         :return:
         """
+        self.sarine_data_setup()
+
         form = BasicUploadForm(
             data={},
             files={"file": SimpleUploadedFile(self.csv_file_invalid_types.name, self.csv_file_invalid_types.read())},
@@ -547,18 +552,17 @@ class BasicUploadFormTest(TestCase):
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors["file"][0], "CSV File Validation Error")
         # For this type of error we're expecting a dictionary of the columns being keys and the rows with the errors being the value
-        import pdb
-
-        pdb.set_trace()
-        self.assertEqual(form.csv_errors[0]["pavilion_angle"][0], "Enter a number.")
-        self.assertEqual(form.csv_errors[1]["girdle_max_number"][0], "Enter a number.")
-        self.assertEqual(form.csv_errors[2]["height"][0], "Enter a number.")
+        self.assertEqual(form.csv_errors[0]["basic_carat"][0], "Enter a number.")
+        # self.assertEqual(form.csv_errors[1]["basic_color_1"][0], "Enter a grade.")
+        # self.assertEqual(form.csv_errors[2]["basic_clarity_1"][0], "Enter a grade.")
 
     def test_form_validated_return_data(self):
         """
         Tests that form.cleaned_data returns a list of dictionaries of stone data
         returns:
         """
+        self.sarine_data_setup()
+
         form = BasicUploadForm(
             data={},
             files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())},
@@ -570,12 +574,12 @@ class BasicUploadFormTest(TestCase):
         for actual_stone, expected_stone in zip(form.cleaned_data, self.expected_stones):
             self.assertEqual(actual_stone, expected_stone)
 
-    def test_form_save_creates_stones(self):
+    def test_form_save_updates_stones(self):
         """
-        Tests that form.save() creates stone instances in the db
+        Tests that form.save() updates stone instances in the db
         :return:
         """
-        Stone.objects.all().delete()
+        self.sarine_data_setup()
 
         form = BasicUploadForm(
             data={},
