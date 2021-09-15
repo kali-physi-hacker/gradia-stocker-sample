@@ -266,10 +266,10 @@ class StoneAdmin(admin.ModelAdmin):
             "external_id",
             "current_location",
             # "carat_weight",
-            "basic_final_color",
-            "basic_final_clarity",
-            "basic_fluorescence",
-            "basic_culet",
+            "basic_color_final",
+            "basic_clarity_final",
+            "basic_fluorescence_final",
+            "basic_culet_final",
             "split_from",
         ]
 
@@ -279,9 +279,11 @@ class StoneAdmin(admin.ModelAdmin):
         "transfer_to_vault",
         "confirm_received_stones",
         "download_ids",
+        "download_basic_grading_csv",  # generate id and girdle_min_grade
         "download_to_goldway_csv",
-        "download_master_reports",
+        "download_adjust_goldway_csv" "download_master_reports",
         "download_to_GIA_csv",
+        "download_adjust_gia_csv",
         "download_to_basic_report_csv",
         "download_to_triple_report_csv",
     ]
@@ -309,7 +311,16 @@ class StoneAdmin(admin.ModelAdmin):
             response["Content-Disposition"] = "attachment; filename=%s" % file_path
             return response
 
-    download_to_goldway_csv.short_description = "Download Goldway CV Transfer"
+    download_to_goldway_csv.short_description = "Download Goldway CSV Transfer"
+
+    def download_adjust_goldway_csv(self, request, queryset):
+        file_path = Stone.objects.generate_adjust_goldway_csv(queryset)
+        with open(file_path, mode="r") as file:
+            response = HttpResponse(file, content_type="text/csv")
+            response["Content-Disposition"] = "attachment; filename=%s" % file_path
+            return response
+
+    download_adjust_goldway_csv.short_description = "Download Adjust Goldway CSV"
 
     def download_to_GIA_csv(self, request, queryset):
         file_path = Stone.objects.generate_to_GIA_csv(queryset)
@@ -318,7 +329,7 @@ class StoneAdmin(admin.ModelAdmin):
             response["Content-Disposition"] = "attachment; filename=%s" % file_path
             return response
 
-    download_to_GIA_csv.short_description = "Download GIA CV Transfer"
+    download_to_GIA_csv.short_description = "Download GIA CSV Transfer"
 
     def download_to_basic_report_csv(self, request, queryset):
         file_path = Stone.objects.generate_basic_report_csv(queryset)
