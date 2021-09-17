@@ -3,7 +3,7 @@ from decimal import Decimal
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
-from grading.forms import UploadFormMetaClass, BaseUploadForm, SarineUploadForm
+from grading.forms import UploadFormMetaClass, BaseUploadForm, SarineUploadForm, BasicUploadForm
 from grading.models import Stone
 
 from stonegrading.mixins import SarineGradingMixin
@@ -457,3 +457,52 @@ class SarineUploadFormTest(TestCase):
                 actual_value = float(raw_actual_value) if type(raw_actual_value) == Decimal else raw_actual_value
                 expected_value = expected_stone[field]
                 self.assertEqual(actual_value, expected_value)
+
+
+class BasicUploadFormTest(TestCase):
+    fixtures = ("grading/fixtures/test_data.json",)
+
+    def setUp(self):
+        self.sarine_csv_file = open("grading/tests/fixtures/sarine-01.csv", "rb")
+
+        self.csv_file = open("grading/tests/fixtures/basic-01.csv", "rb")
+        self.csv_file_spaces = open("grading/tests/fixtures/basic-01-spaces.csv", "rb")
+
+        # self.do_sarine_upload()
+
+    def do_sarine_upload(self):
+        """
+        Perform sarine upload before Basic upload
+        :return:
+        """
+        Stone.objects.all().delete()
+        form = SarineUploadForm(
+            data={},
+            files={"file": SimpleUploadedFile(self.sarine_csv_file.name, self.sarine_csv_file.read())},
+            user=User.objects.get(username="gary"),
+        )
+        if form.is_valid():
+            form.save()
+
+    def test_csv_file_is_valid(self):
+        """
+        Tests csv file True validation
+        """
+
+        # No column spaces
+        # import pdb; pdb.set_trace()
+        form = BasicUploadForm(
+            data={},
+            files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())},
+        )
+        self.assertTrue(form.is_valid())
+
+    def test_csv_file_is_valid_for_csv_with_column_spacesx(self):
+
+        # With column spaces
+        form = BasicUploadForm(
+            data={},
+            files={"file": SimpleUploadedFile(self.csv_file_spaces.name, self.csv_file_spaces.read())},
+        )
+        # import pdb; pdb.set_trace()
+        self.assertTrue(form.is_valid())

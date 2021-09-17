@@ -9,6 +9,8 @@ from django.contrib.auth import get_user_model
 from django.utils.timezone import utc
 
 from stonegrading.mixins import SarineGradingMixin, BasicGradingMixin
+from stonegrading.models import Inclusion
+from stonegrading.grades import Inclusions
 
 from ownerships.models import ParcelTransfer, StoneTransfer
 
@@ -93,7 +95,7 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
 
         # raise a ValueError exception if no Meta class is define
         if not hasattr(self, "Meta"):
-            raise ValueError("You need to define a class Meta for extra data")
+            raise ValueError("You need to define a class `Meta` for extra data")
 
         # raise a ValueError exception if no fields and model attributes are defined within the class Meta.
         if not hasattr(self.Meta, "fields"):
@@ -115,7 +117,7 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
         :return:
         """
 
-        class StoneDataForm(forms.ModelForm):
+        class StoneDataForm(type(forms.ModelForm), metaclass=ModelFormDataMetaClass):
             class Meta:
                 fields = _fields
                 model = mixin
@@ -199,13 +201,49 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
             "EXTREMELY LARGE": "XL",
         }
 
+        # Make uppercase
+        fields = (
+            "basic_diamond_description",
+            "basic_girdle_condition_1",
+            "basic_girdle_condition_2",
+            "basic_girdle_condition_3",
+            "basic_girdle_condition_final",
+            "culet_size_description",
+        )
+
+        for field in fields:
+            if field in data:
+                data[field] = data[field].upper()
+
         if "culet_size_description" in data:
             data["culet_size_description"] = "/".join(
-                [
-                    culet_choices_display_map.get(size.strip().upper())
-                    for size in data["culet_size_description"].split("/")
-                ]
+                [culet_choices_display_map.get(size.strip()) for size in data["culet_size_description"].split("/")]
             )
+
+        # Girdle conditions
+        girdle_conditions_choices_map = {"FACETED": "FAC", "POLISHED": "POL", "BRUTED": "BRU"}
+
+        for field, value in data.items():
+            if "girdle_condition" in field:
+                data[field] = (
+                    girdle_conditions_choices_map[value.upper()] if value in girdle_conditions_choices_map else value
+                )
+
+        # process inclusions
+        # Below code applies if we want to be very specific about which inclusion in the string is not valid
+        # inclusions = [inclusion for inclusion in Inclusions.__dict__.keys() if "__" not in inclusion]
+        # inclusions.remove("CHOICES")
+        #
+        # inclusion_values = [getattr(Inclusions, attr) for attr in inclusions]
+
+        for field, value in data.items():
+            if "inclusion" in field:
+                inclusions = [value.strip() for value in value.split(",")]
+
+                try:
+                    data[field] = [Inclusion.objects.get(inclusion=inclusion) for inclusion in inclusions]
+                except Inclusion.DoesNotExist:
+                    pass
 
         return data
 
@@ -262,12 +300,22 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
         for method in csv_processing_methods:
             stone_data = method(self, stone_data, file_name=csv_file.name)
 
+        import pdb
+
+        pdb.set_trace()
+
         # Do error handling here and return error_dict
         form_errors = self.__build_error_dict(stone_data)
+        import pdb
+
+        pdb.set_trace()
         if form_errors:
             self.__csv_errors = form_errors
             raise ValidationError({"file": "CSV File Validation Error"})
 
+        import pdb
+
+        pdb.set_trace()
         self.__csv_errors = {}
 
         return stone_data
@@ -334,3 +382,35 @@ class SarineUploadForm(BaseUploadForm):
             stones.append(stone)
 
         return stones
+
+
+class BasicUploadForm(BaseUploadForm):
+    class Meta:
+        mixin = BasicGradingMixin
+        fields = [field.name for field in BasicGradingMixin._meta.get_fields()]  #  + ["girdle_min_grade"]
+
+    def __process_graders(self, stone_data, file_name):
+        """
+        Check that graders (user accounts) exists and raise validation error or return stone_data
+
+        Conditions
+        ----------
+        1. basic_grading_1, basic_grading_2, basic_grading_3 ===> Not required
+        2. Raise error instantly when any of them contains a user that does not exist
+        :return:
+        """
+
+        graders = []
+        for data in stone_data:
+            for field, value in data.items():
+                if "basic_grader_" in field:
+                    # import pdb; pdb.set_trace()
+                    try:
+                        user = User.objects.get(username=value.lower())
+                    except User.DoesNotExist:
+                        raise forms.ValidationError("Grader user account does not exist")
+
+                    data[field] = user
+
+        # import pdb; pdb.set_trace()
+        return stone_data
