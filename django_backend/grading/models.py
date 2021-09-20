@@ -305,7 +305,7 @@ class Stone(
     gw_verification = models.ForeignKey(GoldwayVerification, on_delete=models.PROTECT, blank=True, null=True)
 
     remarks = models.TextField(blank=True, null=True)
-    # internal_id = models.IntegerField(unique=True)
+    internal_id = models.IntegerField(unique=True)
     external_id = models.CharField(max_length=11, unique=True, blank=True, null=True)
 
     objects = StoneManager()
