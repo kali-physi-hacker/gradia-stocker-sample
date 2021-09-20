@@ -104,8 +104,30 @@ def clean_basic_csv_upload_file(file_path):
 class AllUploadView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         template = "grading/all-uploads-to.html"
-        context = {}
+        context = {"title": "Stone Grading Types"}
         return render(request, template, context)
+
+
+def get_error_headers(error_dict):
+    """
+    Returns a list of headers given a dict
+    :param error_dict:
+    returns:
+    """
+    error_headers = []
+    for errors in error_dict:
+        for error in error_dict[errors]:
+            if error not in error_headers:
+                error_headers.append(error)
+
+    return error_headers
+
+
+def errors_page(request, title, form):
+    template = "grading/csv_errors.html"
+
+    context = {"form": form, "title": title}
+    return render(request, template, context)
 
 
 class SarineUploadView(LoginRequiredMixin, View):
@@ -120,7 +142,11 @@ class SarineUploadView(LoginRequiredMixin, View):
         :return:
         """
         form = CSVImportForm()
-        context = {"template_title": "Upload a csv file containing sarine data", "form": form}
+        context = {
+            "template_title": "Upload a csv file containing sarine data",
+            "title": "Sarine Grading",
+            "form": form,
+        }
         return render(request, "grading/upload.html", context)
 
     def post(self, request, *args, **kwargs):
@@ -138,8 +164,7 @@ class SarineUploadView(LoginRequiredMixin, View):
         """
         form = SarineUploadForm(user=request.user, data={}, files=request.FILES)
         if not form.is_valid():
-            # get the csv errors and return them to some template as context variables and render as error page
-            HttpResponseRedirect(reverse("grading:sarine_data_upload_url"))
+            return errors_page(request=request, title="Saring Grading", form=form)
 
         stones = form.save()
         split_id = stones[0].split_from.pk

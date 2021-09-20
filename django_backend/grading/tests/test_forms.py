@@ -274,7 +274,6 @@ class SarineUploadFormTest(TestCase):
             },
             user=self.gary_user,
         )
-        # import pdb; pdb.set_trace()
         self.assertFalse(form.is_valid())
         for error_key in form.csv_errors:
             self.assertEqual(form.csv_errors[error_key].get("diameter_min")[0], "This field is required.")
@@ -313,6 +312,22 @@ class SarineUploadFormTest(TestCase):
         self.assertEqual(len(data), 3)
         for actual_stone, expected_stone in zip(form.cleaned_data, self.expected_stones):
             self.assertEqual(actual_stone, expected_stone)
+
+    def test_form_error_as_table(self):
+        """
+        Tests that form.errors_as_table returns the errors as html table
+        :return:
+        """
+        form = SarineUploadForm(
+            data={},
+            files={"file": SimpleUploadedFile(self.csv_file_invalid_types.name, self.csv_file_invalid_types.read())},
+            user=self.gary_user,
+        )
+        self.assertFalse(form.is_valid())
+        actual_html_string = form.errors_as_table()
+        expected_html_string = """<table><thead><tr><th>Row No.</th><th>pavilion_angle</th><th>girdle_max_number</th><th>height</th></tr></thead><tbody><tr><td>1</td><td class="error">Enter a number.</td><td><i class="fas fa-check"></i></td><td><i class="fas fa-check"></i></td></tr><tr><td>2</td><td><i class="fas fa-check"></i></td><td class="error">Enter a number.</td><td><i class="fas fa-check"></i></td></tr><tr><td>3</td><td><i class="fas fa-check"></i></td><td><i class="fas fa-check"></i></td><td class="error">Enter a number.</td></tr></tbody></table>"""
+
+        self.assertEqual(actual_html_string, expected_html_string)
 
     def test_form_save_creates_stones(self):
         """
