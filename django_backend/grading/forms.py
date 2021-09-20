@@ -332,9 +332,9 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
         """
         error_columns = get_error_headers(self.csv_errors)
         table_head = (
-                "<thead><tr><th>Row No.</th>"
-                + "".join([f"<th>{column}</th>" for column in error_columns])
-                + "</tr></thead>"
+            "<thead><tr><th>Row No.</th>"
+            + "".join([f"<th>{column}</th>" for column in error_columns])
+            + "</tr></thead>"
         )
         table_rows = ""
 
