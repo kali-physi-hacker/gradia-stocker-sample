@@ -655,8 +655,4 @@ class BasicUploadFormTest(TestCase):
                 expected_value = expected_stone[field]
 
                 if "inclusion" not in field:
-                    if actual_value is None:
-                        import pdb
-
-                        pdb.set_trace()
                     self.assertEqual(actual_value, expected_value)

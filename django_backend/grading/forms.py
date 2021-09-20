@@ -78,6 +78,21 @@ class UploadFormMetaClass(type(forms.Form)):
         return clsobj
 
 
+def get_error_headers(error_dict):
+    """
+    Returns a list of headers given a dict
+    :param error_dict:
+    returns:
+    """
+    error_headers = []
+    for errors in error_dict:
+        for error in error_dict[errors]:
+            if error not in error_headers:
+                error_headers.append(error)
+
+    return error_headers
+
+
 class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
     file = forms.FileField()
 
@@ -309,6 +324,33 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
         :returns:
         """
         return self.processing_methods
+
+    def errors_as_table(self):
+        """
+        Return html table of the errors
+        :return:
+        """
+        error_columns = get_error_headers(self.csv_errors)
+        table_head = (
+                "<thead><tr><th>Row No.</th>"
+                + "".join([f"<th>{column}</th>" for column in error_columns])
+                + "</tr></thead>"
+        )
+        table_rows = ""
+
+        for _, error_dict in self.csv_errors.items():
+            row = f"<tr><td>{int(_) + 1}</td>"
+            for column, error in error_dict.items():
+                for error_column in error_columns:
+                    if error_column == column:
+                        row += f'<td class="error">{error[0]}</td>'
+                    else:
+                        row += '<td><i class="fas fa-check"></i></td>'
+                row += "</tr>"
+            table_rows += row
+        table_body = f"<tbody>{table_rows}</tbody>"
+        html_string = f"<table>{table_head}{table_body}</table>"
+        return html_string
 
     def clean(self):
         """

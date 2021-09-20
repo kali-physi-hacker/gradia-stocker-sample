@@ -102,6 +102,13 @@ class AllUploadView(LoginRequiredMixin, View):
         return render(request, template, context)
 
 
+def errors_page(request, title, form):
+    template = "grading/csv_errors.html"
+
+    context = {"form": form, "title": title}
+    return render(request, template, context)
+
+
 class SarineUploadView(LoginRequiredMixin, View):
     fields = [field.name for field in SarineGradingMixin._meta.get_fields()] + ["internal_id"]
 
