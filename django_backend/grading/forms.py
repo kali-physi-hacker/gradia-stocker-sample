@@ -1,21 +1,17 @@
 import os
 from datetime import datetime
-from six import with_metaclass
 
 import pandas as pd
 from django import forms
-from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.utils.timezone import utc
-
+from ownerships.models import ParcelTransfer, StoneTransfer
+from stonegrading.grades import GirdleGrades
 from stonegrading.mixins import SarineGradingMixin, BasicGradingMixin
 from stonegrading.models import Inclusion
-from stonegrading.grades import Inclusions
 
-from ownerships.models import ParcelTransfer, StoneTransfer
-
-from .models import Parcel, Receipt, Stone, Split
-
+from .models import Parcel, Stone, Split
 
 User = get_user_model()
 
@@ -83,7 +79,6 @@ class UploadFormMetaClass(type(forms.Form)):
 
 
 class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
-
     file = forms.FileField()
 
     __csv_errors = None
@@ -98,28 +93,45 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
             raise ValueError("You need to define a class `Meta` for extra data")
 
         # raise a ValueError exception if no fields and model attributes are defined within the class Meta.
-        if not hasattr(self.Meta, "fields"):
-            raise ValueError("You need to specify `fields` attribute in the Meta class")
-
-        self.mixin_fields = self.Meta.fields
+        # if not hasattr(self.Meta, "fields"):
+        #     raise ValueError("You need to specify `fields` attribute in the Meta class")
 
         if not hasattr(self.Meta, "mixin"):
             raise ValueError("You need to specify `mixin` attribute in the Meta class")
 
+        self.mixin_fields = [field.name for field in self.Meta.mixin._meta.get_fields()]
+
+        if hasattr(self.Meta, "extra_fields"):
+            self.extra_fields = self.Meta.extra_fields
+
         self.mixin = self.Meta.mixin
 
-        stone_data_class = self.__get_data_class(self.mixin_fields, self.mixin)
+        extra_fields = [
+            {field_name: field} for field_name, field in self.Meta.__dict__.items() if isinstance(field, forms.Field)
+        ]
+
+        self.all_fields = self.mixin_fields + ["internal_id"]
+
+        stone_data_class = self.__get_data_class(self.mixin)
+        for field_dict in extra_fields:
+            for field, value in field_dict.items():
+                self.all_fields.append(field)
+                setattr(stone_data_class, field, value)
+
         setattr(self, "StoneDataForm", stone_data_class)
 
-    def __get_data_class(self, _fields, mixin):
+    def __get_data_class(self, mixin):
         """
         Creates and returns StoneDataForm form modelling
+        :param mixin:
         :return:
         """
 
-        class StoneDataForm(type(forms.ModelForm), metaclass=ModelFormDataMetaClass):
+        class StoneDataForm(forms.ModelForm):
+            internal_id = forms.IntegerField()
+
             class Meta:
-                fields = _fields
+                fields = [field.name for field in mixin._meta.get_fields()]
                 model = mixin
 
         return StoneDataForm
@@ -172,7 +184,7 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
         data = data.copy()
 
         # cleaning for grades
-        grade_fields = [field for field in self.mixin_fields if "grade" in field] + [
+        grade_fields = [field for field in self.all_fields if "grade" in field] + [
             "sarine_cut_pre_polish_symmetry",
             "sarine_symmetry",
         ]
@@ -185,7 +197,7 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
         for field in grade_fields:
             if data.get(field) is not None:
                 try:
-                    data[field] = choices_display_name_map.get(data[field].upper()) or data[field]
+                    data[field] = choices_display_name_map.get(data[field].upper().strip()) or data[field].strip()
                 except:
                     data[field] = data[field]
 
@@ -213,7 +225,7 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
 
         for field in fields:
             if field in data:
-                data[field] = data[field].upper()
+                data[field] = data[field].upper().strip()
 
         if "culet_size_description" in data:
             data["culet_size_description"] = "/".join(
@@ -250,11 +262,14 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
     def __process_csv_content(self, csv_file):
         """
         Do some processing and return data
+        :param csv_file:
+        :returns:
         """
         data_frame = pd.read_csv(csv_file)
         data_frame = data_frame.rename(str.strip, axis="columns")
-        data_frame = pd.DataFrame(data_frame, columns=self.mixin_fields)
-        stone_data = [dict(zip(self.mixin_fields, data)) for data in data_frame.values]
+        data_frame = data_frame.applymap(lambda x: x.strip() if isinstance(x, str) else x)
+        data_frame = pd.DataFrame(data_frame, columns=self.all_fields)
+        stone_data = [dict(zip(self.all_fields, data)) for data in data_frame.values]
 
         for data in stone_data:
             for column in data:
@@ -278,6 +293,12 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
                     data[girdle_grade].upper() if type(data[girdle_grade]) == str else data[girdle_grade]
                 )
 
+        # Remarks
+        for data in stone_data:
+            for field in data:
+                if "remarks" in field:
+                    data[field] = "" if data[field] is None else data[field]
+
         self.__stone_data = stone_data
 
         return stone_data
@@ -285,37 +306,39 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
     def __get_all_data_processing_methods(self):
         """
         Returns all csv data processing methods.
+        :returns:
         """
         return self.processing_methods
 
     def clean(self):
         """
         Clean the csv file and check for any errors
+        :returns:
         """
         cleaned_data = super().clean()
         csv_file = cleaned_data["file"]
         stone_data = self.__process_csv_content(csv_file)
         csv_processing_methods = self.__get_all_data_processing_methods()
 
+        method_errors = {}
+
         for method in csv_processing_methods:
-            stone_data = method(self, stone_data, file_name=csv_file.name)
-
-        import pdb
-
-        pdb.set_trace()
+            stone_data, errors = method(self, stone_data, file_name=csv_file.name)
+            method_errors.update(errors)
 
         # Do error handling here and return error_dict
         form_errors = self.__build_error_dict(stone_data)
-        import pdb
 
-        pdb.set_trace()
+        for row, error_dict in method_errors.items():
+            for field, error in error_dict.items():
+                if field in form_errors[row]:
+                    form_errors[row][field].clear()
+                    form_errors[row][field].append(error)
+
         if form_errors:
             self.__csv_errors = form_errors
             raise ValidationError({"file": "CSV File Validation Error"})
 
-        import pdb
-
-        pdb.set_trace()
         self.__csv_errors = {}
 
         return stone_data
@@ -347,7 +370,7 @@ class SarineUploadForm(BaseUploadForm):
                 }
             )
 
-        return stone_data
+        return stone_data, {}
 
     def save(self):
         """
@@ -387,7 +410,11 @@ class SarineUploadForm(BaseUploadForm):
 class BasicUploadForm(BaseUploadForm):
     class Meta:
         mixin = BasicGradingMixin
-        fields = [field.name for field in BasicGradingMixin._meta.get_fields()]  #  + ["girdle_min_grade"]
+        fields = [field.name for field in BasicGradingMixin._meta.get_fields()]
+
+        # Extra fields which are not fields in the mixin (BasicGradingMixin)
+        girdle_min_grade = forms.ChoiceField(choices=GirdleGrades.CHOICES)
+        # basic_remarks = forms.CharField()
 
     def __process_graders(self, stone_data, file_name):
         """
@@ -397,20 +424,51 @@ class BasicUploadForm(BaseUploadForm):
         ----------
         1. basic_grading_1, basic_grading_2, basic_grading_3 ===> Not required
         2. Raise error instantly when any of them contains a user that does not exist
+        :param stone_data:
+        :param file_name:
         :return:
         """
 
-        graders = []
-        for data in stone_data:
+        errors = {}
+
+        for row, data in enumerate(stone_data):
             for field, value in data.items():
                 if "basic_grader_" in field:
-                    # import pdb; pdb.set_trace()
                     try:
-                        user = User.objects.get(username=value.lower())
+                        data[field] = User.objects.get(username=value.lower())
                     except User.DoesNotExist:
-                        raise forms.ValidationError("Grader user account does not exist")
+                        errors[row] = {}
+                        errors[row][field] = f"Grader user `{value}` account does not exist"
 
-                    data[field] = user
+        return stone_data, errors
 
-        # import pdb; pdb.set_trace()
-        return stone_data
+    def save(self):
+        stones = []
+        for data in self.cleaned_data:
+            stone = Stone.objects.get(internal_id=data["internal_id"])  # After resolving the id stuff
+
+            inclusions_fields = (
+                "basic_inclusions_1",
+                "basic_inclusions_2",
+                "basic_inclusions_3",
+                "basic_inclusions_final",
+            )
+
+            savable_data = data.copy()
+
+            for field in inclusions_fields:
+                inclusions = data[field]
+                stone_inclusions = getattr(stone, field)
+
+                for inclusion in inclusions:
+                    stone_inclusions.add(inclusion)
+
+                del savable_data[field]
+
+            for field, value in savable_data.items():
+                setattr(stone, field, value)
+
+            stone.save()
+            stones.append(stone)
+
+        return stones

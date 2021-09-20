@@ -5,14 +5,14 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from grading.forms import UploadFormMetaClass, BaseUploadForm, SarineUploadForm, BasicUploadForm
 from grading.models import Stone
-
 from stonegrading.mixins import SarineGradingMixin
+from stonegrading.models import Inclusion
 
 User = get_user_model()
 
-
 expected_stones = [
     {
+        "internal_id": 1,
         "diameter_min": 2.9,
         "diameter_max": 2.92,
         "height": 1.77,
@@ -78,6 +78,7 @@ expected_stones = [
         "lower_half_angle_grade": "EX",
     },
     {
+        "internal_id": 5,
         "diameter_min": 2.92,
         "diameter_max": 2.97,
         "height": 1.75,
@@ -143,6 +144,7 @@ expected_stones = [
         "lower_half_angle_grade": "EX",
     },
     {
+        "internal_id": 6,
         "diameter_min": 2.86,
         "diameter_max": 2.9,
         "height": 1.77,
@@ -256,7 +258,6 @@ class BaseUploadFormClassTest(TestCase):
         class SampleUploadClass(BaseUploadForm):
             class Meta:
                 mixin = SarineGradingMixin
-                fields = [field.name for field in SarineGradingMixin._meta.get_fields()]
 
             def __init__(self, user, *args, **kwargs):
                 self.user = user
@@ -278,17 +279,13 @@ class BaseUploadFormClassTest(TestCase):
         Tests that form class (sub classes) are defined with a class Meta
         returns:
         """
+
         # No Meta class
         class Sample(BaseUploadForm):
             pass
 
         with self.assertRaises(ValueError):
             form = Sample()
-
-        # No fields in Meta class
-        class Sample(BaseUploadForm):
-            class Meta:
-                mixin = SarineGradingMixin
 
         with self.assertRaises(ValueError):
             form = Sample()
@@ -358,6 +355,7 @@ class BaseUploadFormClassTest(TestCase):
             },
             user=self.gary_user,
         )
+
         self.assertFalse(form.is_valid())
         for error_key in form.csv_errors:
             self.assertEqual(form.csv_errors[error_key].get("diameter_min")[0], "This field is required.")
@@ -468,7 +466,137 @@ class BasicUploadFormTest(TestCase):
         self.csv_file = open("grading/tests/fixtures/basic-01.csv", "rb")
         self.csv_file_spaces = open("grading/tests/fixtures/basic-01-spaces.csv", "rb")
 
-        # self.do_sarine_upload()
+        self.expected_stones = [
+            {
+                "internal_id": 1,
+                "basic_diamond_description": "NATURAL",
+                "basic_grader_1": User.objects.get(username="gary"),
+                "basic_grader_2": User.objects.get(username="kary"),
+                "basic_grader_3": User.objects.get(username="tanly"),
+                "basic_carat": 0.09,
+                "basic_color_1": "F+",
+                "basic_color_2": "F",
+                "basic_color_3": "F+",
+                "basic_color_final": "F",
+                "basic_clarity_1": "SI1",
+                "basic_clarity_2": "SI1",
+                "basic_clarity_3": "SI1+",
+                "basic_clarity_final": "SI1",
+                "basic_fluorescence_1": "N",
+                "basic_fluorescence_2": "N",
+                "basic_fluorescence_3": "N",
+                "basic_fluorescence_final": "N",
+                "basic_culet_1": "N",
+                "basic_culet_2": "N",
+                "basic_culet_3": "N",
+                "basic_culet_final": "N",
+                "basic_culet_characteristic_1": "N",
+                "basic_culet_characteristic_2": "N",
+                "basic_culet_characteristic_3": "N",
+                "basic_culet_characteristic_final": "N",
+                "basic_girdle_condition_1": "FAC",
+                "basic_girdle_condition_2": "FAC",
+                "basic_girdle_condition_3": "FAC",
+                "basic_girdle_condition_final": "FAC",
+                "basic_inclusions_1": "Cld, Xtl",  # [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Cld, Xtl")],
+                "basic_inclusions_2": "Cld, Xtl, IndN",  # [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Cld, Xtl, IndN")],
+                "basic_inclusions_3": "Cld, IndN",  # [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Cld, IndN")],
+                "basic_inclusions_final": "Cld, IndN",  # [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Cld, IndN")],
+                "basic_polish_1": "GD",
+                "basic_polish_2": "GD",
+                "basic_polish_3": "VG",
+                "basic_polish_final": "VG",
+                "girdle_min_grade": "STK",
+                "basic_girdle_min_grade_final": "STK",
+                "basic_remarks": "",
+            },
+            {
+                "internal_id": 5,
+                "basic_diamond_description": "NATURAL",
+                "basic_grader_1": User.objects.get(username="gary"),
+                "basic_grader_2": User.objects.get(username="kary"),
+                "basic_grader_3": User.objects.get(username="tanly"),
+                "basic_carat": 0.09,
+                "basic_color_1": "F",
+                "basic_color_2": "F",
+                "basic_color_3": "F+",
+                "basic_color_final": "F",
+                "basic_clarity_1": "VS2",
+                "basic_clarity_2": "VS2",
+                "basic_clarity_3": "VS1",
+                "basic_clarity_final": "VS1",
+                "basic_fluorescence_1": "N",
+                "basic_fluorescence_2": "N",
+                "basic_fluorescence_3": "N",
+                "basic_fluorescence_final": "N",
+                "basic_culet_1": "N",
+                "basic_culet_2": "N",
+                "basic_culet_3": "N",
+                "basic_culet_final": "N",
+                "basic_culet_characteristic_1": "N",
+                "basic_culet_characteristic_2": "N",
+                "basic_culet_characteristic_3": "N",
+                "basic_culet_characteristic_final": "N",
+                "basic_girdle_condition_1": "FAC",
+                "basic_girdle_condition_2": "FAC",
+                "basic_girdle_condition_3": "FAC",
+                "basic_girdle_condition_final": "FAC",
+                "basic_inclusions_1": "Xtl, Ftr",  # [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Xtl, Ftr")],
+                "basic_inclusions_2": "Xtl",  # Inclusion.objects.get(inclusion="Xtl"),
+                "basic_inclusions_3": "Cld",  # Inclusion.objects.get("Cld"),
+                "basic_inclusions_final": "Cld",  # Inclusion.objects.get(inclusion="Cld"),
+                "basic_polish_1": "GD",
+                "basic_polish_2": "GD",
+                "basic_polish_3": "VG",
+                "basic_polish_final": "VG",
+                "girdle_min_grade": "MED",
+                "basic_girdle_min_grade_final": "MED",
+                "basic_remarks": "",
+            },
+            {
+                "internal_id": 6,
+                "basic_diamond_description": "NATURAL",
+                "basic_grader_1": User.objects.get(username="gary"),
+                "basic_grader_2": User.objects.get(username="kary"),
+                "basic_grader_3": User.objects.get(username="tanly"),
+                "basic_carat": 0.09,
+                "basic_color_1": "F",
+                "basic_color_2": "F",
+                "basic_color_3": "F",
+                "basic_color_final": "F",
+                "basic_clarity_1": "VS2",
+                "basic_clarity_2": "VS2",
+                "basic_clarity_3": "VS1",
+                "basic_clarity_final": "VS1",
+                "basic_fluorescence_1": "N",
+                "basic_fluorescence_2": "N",
+                "basic_fluorescence_3": "N",
+                "basic_fluorescence_final": "N",
+                "basic_culet_1": "N",
+                "basic_culet_2": "N",
+                "basic_culet_3": "N",
+                "basic_culet_final": "N",
+                "basic_culet_characteristic_1": "N",
+                "basic_culet_characteristic_2": "N",
+                "basic_culet_characteristic_3": "N",
+                "basic_culet_characteristic_final": "N",
+                "basic_girdle_condition_1": "FAC",
+                "basic_girdle_condition_2": "FAC",
+                "basic_girdle_condition_3": "FAC",
+                "basic_girdle_condition_final": "FAC",
+                "basic_inclusions_1": "Xtl, Cld, IndN",  # [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Xtl, Cld, IndN")],
+                "basic_inclusions_2": "Xtl, Cld",  #  [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Xtl, Cld")],
+                "basic_inclusions_3": "Cld, Xtl",  # [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Cld, Xtl")],
+                "basic_inclusions_final": "Cld, Xtl",  # [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Cld, Xtl")],
+                "basic_polish_1": "EX",
+                "basic_polish_2": "EX",
+                "basic_polish_3": "EX",
+                "basic_polish_final": "EX",
+                "girdle_min_grade": "STK",
+                "basic_girdle_min_grade_final": "STK",
+                "basic_remarks": "",
+            },
+        ]
 
     def do_sarine_upload(self):
         """
@@ -490,19 +618,45 @@ class BasicUploadFormTest(TestCase):
         """
 
         # No column spaces
-        # import pdb; pdb.set_trace()
         form = BasicUploadForm(
             data={},
             files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())},
         )
         self.assertTrue(form.is_valid())
 
-    def test_csv_file_is_valid_for_csv_with_column_spacesx(self):
-
+    def test_csv_file_is_valid_for_csv_with_column_spaces(self):
         # With column spaces
         form = BasicUploadForm(
             data={},
             files={"file": SimpleUploadedFile(self.csv_file_spaces.name, self.csv_file_spaces.read())},
         )
-        # import pdb; pdb.set_trace()
         self.assertTrue(form.is_valid())
+
+    def test_save_updates_stones(self):
+        self.do_sarine_upload()
+
+        form = BasicUploadForm(
+            data={},
+            files={"file": SimpleUploadedFile(self.csv_file_spaces.name, self.csv_file_spaces.read())},
+        )
+        self.assertTrue(form.is_valid())
+        form.save()
+
+        stones = Stone.objects.all()
+
+        self.assertEqual(len(stones), 3)
+
+        fields = self.expected_stones[0].keys()
+
+        for actual_stone, expected_stone in zip(stones, self.expected_stones):
+            for field in fields:
+                raw_actual_value = getattr(actual_stone, field)
+                actual_value = float(raw_actual_value) if type(raw_actual_value) == Decimal else raw_actual_value
+                expected_value = expected_stone[field]
+
+                if "inclusion" not in field:
+                    if actual_value is None:
+                        import pdb
+
+                        pdb.set_trace()
+                    self.assertEqual(actual_value, expected_value)
