@@ -3,16 +3,15 @@ from datetime import datetime
 
 import pandas as pd
 from django import forms
-from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.utils.timezone import utc
-
-from stonegrading.mixins import SarineGradingMixin
-
 from ownerships.models import ParcelTransfer, StoneTransfer
+from stonegrading.grades import GirdleGrades
+from stonegrading.mixins import SarineGradingMixin, BasicGradingMixin
+from stonegrading.models import Inclusion
 
-from .models import Parcel, Receipt, Stone, Split, BasicGradingMixin
-
+from .models import Parcel, Stone, Split
 
 User = get_user_model()
 
@@ -60,12 +59,23 @@ class CSVImportForm(forms.Form):
 sarine_fields = [field.name for field in SarineGradingMixin._meta.get_fields()] + ["internal_id"]
 
 
-class SarineDataForm(forms.ModelForm):
-    internal_id = forms.IntegerField()
+class UploadFormMetaClass(type(forms.Form)):
+    def __new__(cls, name, bases, clsdict):
+        """
+        Create the class object, get all processing / validation methods and assign to class
+        :param name:
+        :param bases:
+        :param clsdict:
+        """
+        clsobj = super().__new__(cls, name, bases, clsdict)
 
-    class Meta:
-        model = SarineGradingMixin
-        fields = [field.name for field in SarineGradingMixin._meta.get_fields()]
+        callables = [attr for _, attr in clsdict.items() if callable(attr)]
+
+        processing_methods = [method for method in callables if method.__name__.startswith("__process_")]
+
+        setattr(clsobj, "processing_methods", processing_methods)
+
+        return clsobj
 
 
 def get_error_headers(error_dict):
@@ -83,23 +93,63 @@ def get_error_headers(error_dict):
     return error_headers
 
 
-class SarineUploadForm(forms.Form):
+class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
     file = forms.FileField()
 
-    parcel = None
     __csv_errors = None
     __cleaned_stone_data = None
     __stone_data = []
 
-    def __init__(self, user, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
+        super(BaseUploadForm, self).__init__(*args, **kwargs)
+
+        # raise a ValueError exception if no Meta class is define
+        if not hasattr(self, "Meta"):
+            raise ValueError("You need to define a class `Meta` for extra data")
+
+        # raise a ValueError exception if no fields and model attributes are defined within the class Meta.
+        # if not hasattr(self.Meta, "fields"):
+        #     raise ValueError("You need to specify `fields` attribute in the Meta class")
+
+        if not hasattr(self.Meta, "mixin"):
+            raise ValueError("You need to specify `mixin` attribute in the Meta class")
+
+        self.mixin_fields = [field.name for field in self.Meta.mixin._meta.get_fields()]
+
+        if hasattr(self.Meta, "extra_fields"):
+            self.extra_fields = self.Meta.extra_fields
+
+        self.mixin = self.Meta.mixin
+
+        extra_fields = [
+            {field_name: field} for field_name, field in self.Meta.__dict__.items() if isinstance(field, forms.Field)
+        ]
+
+        self.all_fields = self.mixin_fields + ["internal_id"]
+
+        stone_data_class = self.__get_data_class(self.mixin)
+        for field_dict in extra_fields:
+            for field, value in field_dict.items():
+                self.all_fields.append(field)
+                setattr(stone_data_class, field, value)
+
+        setattr(self, "StoneDataForm", stone_data_class)
+
+    def __get_data_class(self, mixin):
         """
-        Overriding constructor to provide ability to accept current user
-        :param user:
-        :param args:
-        :param kwargs:
+        Creates and returns StoneDataForm form modelling
+        :param mixin:
+        :return:
         """
-        super(SarineUploadForm, self).__init__(*args, **kwargs)
-        self.user = user
+
+        class StoneDataForm(forms.ModelForm):
+            internal_id = forms.IntegerField()
+
+            class Meta:
+                fields = [field.name for field in mixin._meta.get_fields()]
+                model = mixin
+
+        return StoneDataForm
 
     @property
     def csv_errors(self):
@@ -108,7 +158,7 @@ class SarineUploadForm(forms.Form):
         :return:
         """
         if self.__csv_errors is None:
-            raise Exception("You need to call form.is_valid() first")
+            raise ValueError("You need to call form.is_valid() first")
 
         return self.__csv_errors
 
@@ -127,6 +177,20 @@ class SarineUploadForm(forms.Form):
     def stone_data(self):
         return self.__stone_data
 
+    def __build_error_dict(self, data):
+        """
+        Create a form instance and return form errors if it exists
+        :param data:
+        :return:
+        """
+        errors = {}
+        for row, _dt in enumerate(data):
+            form = self.StoneDataForm(_dt)
+            if not form.is_valid():
+                errors[row] = form.errors
+
+        return errors
+
     def __to_db_name(self, data):
         """
         Change from display name to db name
@@ -135,18 +199,22 @@ class SarineUploadForm(forms.Form):
         data = data.copy()
 
         # cleaning for grades
-        grade_fields = [field for field in sarine_fields if "grade" in field] + [
+        grade_fields = [field for field in self.all_fields if "grade" in field] + [
             "sarine_cut_pre_polish_symmetry",
             "sarine_symmetry",
         ]
-        grade_fields.remove("girdle_min_grade")
-        grade_fields.remove("girdle_max_grade")
+        for field in ("girdle_min_grade", "girdle_max_grade"):
+            if field in grade_fields:
+                grade_fields.remove(field)
 
         choices_display_name_map = {"EXCELLENT": "EX", "VERY GOOD": "VG", "GOOD": "GD", "FAIR": "F", "POOR": "P"}
 
         for field in grade_fields:
-            if data[field] is not None:
-                data[field] = choices_display_name_map.get(data[field].upper()) or data[field]
+            if data.get(field) is not None:
+                try:
+                    data[field] = choices_display_name_map.get(data[field].upper().strip()) or data[field].strip()
+                except:
+                    data[field] = data[field]
 
         # cleaning for culet_descriptions
         culet_choices_display_map = {
@@ -160,25 +228,63 @@ class SarineUploadForm(forms.Form):
             "EXTREMELY LARGE": "XL",
         }
 
-        data["culet_size_description"] = "/".join(
-            [
-                culet_choices_display_map.get(size.strip().upper())
-                for size in data["culet_size_description"].split("/")
-            ]
+        # Make uppercase
+        fields = (
+            "basic_diamond_description",
+            "basic_girdle_condition_1",
+            "basic_girdle_condition_2",
+            "basic_girdle_condition_3",
+            "basic_girdle_condition_final",
+            "culet_size_description",
         )
+
+        for field in fields:
+            if field in data:
+                data[field] = data[field].upper().strip()
+
+        if "culet_size_description" in data:
+            data["culet_size_description"] = "/".join(
+                [culet_choices_display_map.get(size.strip()) for size in data["culet_size_description"].split("/")]
+            )
+
+        # Girdle conditions
+        girdle_conditions_choices_map = {"FACETED": "FAC", "POLISHED": "POL", "BRUTED": "BRU"}
+
+        for field, value in data.items():
+            if "girdle_condition" in field:
+                data[field] = (
+                    girdle_conditions_choices_map[value.upper()] if value in girdle_conditions_choices_map else value
+                )
+
+        # process inclusions
+        # Below code applies if we want to be very specific about which inclusion in the string is not valid
+        # inclusions = [inclusion for inclusion in Inclusions.__dict__.keys() if "__" not in inclusion]
+        # inclusions.remove("CHOICES")
+        #
+        # inclusion_values = [getattr(Inclusions, attr) for attr in inclusions]
+
+        for field, value in data.items():
+            if "inclusion" in field:
+                inclusions = [value.strip() for value in value.split(",")]
+
+                try:
+                    data[field] = [Inclusion.objects.get(inclusion=inclusion) for inclusion in inclusions]
+                except Inclusion.DoesNotExist:
+                    pass
 
         return data
 
     def __process_csv_content(self, csv_file):
         """
-        Process and clean the content of the csv file and return a list of stone (which are dictionaries)
+        Do some processing and return data
         :param csv_file:
-        :return:
+        :returns:
         """
-        csv_data = pd.read_csv(csv_file)
-        data_frame = csv_data.rename(str.strip, axis="columns")
-        data_frame = pd.DataFrame(data_frame, columns=sarine_fields)
-        stone_data = [dict(zip(sarine_fields, data)) for data in data_frame.values]
+        data_frame = pd.read_csv(csv_file)
+        data_frame = data_frame.rename(str.strip, axis="columns")
+        data_frame = data_frame.applymap(lambda x: x.strip() if isinstance(x, str) else x)
+        data_frame = pd.DataFrame(data_frame, columns=self.all_fields)
+        stone_data = [dict(zip(self.all_fields, data)) for data in data_frame.values]
 
         for data in stone_data:
             for column in data:
@@ -190,63 +296,34 @@ class SarineUploadForm(forms.Form):
         # clean for height and girdle_min_grade
         for data in stone_data:
             try:
-                data["height"] = round(float(data["height"]), 2)
+                if "height" in data:
+                    data["height"] = round(float(data["height"]), 2)
             except ValueError:
                 pass
 
-            data["girdle_min_grade"] = (
-                data["girdle_min_grade"].upper()
-                if type(data["girdle_min_grade"]) == str
-                else data["girdle_min_grade"]
-            )
+            girdle_grades = [grade for grade in data if "girdle_min_grade" in grade or "girdle_max_grade" in grade]
+
+            for girdle_grade in girdle_grades:
+                data[girdle_grade] = (
+                    data[girdle_grade].upper() if type(data[girdle_grade]) == str else data[girdle_grade]
+                )
+
+        # Remarks
+        for data in stone_data:
+            for field in data:
+                if "remarks" in field:
+                    data[field] = "" if data[field] is None else data[field]
 
         self.__stone_data = stone_data
+
         return stone_data
 
-    def __build_error_dict(self, data):
+    def __get_all_data_processing_methods(self):
         """
-        Create a form instance and return form errors if it exists
-        :param data:
-        :return:
+        Returns all csv data processing methods.
+        :returns:
         """
-        errors = {}
-        for row, _dt in enumerate(data):
-            form = SarineDataForm(_dt)
-            if not form.is_valid():
-                errors[row] = form.errors
-
-        return errors
-
-    def clean(self):
-        """
-        Clean the csv file and check for some errors
-        :return:
-        """
-        cleaned_data = super(SarineUploadForm, self).clean()
-
-        # Invalid csv file name
-        file = cleaned_data["file"]
-        gradia_parcel_code = os.path.splitext(file.name)[0]
-
-        try:
-            self.parcel = Parcel.objects.get(gradia_parcel_code=gradia_parcel_code)
-        except Parcel.DoesNotExist:
-            raise ValidationError(
-                {
-                    "file": "No parcel with such a parcel code. Please be sure the csv file name matches the parcel code"
-                }
-            )
-
-        stone_data = self.__process_csv_content(file)
-
-        form_errors = self.__build_error_dict(stone_data)
-
-        if form_errors:
-            self.__csv_errors = form_errors
-            raise ValidationError({"file": "CSV File Validation Error"})
-
-        self.__csv_errors = {}
-        return stone_data
+        return self.processing_methods
 
     def errors_as_table(self):
         """
@@ -262,7 +339,7 @@ class SarineUploadForm(forms.Form):
         table_rows = ""
 
         for _, error_dict in self.csv_errors.items():
-            row = f"<tr><td>{int(_)+1}</td>"
+            row = f"<tr><td>{int(_) + 1}</td>"
             for column, error in error_dict.items():
                 for error_column in error_columns:
                     if error_column == column:
@@ -275,6 +352,68 @@ class SarineUploadForm(forms.Form):
         html_string = f"<table>{table_head}{table_body}</table>"
         return html_string
 
+    def clean(self):
+        """
+        Clean the csv file and check for any errors
+        :returns:
+        """
+        cleaned_data = super().clean()
+        csv_file = cleaned_data["file"]
+        stone_data = self.__process_csv_content(csv_file)
+        csv_processing_methods = self.__get_all_data_processing_methods()
+
+        method_errors = {}
+
+        for method in csv_processing_methods:
+            stone_data, errors = method(self, stone_data, file_name=csv_file.name)
+            method_errors.update(errors)
+
+        # Do error handling here and return error_dict
+        form_errors = self.__build_error_dict(stone_data)
+
+        for row, error_dict in method_errors.items():
+            for field, error in error_dict.items():
+                if field in form_errors[row]:
+                    form_errors[row][field].clear()
+                    form_errors[row][field].append(error)
+
+        if form_errors:
+            self.__csv_errors = form_errors
+            raise ValidationError({"file": "CSV File Validation Error"})
+
+        self.__csv_errors = {}
+
+        return stone_data
+
+
+class SarineUploadForm(BaseUploadForm):
+    class Meta:
+        mixin = SarineGradingMixin
+        fields = [field.name for field in SarineGradingMixin._meta.get_fields()]
+
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
+
+    def __process_file_name(self, stone_data, file_name):
+        """
+        Raise a validation error if file name does not match any gradia parcel code
+        :param stone_data:
+        :param file_name:
+        :returns:
+        """
+        gradia_parcel_code = os.path.splitext(file_name)[0]
+        try:
+            self.parcel = Parcel.objects.get(gradia_parcel_code=gradia_parcel_code)
+        except Parcel.DoesNotExist:
+            raise ValidationError(
+                {
+                    "file": "No parcel with such a parcel code. Please be sure the csv file name matches the parcel code"
+                }
+            )
+
+        return stone_data, {}
+
     def save(self):
         """
         Create and return a list of stones
@@ -286,7 +425,7 @@ class SarineUploadForm(forms.Form):
 
         for stone_data in self.cleaned_data:
 
-            stone_data["data_entry_user"] = self.user  # refactor
+            stone_data["data_entry_user"] = self.user
             stone_data["split_from"] = split
             stone = Stone.objects.create(**stone_data)
 
@@ -310,5 +449,68 @@ class SarineUploadForm(forms.Form):
         return stones
 
 
-class BasicUploadForm(forms.Form):
-    carat = forms.CharField()
+class BasicUploadForm(BaseUploadForm):
+    class Meta:
+        mixin = BasicGradingMixin
+        fields = [field.name for field in BasicGradingMixin._meta.get_fields()]
+
+        # Extra fields which are not fields in the mixin (BasicGradingMixin)
+        girdle_min_grade = forms.ChoiceField(choices=GirdleGrades.CHOICES)
+        # basic_remarks = forms.CharField()
+
+    def __process_graders(self, stone_data, file_name):
+        """
+        Check that graders (user accounts) exists and raise validation error or return stone_data
+
+        Conditions
+        ----------
+        1. basic_grading_1, basic_grading_2, basic_grading_3 ===> Not required
+        2. Raise error instantly when any of them contains a user that does not exist
+        :param stone_data:
+        :param file_name:
+        :return:
+        """
+
+        errors = {}
+
+        for row, data in enumerate(stone_data):
+            for field, value in data.items():
+                if "basic_grader_" in field:
+                    try:
+                        data[field] = User.objects.get(username=value.lower())
+                    except User.DoesNotExist:
+                        errors[row] = {}
+                        errors[row][field] = f"Grader user `{value}` account does not exist"
+
+        return stone_data, errors
+
+    def save(self):
+        stones = []
+        for data in self.cleaned_data:
+            stone = Stone.objects.get(internal_id=data["internal_id"])  # After resolving the id stuff
+
+            inclusions_fields = (
+                "basic_inclusions_1",
+                "basic_inclusions_2",
+                "basic_inclusions_3",
+                "basic_inclusions_final",
+            )
+
+            savable_data = data.copy()
+
+            for field in inclusions_fields:
+                inclusions = data[field]
+                stone_inclusions = getattr(stone, field)
+
+                for inclusion in inclusions:
+                    stone_inclusions.add(inclusion)
+
+                del savable_data[field]
+
+            for field, value in savable_data.items():
+                setattr(stone, field, value)
+
+            stone.save()
+            stones.append(stone)
+
+        return stones

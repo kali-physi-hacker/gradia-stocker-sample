@@ -108,6 +108,24 @@
     }
   },
   {
+    "model": "auth.user",
+    "pk": 7,
+    "fields": {
+      "password": "pbkdf2_sha256$216000$iQSUR3qNHdm3$fqOSh1HEYY2NTIZUL5oNgFJ+vSod9hktx9dAcIOHd+E=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "kary",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2020-12-04T06:00:35.918Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
     "model": "customers.entity",
     "pk": 1,
     "fields": {
@@ -267,7 +285,7 @@
     "model": "grading.stone",
     "pk": 1,
     "fields": {
-      "internal_id": 100,
+      "internal_id": "100",
       "basic_diamond_description": null,
       "basic_grader_1": 2,
       "basic_grader_2": null,
@@ -293,10 +311,10 @@
       "basic_culet_characteristic_2": "SAB",
       "basic_culet_characteristic_3": "CH",
       "basic_culet_characteristic_final": "CH",
-      "basic_girdle_characteristic_1": "FAC",
-      "basic_girdle_characteristic_2": "BRU",
-      "basic_girdle_characteristic_3": "POL",
-      "basic_girdle_characteristic_final": "BRU",
+      "basic_girdle_condition_1": "FAC",
+      "basic_girdle_condition_2": "BRU",
+      "basic_girdle_condition_3": "POL",
+      "basic_girdle_condition_final": "BRU",
       "basic_inclusions_1": [],
       "basic_inclusions_2": [],
       "basic_inclusions_3": [],
@@ -306,7 +324,7 @@
       "basic_polish_3": "F",
       "basic_polish_final": "EX",
       "basic_girdle_min_grade_final": "THN",
-      "basic_remarks": null,
+      "basic_remarks": "",
       "diameter_min": "2.30",
       "diameter_max": "2.39",
       "height": "1.76",
@@ -375,7 +393,7 @@
       "gw_color": "D",
       "gw_clarity": "VS2",
       "gw_fluorescence": "VS",
-      "gw_remarks": null,
+      "gw_remarks": "",
       "gw_adjust_grader_1": null,
       "gw_adjust_grader_2": null,
       "gw_adjust_grader_3": null,
@@ -391,7 +409,7 @@
       "gw_fluorescence_adjusted_2": null,
       "gw_fluorescence_adjusted_3": null,
       "gw_fluorescence_adjusted_final": null,
-      "gw_adjust_remarks": null,
+      "gw_adjust_remarks": "",
       "date_from_gia": "2021-03-04T19:28:20Z",
       "gia_color": "F",
       "post_gia_final_color": "D",
@@ -415,7 +433,7 @@
       "gia_culet_characteristic_2": null,
       "gia_culet_characteristic_3": null,
       "gia_culet_characteristic_final": null,
-      "gia_adjust_remarks": null,
+      "gia_adjust_remarks": "",
       "auto_table_size_rounded_grade": null,
       "auto_crown_angle_rounded_grade_grade": null,
       "auto_pavilion_angle_rounded_grade": null,
@@ -434,7 +452,7 @@
       "split_from": 1,
       "gia_verification": null,
       "gw_verification": null,
-      "remarks": null
+      "remarks": ""
     }
   },
   {
