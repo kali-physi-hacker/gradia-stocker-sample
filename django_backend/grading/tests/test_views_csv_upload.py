@@ -110,37 +110,6 @@ class TestCSVUpload(TestCase):
         # float() because django will return a Decimal of 0.090
         self.assertEqual(float(stone_1.basic_carat), 0.09)
 
-    def test_basic_grading_view_process_users(self):
-        graders = {"basic_grader_1": "gary", "basic_grader_2": None, "basic_grader_3": None}
-        result = BasicGradingUploadView._process_graders(self=None, data_dict=graders)
-        self.assertEqual(result["basic_grader_1"], User.objects.get(username="gary"))
-
-        graders = {"basic_grader_1": "Not-Exist-User", "basic_grader_2": None, "basic_grader_3": None}
-        result = BasicGradingUploadView._process_graders(self=None, data_dict=graders)
-        self.assertEqual(result["basic_grader_1"], None)
-
-    def test_basic_grading_view_process_inclusions(self):
-        """
-        Tests that _process_inclusions returns desired inclusion dictionary object
-        """
-        inclusions = {
-            "basic_inclusions_1": "Br, Cv, Ch",
-            "basic_inclusions_2": "Clv, Cld, Xtl",
-            "basic_inclusions_3": "Clv, Cv, Br",
-            "basic_inclusions_final": "Br, Cv, Ch",
-        }
-        basic_inclusions_1 = [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Br", "Cv", "Ch")]
-        basic_inclusions_2 = [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Clv", "Cld", "Xtl")]
-        basic_inclusions_3 = [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Clv", "Cv", "Br")]
-        basic_inclusions_final = [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Br", "Cv", "Ch")]
-
-        processed_inclusions = BasicGradingUploadView._process_inclusions(self=None, data_dict=inclusions)
-
-        self.assertEqual(basic_inclusions_1, processed_inclusions["basic_inclusions_1"])
-        self.assertEqual(basic_inclusions_2, processed_inclusions["basic_inclusions_2"])
-        self.assertEqual(basic_inclusions_3, processed_inclusions["basic_inclusions_3"])
-        self.assertEqual(basic_inclusions_final, processed_inclusions["basic_inclusions_final"])
-
     def xtest_views_basic_csv_upload_generates_basic_id_hash(self):
         """
         Tests that basic csv upload generates id hashing
