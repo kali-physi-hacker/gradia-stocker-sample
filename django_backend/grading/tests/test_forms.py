@@ -3,7 +3,7 @@ from decimal import Decimal
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
-from grading.forms import UploadFormMetaClass, BaseUploadForm, SarineUploadForm, BasicUploadForm
+from grading.forms import UploadFormMetaClass, BaseUploadForm, SarineUploadForm, BasicUploadForm, GIAUploadForm
 from grading.models import Stone
 from stonegrading.mixins import SarineGradingMixin
 from stonegrading.models import Inclusion
@@ -656,3 +656,60 @@ class BasicUploadFormTest(TestCase):
 
                 if "inclusion" not in field:
                     self.assertEqual(actual_value, expected_value)
+
+
+class GiaGradingUploadForm(TestCase):
+    fixtures = ("grading/fixtures/test_data.json",)
+
+    def setUp(self):
+        self.sarine_csv_file = open("grading/tests/fixtures/sarine-01.csv", "rb")
+        self.csv_file = open("grading/tests/fixtures/basic-01.csv", "rb")
+        self.csv_file_spaces = open("grading/tests/fixtures/basic-01-spaces.csv", "rb")
+
+    def do_initial_upload(self):
+        Stone.objects.all().delete()
+        form = SarineUploadForm(
+            data={},
+            files={"file": SimpleUploadedFile(self.sarine_csv_file.name, self.sarine_csv_file.read())},
+            user=User.objects.get(username="gary"),
+        )
+        if form.is_valid():
+            form.save()
+        
+    def test_save_updates_stones(self):
+        """
+        Tests that stones get updated when form.save() is called
+        :returns:
+        """
+        # /localhost:8000/profile?username='something'&password='something'
+
+        form = GIAUploadForm(data={}, files={"file": SimpleUploadedFile(self.csv_file)})
+        self.do_sarine_upload()
+
+        self.assertTrue(form.is_valid())
+        form.save()
+
+        stones = Stone.objects.all()
+
+        self.assertEqual(len(stones), 3)
+
+        fields = self.expected_stones[0].keys()
+
+        for actual_stone, expected_stone in zip(stones, self.expected_stones):
+            for field in fields:
+                raw_actual_value = getattr(actual_stone, field)
+                actual_value = float(raw_actual_value) if type(raw_actual_value) == Decimal else raw_actual_value
+                expected_value = expected_stone[field]
+
+                if "inclusion" not in field:
+                    import pdb; pdb.set
+                    self.assertEqual(actual_value, expected_value)
+    
+
+
+    
+
+    
+
+
+    

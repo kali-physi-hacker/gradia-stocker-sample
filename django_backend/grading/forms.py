@@ -8,7 +8,7 @@ from django.core.exceptions import ValidationError
 from django.utils.timezone import utc
 from ownerships.models import ParcelTransfer, StoneTransfer
 from stonegrading.grades import GirdleGrades
-from stonegrading.mixins import SarineGradingMixin, BasicGradingMixin
+from stonegrading.mixins import SarineGradingMixin, BasicGradingMixin, GIAGradingMixin
 from stonegrading.models import Inclusion
 
 from .models import Parcel, Stone, Split
@@ -514,3 +514,26 @@ class BasicUploadForm(BaseUploadForm):
             stones.append(stone)
 
         return stones
+
+
+class GIAUploadForm(BaseUploadForm):
+    class Meta:
+        mixin = GIAGradingMixin 
+        fields = [field.name for field in GIAGradingMixin._meta.get_fields()]
+
+    def save(self):
+        """
+        Updates the existing stones with the results from GIA
+        :returns:
+        """
+        stones = []
+        import pdb; pdb.set_trace()
+        for data in self.cleaned_data:
+            stone = Stone.objects.get(internal_id=data["internal_id"])
+            for field, value in data.items():
+                setattr(stone, field, value)
+            
+            stone.save()
+            stones.append(stone)
+
+        return stones 
