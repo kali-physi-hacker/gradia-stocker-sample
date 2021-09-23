@@ -3,10 +3,15 @@ from decimal import Decimal
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
-from grading.forms import UploadFormMetaClass, BaseUploadForm, SarineUploadForm, BasicUploadForm
+from grading.forms import (
+    UploadFormMetaClass,
+    BaseUploadForm,
+    SarineUploadForm,
+    BasicUploadForm,
+    GWAdjustingUploadForm,
+)
 from grading.models import Stone
 from stonegrading.mixins import SarineGradingMixin
-from stonegrading.models import Inclusion
 
 User = get_user_model()
 
@@ -498,10 +503,14 @@ class BasicUploadFormTest(TestCase):
                 "basic_girdle_condition_2": "FAC",
                 "basic_girdle_condition_3": "FAC",
                 "basic_girdle_condition_final": "FAC",
-                "basic_inclusions_1": "Cld, Xtl",  # [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Cld, Xtl")],
-                "basic_inclusions_2": "Cld, Xtl, IndN",  # [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Cld, Xtl, IndN")],
-                "basic_inclusions_3": "Cld, IndN",  # [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Cld, IndN")],
-                "basic_inclusions_final": "Cld, IndN",  # [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Cld, IndN")],
+                "basic_inclusions_1": "Cld, Xtl",
+                # [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Cld, Xtl")],
+                "basic_inclusions_2": "Cld, Xtl, IndN",
+                # [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Cld, Xtl, IndN")],
+                "basic_inclusions_3": "Cld, IndN",
+                # [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Cld, IndN")],
+                "basic_inclusions_final": "Cld, IndN",
+                # [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Cld, IndN")],
                 "basic_polish_1": "GD",
                 "basic_polish_2": "GD",
                 "basic_polish_3": "VG",
@@ -541,7 +550,8 @@ class BasicUploadFormTest(TestCase):
                 "basic_girdle_condition_2": "FAC",
                 "basic_girdle_condition_3": "FAC",
                 "basic_girdle_condition_final": "FAC",
-                "basic_inclusions_1": "Xtl, Ftr",  # [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Xtl, Ftr")],
+                "basic_inclusions_1": "Xtl, Ftr",
+                # [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Xtl, Ftr")],
                 "basic_inclusions_2": "Xtl",  # Inclusion.objects.get(inclusion="Xtl"),
                 "basic_inclusions_3": "Cld",  # Inclusion.objects.get("Cld"),
                 "basic_inclusions_final": "Cld",  # Inclusion.objects.get(inclusion="Cld"),
@@ -584,10 +594,14 @@ class BasicUploadFormTest(TestCase):
                 "basic_girdle_condition_2": "FAC",
                 "basic_girdle_condition_3": "FAC",
                 "basic_girdle_condition_final": "FAC",
-                "basic_inclusions_1": "Xtl, Cld, IndN",  # [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Xtl, Cld, IndN")],
-                "basic_inclusions_2": "Xtl, Cld",  #  [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Xtl, Cld")],
-                "basic_inclusions_3": "Cld, Xtl",  # [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Cld, Xtl")],
-                "basic_inclusions_final": "Cld, Xtl",  # [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Cld, Xtl")],
+                "basic_inclusions_1": "Xtl, Cld, IndN",
+                # [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Xtl, Cld, IndN")],
+                "basic_inclusions_2": "Xtl, Cld",
+                # [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Xtl, Cld")],
+                "basic_inclusions_3": "Cld, Xtl",
+                # [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Cld, Xtl")],
+                "basic_inclusions_final": "Cld, Xtl",
+                # [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Cld, Xtl")],
                 "basic_polish_1": "EX",
                 "basic_polish_2": "EX",
                 "basic_polish_3": "EX",
@@ -656,3 +670,109 @@ class BasicUploadFormTest(TestCase):
 
                 if "inclusion" not in field:
                     self.assertEqual(actual_value, expected_value)
+
+
+class GWAdjustingUploadFormTest(TestCase):
+    fixtures = ("grading/fixtures/test_data.json",)
+
+    def setUp(self):
+        self.sarine_csv_file = open("grading/tests/fixtures/sarine-01.csv", "rb")
+        self.csv_file = open("grading/tests/fixtures/gia_adjusting.csv", "rb")
+
+        self.expected_stones = [
+            {
+                "internal_id": 1,
+                "gw_adjust_grader_1": User.objects.get(username="kary"),
+                "gw_adjust_grader_2": User.objects.get(username="tanly"),
+                "gw_adjust_grader_3": User.objects.get(username="gary"),
+                "gw_color_adjusted_1": "D",
+                "gw_color_adjusted_2": "F",
+                "gw_color_adjusted_3": "E",
+                "gw_color_adjusted_final": "D",
+                "gw_clarity_adjusted_1": "SI1",
+                "gw_clarity_adjusted_2": "SI1",
+                "gw_clarity_adjusted_3": "SI1+",
+                "gw_clarity_adjusted_final": "SI1",
+                "gw_fluorescence_adjusted_1": "N",
+                "gw_fluorescence_adjusted_2": "N",
+                "gw_fluorescence_adjusted_3": "N",
+                "gw_fluorescence_adjusted_final": "N",
+                "gw_adjust_remarks": "nothing really",
+            },
+            {
+                "internal_id": 5,
+                "gw_adjust_grader_1": User.objects.get(username="kary"),
+                "gw_adjust_grader_2": User.objects.get(username="tanly"),
+                "gw_adjust_grader_3": User.objects.get(username="gary"),
+                "gw_color_adjusted_1": "D",
+                "gw_color_adjusted_2": "F",
+                "gw_color_adjusted_3": "E",
+                "gw_color_adjusted_final": "D",
+                "gw_clarity_adjusted_1": "SI1",
+                "gw_clarity_adjusted_2": "SI1",
+                "gw_clarity_adjusted_3": "SI1+",
+                "gw_clarity_adjusted_final": "SI1",
+                "gw_fluorescence_adjusted_1": "N",
+                "gw_fluorescence_adjusted_2": "N",
+                "gw_fluorescence_adjusted_3": "N",
+                "gw_fluorescence_adjusted_final": "N",
+                "gw_adjust_remarks": "nothing really",
+            },
+            {
+                "internal_id": 6,
+                "gw_adjust_grader_1": User.objects.get(username="kary"),
+                "gw_adjust_grader_2": User.objects.get(username="tanly"),
+                "gw_adjust_grader_3": User.objects.get(username="gary"),
+                "gw_color_adjusted_1": "D",
+                "gw_color_adjusted_2": "F",
+                "gw_color_adjusted_3": "E",
+                "gw_color_adjusted_final": "D",
+                "gw_clarity_adjusted_1": "SI1",
+                "gw_clarity_adjusted_2": "SI1",
+                "gw_clarity_adjusted_3": "SI1+",
+                "gw_clarity_adjusted_final": "SI1",
+                "gw_fluorescence_adjusted_1": "N",
+                "gw_fluorescence_adjusted_2": "N",
+                "gw_fluorescence_adjusted_3": "N",
+                "gw_fluorescence_adjusted_final": "N",
+                "gw_adjust_remarks": "nothing really",
+            },
+        ]
+
+    def do_initial_upload(self):
+        """
+        Do initial uploads to create stones for updating
+        :return:
+        """
+        Stone.objects.all().delete()
+        form = SarineUploadForm(
+            data={},
+            files={"file": SimpleUploadedFile(self.sarine_csv_file.name, self.sarine_csv_file.read())},
+            user=User.objects.get(username="gary"),
+        )
+        if form.is_valid():
+            form.save()
+
+    def test_save_updates_stones(self):
+        """
+        Tests that save method updates stone correctly
+        :return:
+        """
+        self.do_initial_upload()
+        form = GWAdjustingUploadForm(
+            data={}, files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())}
+        )
+        self.assertTrue(form.is_valid())
+        form.save()
+        stones = Stone.objects.all()
+
+        self.assertEqual(len(stones), 3)
+
+        fields = self.expected_stones[0].keys()
+
+        for actual_stone, expected_stone in zip(stones, self.expected_stones):
+            for field in fields:
+                raw_actual_value = getattr(actual_stone, field)
+                actual_value = float(raw_actual_value) if type(raw_actual_value) == Decimal else raw_actual_value
+                expected_value = expected_stone[field]
+                self.assertEqual(actual_value, expected_value)

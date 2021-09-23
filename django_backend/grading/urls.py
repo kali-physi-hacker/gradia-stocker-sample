@@ -10,6 +10,7 @@ urlpatterns = [
     path("upload/all/", views.AllUploadView.as_view(), name="upload_all"),
     path("upload/sarine/", views.SarineUploadView.as_view(), name="sarine_data_upload_url"),
     path("upload/basic_grading/", views.BasicGradingUploadView.as_view(), name="basic_grading_data_upload_url"),
+    path("upload/gia_adjusting/", views.GIAGradingAdjustView.as_view(), name="gia_adjusting_data_upload_url"),
     path("upload/", views.BasicGradingUploadView.as_view(), name="upload_parcel_csv"),
     path("upload/errors/", views.errors_page, name="errors_page"),
 ]

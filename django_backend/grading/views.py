@@ -12,7 +12,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 
 from .models import Parcel, Receipt, ParcelTransfer, BasicGradingMixin
-from .forms import SarineUploadForm, BasicUploadForm
+from .forms import SarineUploadForm, BasicUploadForm, GWAdjustingUploadForm
 
 from stonegrading.mixins import SarineGradingMixin
 
@@ -195,6 +195,31 @@ class BasicGradingUploadView(LoginRequiredMixin, View):
 
         form.save()
         return HttpResponseRedirect(reverse("grading:basic_grading_data_upload_url"))
+
+
+class GIAGradingAdjustView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        """
+        Return get page from uploading GIAGradingAdjust Results
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        context = {"template_title": "Upload a csv file containing basic grading data"}
+        if "errors" in kwargs:
+            context["errors"] = kwargs["errors"]
+        return render(request, "grading/upload.html", context)
+
+    def post(self, request, *args, **kwargs):
+        form = GWAdjustingUploadForm(data={}, files=request.FILES)
+        if not form.is_valid():
+            return errors_page(request=request, title="GIA Adjusting Grading", form=form)
+
+        stones = form.save()
+        split_id = stones[0].split_from_id
+
+        return HttpResponseRedirect(reverse("admin:grading_split_change", args=(split_id,)))
 
 
 """
