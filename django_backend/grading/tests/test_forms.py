@@ -742,7 +742,7 @@ class GoldWayGradingDataTest(TestCase):
         fields = self.expected_stones[0].keys()
 
         for actual_stone, expected_stone in zip(stones, self.expected_stones):
-            for field in fields:g
+            for field in fields:
                 raw_actual_value = getattr(actual_stone, field)
                 actual_value = float(raw_actual_value) if type(raw_actual_value) == Decimal else raw_actual_value
                 expected_value = expected_stone[field]

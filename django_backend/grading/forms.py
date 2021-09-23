@@ -105,13 +105,8 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
     def __init__(self, *args, **kwargs):
         super(BaseUploadForm, self).__init__(*args, **kwargs)
 
-        # raise a ValueError exception if no Meta class is define
         if not hasattr(self, "Meta"):
             raise ValueError("You need to define a class `Meta` for extra data")
-
-        # raise a ValueError exception if no fields and model attributes are defined within the class Meta.
-        # if not hasattr(self.Meta, "fields"):
-        #     raise ValueError("You need to specify `fields` attribute in the Meta class")
 
         if not hasattr(self.Meta, "mixin"):
             raise ValueError("You need to specify `mixin` attribute in the Meta class")
@@ -193,7 +188,7 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
 
         return errors
 
-    def __clean_graders(self, data):
+    def __to_db_name_grades(self, data):
         # cleaning for grades
         grade_fields = [field for field in self.all_fields if "grade" in field] + [
             "sarine_cut_pre_polish_symmetry",
@@ -214,7 +209,7 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
 
         return data
 
-    def __clean_fluorescence(self, data):
+    def __to_db_name_fluorescence(self, data):
         fluorescence_choices_map = {"Very Strong": "S", "Faint": "F", "Medium": "M", "Strong": "S", "None": "N"}
 
         for field, value in data.items():
@@ -223,7 +218,7 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
 
         return data
 
-    def __clean_inclusions(self, data):
+    def __to_db_name_inclusions(self, data):
         for field, value in data.items():
             if "inclusion" in field:
                 inclusions = [value.strip() for value in value.split(",")]
@@ -235,29 +230,7 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
 
         return data
 
-    def __to_db_name(self, data):
-        """
-        Change from display name to db name
-        :return:
-        """
-        data = data.copy()
-
-        cleaners = (self.__clean_graders, self.__clean_fluorescence, self.__clean_inclusions)
-        for cleaner in cleaners:
-            data = cleaner(data)
-
-        # cleaning for culet_descriptions
-        culet_choices_display_map = {
-            "NONE": "N",
-            "VERY SMALL": "VS",
-            "SMALL": "S",
-            "MEDIUM": "M",
-            "SLIGHTLY LARGE": "SL",
-            "LARGE": "L",
-            "VERY LARGE": "VL",
-            "EXTREMELY LARGE": "XL",
-        }
-
+    def __make_caps(self, data):
         # Make uppercase
         fields = (
             "basic_diamond_description",
@@ -272,12 +245,9 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
             if field in data:
                 data[field] = data[field].upper().strip()
 
-        if "culet_size_description" in data:
-            data["culet_size_description"] = "/".join(
-                [culet_choices_display_map.get(size.strip()) for size in data["culet_size_description"].split("/")]
-            )
+        return data
 
-        # Girdle conditions
+    def __to_db_name_girdles(self, data):
         girdle_conditions_choices_map = {"FACETED": "FAC", "POLISHED": "POL", "BRUTED": "BRU"}
 
         for field, value in data.items():
@@ -286,12 +256,81 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
                     girdle_conditions_choices_map[value.upper()] if value in girdle_conditions_choices_map else value
                 )
 
-        # process inclusions
-        # Below code applies if we want to be very specific about which inclusion in the string is not valid
-        # inclusions = [inclusion for inclusion in Inclusions.__dict__.keys() if "__" not in inclusion]
-        # inclusions.remove("CHOICES")
-        #
-        # inclusion_values = [getattr(Inclusions, attr) for attr in inclusions]
+        return data
+
+    def __to_db_name_culet_descriptions(self, data):
+        culet_choices_display_map = {
+            "NONE": "N",
+            "VERY SMALL": "VS",
+            "SMALL": "S",
+            "MEDIUM": "M",
+            "SLIGHTLY LARGE": "SL",
+            "LARGE": "L",
+            "VERY LARGE": "VL",
+            "EXTREMELY LARGE": "XL",
+        }
+
+        if "culet_size_description" in data:
+            data["culet_size_description"] = "/".join(
+                [culet_choices_display_map.get(size.strip()) for size in data["culet_size_description"].split("/")]
+            )
+
+        return data
+
+    def __clean_date_fields(self, data):
+        # Clean date fields
+        for field in data:
+            if "date" in field:
+                day, month, year = [int(value) for value in data[field].split("/")]
+                try:
+                    data[field] = datetime(year, month, day)
+                except:
+                    pass
+        return data
+
+    def __to_db_name(self, data):
+        """
+        Change from display name to db name
+        :return:
+        """
+        data = data.copy()
+
+        cleaners = (
+            self.__make_caps,
+            self.__to_db_name_grades,
+            self.__to_db_name_fluorescence,
+            self.__to_db_name_inclusions,
+            self.__to_db_name_girdles,
+            self.__to_db_name_culet_descriptions,
+        )
+        for cleaner in cleaners:
+            data = cleaner(data)
+
+        return data
+
+    def __clean_heights(self, data):
+        try:
+            if "height" in data:
+                data["height"] = round(float(data["height"]), 2)
+        except ValueError:
+            pass
+
+        return data
+
+    def __clean_girdles(self, data):
+        girdle_grades = [grade for grade in data if "girdle_min_grade" in grade or "girdle_max_grade" in grade]
+
+        for girdle_grade in girdle_grades:
+            data[girdle_grade] = (
+                data[girdle_grade].upper() if type(data[girdle_grade]) == str else data[girdle_grade]
+            )
+
+        return data
+
+    def __clean_remarks(self, data):
+        for field in data:
+            if "remarks" in field:
+                data[field] = "" if data[field] is None else data[field]
 
         return data
 
@@ -314,36 +353,10 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
 
         stone_data = [self.__to_db_name(data) for data in stone_data]
 
-        # clean for height and girdle_min_grade
-        for data in stone_data:
-            try:
-                if "height" in data:
-                    data["height"] = round(float(data["height"]), 2)
-            except ValueError:
-                pass
-
-            girdle_grades = [grade for grade in data if "girdle_min_grade" in grade or "girdle_max_grade" in grade]
-
-            for girdle_grade in girdle_grades:
-                data[girdle_grade] = (
-                    data[girdle_grade].upper() if type(data[girdle_grade]) == str else data[girdle_grade]
-                )
-
-        # Remarks
-        for data in stone_data:
-            for field in data:
-                if "remarks" in field:
-                    data[field] = "" if data[field] is None else data[field]
-
-        # Clean date fields
-        for data in stone_data:
-            for field in data:
-                if "date" in field:
-                    day, month, year = [int(value) for value in data[field].split("/")]
-                    try:
-                        data[field] = datetime(year, month, day)
-                    except:
-                        pass
+        stone_data = [self.__clean_date_fields(data) for data in stone_data]
+        stone_data = [self.__clean_heights(data) for data in stone_data]
+        stone_data = [self.__clean_girdles(data) for data in stone_data]
+        stone_data = [self.__clean_remarks(data) for data in stone_data]
 
         self.__stone_data = stone_data
 
@@ -424,7 +437,6 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
 class SarineUploadForm(BaseUploadForm):
     class Meta:
         mixin = SarineGradingMixin
-        fields = [field.name for field in SarineGradingMixin._meta.get_fields()]
 
     def __init__(self, user, *args, **kwargs):
         self.user = user
@@ -489,20 +501,13 @@ class SarineUploadForm(BaseUploadForm):
 class BasicUploadForm(BaseUploadForm):
     class Meta:
         mixin = BasicGradingMixin
-        fields = [field.name for field in BasicGradingMixin._meta.get_fields()]
 
         # Extra fields which are not fields in the mixin (BasicGradingMixin)
         girdle_min_grade = forms.ChoiceField(choices=GirdleGrades.CHOICES)
-        # basic_remarks = forms.CharField()
 
     def __process_graders(self, stone_data, file_name):
         """
         Check that graders (user accounts) exists and raise validation error or return stone_data
-
-        Conditions
-        ----------
-        1. basic_grading_1, basic_grading_2, basic_grading_3 ===> Not required
-        2. Raise error instantly when any of them contains a user that does not exist
         :param stone_data:
         :param file_name:
         :return:
