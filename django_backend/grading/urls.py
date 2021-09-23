@@ -11,5 +11,6 @@ urlpatterns = [
     path("upload/sarine/", views.SarineUploadView.as_view(), name="sarine_data_upload_url"),
     path("upload/basic_grading/", views.BasicGradingUploadView.as_view(), name="basic_grading_data_upload_url"),
     path("upload/", views.BasicGradingUploadView.as_view(), name="upload_parcel_csv"),
+    path("upload/gia_grading/", views.GIAGradingUploadView.as_view(), name="gia_grading_data_upload_url"),
     path("upload/errors/", views.errors_page, name="errors_page"),
 ]

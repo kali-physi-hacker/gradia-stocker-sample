@@ -519,7 +519,6 @@ class BasicUploadForm(BaseUploadForm):
 class GIAUploadForm(BaseUploadForm):
     class Meta:
         mixin = GIAGradingMixin 
-        fields = [field.name for field in GIAGradingMixin._meta.get_fields()]
 
     def save(self):
         """
@@ -527,7 +526,6 @@ class GIAUploadForm(BaseUploadForm):
         :returns:
         """
         stones = []
-        import pdb; pdb.set_trace()
         for data in self.cleaned_data:
             stone = Stone.objects.get(internal_id=data["internal_id"])
             for field, value in data.items():

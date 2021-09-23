@@ -666,6 +666,8 @@ class GiaGradingUploadForm(TestCase):
         self.csv_file = open("grading/tests/fixtures/basic-01.csv", "rb")
         self.csv_file_spaces = open("grading/tests/fixtures/basic-01-spaces.csv", "rb")
 
+
+
     def do_initial_upload(self):
         Stone.objects.all().delete()
         form = SarineUploadForm(
@@ -702,7 +704,6 @@ class GiaGradingUploadForm(TestCase):
                 expected_value = expected_stone[field]
 
                 if "inclusion" not in field:
-                    import pdb; pdb.set
                     self.assertEqual(actual_value, expected_value)
     
 

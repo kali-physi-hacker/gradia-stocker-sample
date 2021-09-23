@@ -12,9 +12,9 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 
 from .models import Parcel, Receipt, ParcelTransfer, BasicGradingMixin
-from .forms import SarineUploadForm, BasicUploadForm
+from .forms import GIAUploadForm, SarineUploadForm, BasicUploadForm
 
-from stonegrading.mixins import SarineGradingMixin
+from stonegrading.mixins import GIAGradingMixin, SarineGradingMixin
 
 from .forms import CSVImportForm
 
@@ -164,23 +164,22 @@ class BasicGradingUploadView(LoginRequiredMixin, View):
             context["errors"] = kwargs["errors"]
         return render(request, "grading/upload.html", context)
 
-    # def _process_graders(self, data_dict):
-    #     """
-    #     Return the basic graders or None. Eg. {"basic_grader_1"}
-    #     """
-    #     # Will change this implementation later for a better way of giving error messages
-    #     graders = {"basic_grader_1": None, "basic_grader_2": None, "basic_grader_3": None}
-    #
-    #     for grader in graders:
-    #         try:
-    #             graders[grader] = User.objects.get(username=data_dict[grader])
-    #         except User.DoesNotExist:
-    #             pass
-    #
-    #     return graders
+class GIAGradingUploadView(LoginRequiredMixin, View):
+    fields = [field.name for field in GIAGradingMixin._meta.get_fields()]
+    fields.append("internal_id")
 
-    # Simple table for displaying the errors == form.errors = {"height": []}
-
+    def get(self, request, *args, **kwargs):
+        """
+        Page to return the HTML for sarine data upload
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        form = CSVImportForm()
+        context = {"template_title": "Upload a csv file containing gia grading data", "form": form}
+        return render(request, "grading/upload.html", context)
+    
     def post(self, request, *args, **kwargs):
         """
         Decouple file and do the splitting
@@ -189,11 +188,12 @@ class BasicGradingUploadView(LoginRequiredMixin, View):
         :param kwargs:
         :return:
         """
-        form = BasicUploadForm(data={}, files=request.FILES)
+        form = GIAUploadForm(data={}, files=request.FILES)
         if not form.is_valid():
-            HttpResponseRedirect(reverse("grading:sarine_data_upload_url"))
+            HttpResponseRedirect(reverse("grading:gia_grading_data_upload_url"))
 
         form.save()
+        #would have to wait 
         return HttpResponseRedirect(reverse("grading:basic_grading_data_upload_url"))
 
 
