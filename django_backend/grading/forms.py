@@ -1,11 +1,13 @@
 import os
-from datetime import datetime
 
 import pandas as pd
+
 from django import forms
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.utils.timezone import utc
+from django.utils.datetime_safe import datetime
+
 from ownerships.models import ParcelTransfer, StoneTransfer
 from stonegrading.grades import GirdleGrades
 from stonegrading.mixins import SarineGradingMixin, BasicGradingMixin, GWGradingMixin
@@ -213,13 +215,7 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
         return data
 
     def __clean_fluorescence(self, data):
-        fluorescence_choices_map = {
-            "Very Strong": "S",
-            "Faint": "F",
-            "Medium": "M",
-            "Strong": "S",
-            "None": "N"
-        }
+        fluorescence_choices_map = {"Very Strong": "S", "Faint": "F", "Medium": "M", "Strong": "S", "None": "N"}
 
         for field, value in data.items():
             if "fluorescence" in field:
@@ -245,7 +241,7 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
         :return:
         """
         data = data.copy()
-        
+
         cleaners = (self.__clean_graders, self.__clean_fluorescence, self.__clean_inclusions)
         for cleaner in cleaners:
             data = cleaner(data)
@@ -339,8 +335,7 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
                 if "remarks" in field:
                     data[field] = "" if data[field] is None else data[field]
 
-
-        # Clean date fields 
+        # Clean date fields
         for data in stone_data:
             for field in data:
                 if "date" in field:
@@ -348,7 +343,7 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
                     try:
                         data[field] = datetime(year, month, day)
                     except:
-                        pass 
+                        pass
 
         self.__stone_data = stone_data
 
@@ -448,7 +443,11 @@ class SarineUploadForm(BaseUploadForm):
         try:
             self.parcel = Parcel.objects.get(gradia_parcel_code=gradia_parcel_code)
         except Parcel.DoesNotExist:
-            errors.update({"file": "No parcel with such a parcel code. Please be sure the csv file name matches the parcel code"})
+            errors.update(
+                {
+                    "file": "No parcel with such a parcel code. Please be sure the csv file name matches the parcel code"
+                }
+            )
 
         return stone_data, errors
 
@@ -553,29 +552,13 @@ class BasicUploadForm(BaseUploadForm):
 
         return stones
 
+
 class GWGradingDataUploadForm(BaseUploadForm):
     class Meta:
         mixin = GWGradingMixin
 
         # extra_fields
         external_id = forms.CharField(max_length=11)
-
-    # def __process_date_to_gw(self, stone_data, file_name):
-    #     """"""
-    #     """"""
-    #     errors = {}
-
-    #     # Until we discuss with Conrad whether or not graders are providing us with the date or we make the date `auto_now_add`
-    #     # Do some processing and validation here. stone_data or/and errors may be modified
-    #     for row, data in enumerate(stone_data):
-    #         try:
-    #             day, month, year = [int(value) for value in data["date_from_gw"].split("/")]
-    #             data["date_from_gw"] = datetime(year, month, day)
-    #         except:
-    #             errors[row] = {}
-    #             errors[row]["date_from_gw"] = "Please enter a valid date field"
-
-    #     return stone_data, errors
 
     def save(self):
         """
@@ -585,11 +568,10 @@ class GWGradingDataUploadForm(BaseUploadForm):
         stones = []
         for data in self.cleaned_data:
             stone = Stone.objects.get(internal_id=data["internal_id"])
-            for field, value in data.items():   
+            for field, value in data.items():
                 setattr(stone, field, value)
-            
+
             stone.save()
             stones.append(stone)
 
         return stones
-                
