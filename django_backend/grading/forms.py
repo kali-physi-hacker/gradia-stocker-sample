@@ -552,6 +552,7 @@ class BasicUploadForm(BaseUploadForm):
             for field, value in savable_data.items():
                 setattr(stone, field, value)
 
+            stone.generate_basic_external_id()
             stone.save()
             stones.append(stone)
 
