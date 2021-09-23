@@ -139,7 +139,7 @@ class SarineUploadView(LoginRequiredMixin, View):
         """
         form = SarineUploadForm(user=request.user, data={}, files=request.FILES)
         if not form.is_valid():
-            return errors_page(request=request, title="Saring Grading", form=form)
+            return errors_page(request=request, title="Sarine Grading", form=form)
 
         stones = form.save()
         split_id = stones[0].split_from.pk
@@ -176,8 +176,10 @@ class BasicGradingUploadView(LoginRequiredMixin, View):
         if not form.is_valid():
             return errors_page(request=request, title="Basic Grading", form=form)
 
-        form.save()
-        return HttpResponseRedirect(reverse("grading:basic_grading_data_upload_url"))
+        stones = form.save()
+        split_id = stones[0].split_from.pk
+
+        return HttpResponseRedirect(reverse("admin:grading_split_change", args=(split_id,)))
 
 
 """
@@ -197,18 +199,19 @@ class ConfirmTransferToGoldwayView(View):
         ParcelTransfer.confirm_received(parcel)
         return HttpResponseRedirect(reverse("admin:grading_parcel_change", args=[parcel.id]))
 """
+
+
 class GWGradingDataUploadView(LoginRequiredMixin, View):
     fields = [field.name for field in GWGradingMixin._meta.get_fields()]
     fields.append("internal_id")
 
     def get(self, request, *args, **kwargs):
-        
+
         form = GWGradingDataUploadForm()
         context = {"template_title": "Upload a csv file containing gold way grading data"}
         if "errors" in kwargs:
             context["errors"] = kwargs["errors"]
-        return render(request, 'grading/upload.html', context)
-
+        return render(request, "grading/upload.html", context)
 
     def post(self, request, *args, **kwargs):
 
@@ -216,5 +219,7 @@ class GWGradingDataUploadView(LoginRequiredMixin, View):
         if not form.is_valid():
             return errors_page(request=request, title="Goldway Grading", form=form)
 
-        form.save()
-        return HttpResponseRedirect(reverse("grading:basic_grading_data_upload_url"))
+        stones = form.save()
+        split_id = stones[0].split_from.pk
+
+        return HttpResponseRedirect(reverse("admin:grading_split_change", args=(split_id,)))
