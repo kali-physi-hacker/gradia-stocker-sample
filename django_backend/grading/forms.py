@@ -8,7 +8,7 @@ from django.core.exceptions import ValidationError
 from django.utils.timezone import utc
 from ownerships.models import ParcelTransfer, StoneTransfer
 from stonegrading.grades import GirdleGrades
-from stonegrading.mixins import SarineGradingMixin, BasicGradingMixin
+from stonegrading.mixins import SarineGradingMixin, BasicGradingMixin, GWGradingMixin
 from stonegrading.models import Inclusion
 
 from .models import Parcel, Stone, Split
@@ -191,13 +191,7 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
 
         return errors
 
-    def __to_db_name(self, data):
-        """
-        Change from display name to db name
-        :return:
-        """
-        data = data.copy()
-
+    def __clean_graders(self, data):
         # cleaning for grades
         grade_fields = [field for field in self.all_fields if "grade" in field] + [
             "sarine_cut_pre_polish_symmetry",
@@ -215,6 +209,46 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
                     data[field] = choices_display_name_map.get(data[field].upper().strip()) or data[field].strip()
                 except:
                     data[field] = data[field]
+
+        return data
+
+    def __clean_fluorescence(self, data):
+        fluorescence_choices_map = {
+            "Very Strong": "S",
+            "Faint": "F",
+            "Medium": "M",
+            "Strong": "S",
+            "None": "N"
+        }
+
+        for field, value in data.items():
+            if "fluorescence" in field:
+                data[field] = fluorescence_choices_map[value] if value in fluorescence_choices_map else value
+
+        return data
+
+    def __clean_inclusions(self, data):
+        for field, value in data.items():
+            if "inclusion" in field:
+                inclusions = [value.strip() for value in value.split(",")]
+
+                try:
+                    data[field] = [Inclusion.objects.get(inclusion=inclusion) for inclusion in inclusions]
+                except Inclusion.DoesNotExist:
+                    pass
+
+        return data
+
+    def __to_db_name(self, data):
+        """
+        Change from display name to db name
+        :return:
+        """
+        data = data.copy()
+        
+        cleaners = (self.__clean_graders, self.__clean_fluorescence, self.__clean_inclusions)
+        for cleaner in cleaners:
+            data = cleaner(data)
 
         # cleaning for culet_descriptions
         culet_choices_display_map = {
@@ -263,15 +297,6 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
         #
         # inclusion_values = [getattr(Inclusions, attr) for attr in inclusions]
 
-        for field, value in data.items():
-            if "inclusion" in field:
-                inclusions = [value.strip() for value in value.split(",")]
-
-                try:
-                    data[field] = [Inclusion.objects.get(inclusion=inclusion) for inclusion in inclusions]
-                except Inclusion.DoesNotExist:
-                    pass
-
         return data
 
     def __process_csv_content(self, csv_file):
@@ -313,6 +338,17 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
             for field in data:
                 if "remarks" in field:
                     data[field] = "" if data[field] is None else data[field]
+
+
+        # Clean date fields 
+        for data in stone_data:
+            for field in data:
+                if "date" in field:
+                    day, month, year = [int(value) for value in data[field].split("/")]
+                    try:
+                        data[field] = datetime(year, month, day)
+                    except:
+                        pass 
 
         self.__stone_data = stone_data
 
@@ -368,6 +404,10 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
             stone_data, errors = method(self, stone_data, file_name=csv_file.name)
             method_errors.update(errors)
 
+        if "file" in method_errors:
+            self.__csv_errors = {}
+            raise ValidationError(method_errors)
+
         # Do error handling here and return error_dict
         form_errors = self.__build_error_dict(stone_data)
 
@@ -403,16 +443,14 @@ class SarineUploadForm(BaseUploadForm):
         :returns:
         """
         gradia_parcel_code = os.path.splitext(file_name)[0]
+
+        errors = {}
         try:
             self.parcel = Parcel.objects.get(gradia_parcel_code=gradia_parcel_code)
         except Parcel.DoesNotExist:
-            raise ValidationError(
-                {
-                    "file": "No parcel with such a parcel code. Please be sure the csv file name matches the parcel code"
-                }
-            )
+            errors.update({"file": "No parcel with such a parcel code. Please be sure the csv file name matches the parcel code"})
 
-        return stone_data, {}
+        return stone_data, errors
 
     def save(self):
         """
@@ -514,3 +552,44 @@ class BasicUploadForm(BaseUploadForm):
             stones.append(stone)
 
         return stones
+
+class GWGradingDataUploadForm(BaseUploadForm):
+    class Meta:
+        mixin = GWGradingMixin
+
+        # extra_fields
+        external_id = forms.CharField(max_length=11)
+
+    # def __process_date_to_gw(self, stone_data, file_name):
+    #     """"""
+    #     """"""
+    #     errors = {}
+
+    #     # Until we discuss with Conrad whether or not graders are providing us with the date or we make the date `auto_now_add`
+    #     # Do some processing and validation here. stone_data or/and errors may be modified
+    #     for row, data in enumerate(stone_data):
+    #         try:
+    #             day, month, year = [int(value) for value in data["date_from_gw"].split("/")]
+    #             data["date_from_gw"] = datetime(year, month, day)
+    #         except:
+    #             errors[row] = {}
+    #             errors[row]["date_from_gw"] = "Please enter a valid date field"
+
+    #     return stone_data, errors
+
+    def save(self):
+        """
+        Update the stone instance using data from the gw
+        :returns:
+        """
+        stones = []
+        for data in self.cleaned_data:
+            stone = Stone.objects.get(internal_id=data["internal_id"])
+            for field, value in data.items():   
+                setattr(stone, field, value)
+            
+            stone.save()
+            stones.append(stone)
+
+        return stones
+                
