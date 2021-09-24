@@ -12,7 +12,7 @@ from grading.forms import (
     SarineUploadForm,
     BasicUploadForm,
     GWGradingUploadForm,
-    GIAUploadForm
+    GIAUploadForm,
 )
 from grading.models import Stone
 from stonegrading.mixins import SarineGradingMixin
