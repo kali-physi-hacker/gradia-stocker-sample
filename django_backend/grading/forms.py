@@ -10,7 +10,7 @@ from django.utils.datetime_safe import datetime
 
 from ownerships.models import ParcelTransfer, StoneTransfer
 from stonegrading.grades import GirdleGrades
-from stonegrading.mixins import SarineGradingMixin, BasicGradingMixin, GWGradingMixin
+from stonegrading.mixins import SarineGradingMixin, BasicGradingMixin, GWGradingMixin, GIAGradingMixin
 from stonegrading.models import Inclusion
 
 from .models import Parcel, Stone, Split
@@ -559,7 +559,7 @@ class BasicUploadForm(BaseUploadForm):
         return stones
 
 
-class GWGradingDataUploadForm(BaseUploadForm):
+class GWGradingUploadForm(BaseUploadForm):
     class Meta:
         mixin = GWGradingMixin
 
@@ -569,6 +569,27 @@ class GWGradingDataUploadForm(BaseUploadForm):
     def save(self):
         """
         Update the stone instance using data from the gw
+        :returns:
+        """
+        stones = []
+        for data in self.cleaned_data:
+            stone = Stone.objects.get(internal_id=data["internal_id"])
+            for field, value in data.items():
+                setattr(stone, field, value)
+
+            stone.save()
+            stones.append(stone)
+
+        return stones
+
+
+class GIAUploadForm(BaseUploadForm):
+    class Meta:
+        mixin = GIAGradingMixin
+
+    def save(self):
+        """
+        Updates the existing stones with the results from GIA
         :returns:
         """
         stones = []
