@@ -1,3 +1,4 @@
+from pdb import set_trace
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
@@ -7,7 +8,7 @@ from django.contrib.messages.api import get_messages
 from stonegrading.models import Inclusion
 
 import pandas as pd
-from grading.views import BasicGradingUploadView
+from grading.views import BasicGradingUploadView, GWGradingDataUploadView
 
 from grading.models import Parcel, Split, Stone
 
@@ -22,12 +23,14 @@ class TestCSVUpload(TestCase):
     def setUp(self):
         self.sarine_data_upload_url = reverse("grading:sarine_data_upload_url")
         self.basic_grading_data_upload_url = reverse("grading:basic_grading_data_upload_url")
+        self.gw_data_upload_url = reverse("grading:gw_data_upload_url")
 
         self.sarine_upload_csv_file = open("grading/tests/fixtures/sarine-01.csv", "r")
         self.gradia_parcel_code = "sarine-01"
         self.invalid_csv_file = open("grading/tests/fixtures/no-parcel.csv", "r")
 
         self.basic_grading_upload_csv_file = open("grading/tests/fixtures/basic-01.csv", "r")
+        self.gw_data_upload_csv_file = open("grading/tests/fixtures/gold_way-01.csv", "r")
 
         self.parcel = Parcel.objects.get(gradia_parcel_code=self.gradia_parcel_code)
 
@@ -134,6 +137,32 @@ class TestCSVUpload(TestCase):
         # Check that all uploaded stones have external_ids
         for stone in Stone.objects.all():
             self.assertIsNotNone(stone.external_id)
+
+    def test_gw_grading_data_upload_get_page(self):
+        """
+        Tests that gold way grading upload get page returns 200
+        :return:
+        """
+        template_title = "Upload a csv file containing gold way grading data"
+        self.client.login(**self.grader)
+        response = self.client.get(self.gw_data_upload_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(template_title, response.content.decode())
+        button = '<input type="submit" value="Upload CSV" class="default" name="_upload"/>'
+        self.assertIn(button, response.content.decode())
+
+    def test_gw_grading_data_upload_success_if_valid_csv(self):
+
+        Stone.objects.all().delete()
+        self.setup_sarine_data()
+        self.client.login(**self.grader)
+        response = self.client.post(self.gw_data_upload_url, {"file": self.gw_data_upload_csv_file})
+        # import pdb;
+        # pdb.set_trace()
+        self.assertEqual(response.status_code, 302)
+        stone_1 = Stone.objects.get(internal_id=1)
+        # # float() because django will return a Decimal of 0.090
+        # self.assertEqual(float(stone_1.gold_ai_code), 0.091)
 
     def test_views_basic_grading_does_not_upload_and_returns_400_with_invalid_csv_file_field_values(self):
         pass

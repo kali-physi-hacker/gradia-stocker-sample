@@ -3,7 +3,16 @@ from decimal import Decimal
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
-from grading.forms import UploadFormMetaClass, BaseUploadForm, SarineUploadForm, BasicUploadForm
+from django.utils.datetime_safe import datetime
+from django.utils.timezone import utc
+
+from grading.forms import (
+    UploadFormMetaClass,
+    BaseUploadForm,
+    SarineUploadForm,
+    BasicUploadForm,
+    GWGradingDataUploadForm,
+)
 from grading.models import Stone
 from stonegrading.mixins import SarineGradingMixin
 from stonegrading.models import Inclusion
@@ -404,15 +413,6 @@ class SarineUploadFormTest(TestCase):
         )
         self.assertTrue(form.is_valid())
 
-    def test_csv_file_valid_for_column_name_with_spaces(self):
-        # With column spaces
-        form = SarineUploadForm(
-            data={},
-            files={"file": SimpleUploadedFile(self.csv_file_spaces.name, self.csv_file_spaces.read())},
-            user=self.gary_user,
-        )
-        self.assertTrue(form.is_valid())
-
     def test_csv_invalid_if_wrong_parcel_code(self):
         """
         Tests that form errors
@@ -656,3 +656,94 @@ class BasicUploadFormTest(TestCase):
 
                 if "inclusion" not in field:
                     self.assertEqual(actual_value, expected_value)
+
+
+def get_date_from_str(date_string):
+    day, month, year = [int(value) for value in date_string.split("/")]
+    return datetime(year, month, day, tzinfo=utc)
+
+
+class GoldWayGradingDataTest(TestCase):
+
+    fixtures = ("grading/fixtures/test_data.json",)
+
+    def setUp(self):
+        self.sarine_csv_file = open("grading/tests/fixtures/sarine-01.csv", "rb")
+        self.basic_csv_file = open("grading/tests/fixtures/basic-01-spaces.csv", "rb")
+        self.csv_file = open("grading/tests/fixtures/gold_way-01.csv", "rb")
+
+        self.expected_stones = [
+            {
+                "internal_id": 1,
+                "date_from_gw": get_date_from_str("26/2/2021"),
+                # "goldway_code": "SIOT202101003",
+                # "nano_etch_inscription": "G00000028",
+                "gw_return_reweight": 0.09,
+                "gw_color": "E",
+                "gw_clarity": "VVS2",
+                "gw_fluorescence": "M",
+                "gw_remarks": "",
+            },
+            {
+                "internal_id": 5,
+                "date_from_gw": get_date_from_str("26/2/2021"),
+                # "goldway_code": "SIOT202101003",
+                # "nano_etch_inscription": "G00000030",
+                "gw_return_reweight": 0.1,
+                "gw_color": "F",
+                "gw_clarity": "VS2",
+                "gw_fluorescence": "F",
+                "gw_remarks": "",
+            },
+            {
+                "internal_id": 6,
+                "date_from_gw": get_date_from_str("26/2/2021"),
+                # "goldway_code": "SIOT202101003",
+                # "nano_etch_inscription": "G00000031",
+                "gw_return_reweight": 0.1,
+                "gw_color": "D",
+                "gw_clarity": "VVS2",
+                "gw_fluorescence": "M",
+                "gw_remarks": "",
+            },
+        ]
+
+    def do_initial_uploads(self):
+        # Sarine Upload setup
+        Stone.objects.all().delete()
+        form = SarineUploadForm(
+            data={},
+            files={"file": SimpleUploadedFile(self.sarine_csv_file.name, self.sarine_csv_file.read())},
+            user=User.objects.get(username="gary"),
+        )
+        if form.is_valid():
+            form.save()
+
+        # Basic Upload setup
+        form = BasicUploadForm(
+            data={}, files={"file": SimpleUploadedFile(self.basic_csv_file.name, self.basic_csv_file.read())}
+        )
+        if form.is_valid():
+            form.save()
+
+    def test_save_updates_stones(self):
+        self.do_initial_uploads()
+
+        form = GWGradingDataUploadForm(
+            data={}, files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())}
+        )
+        self.assertTrue(form.is_valid())
+        form.save()
+
+        stones = Stone.objects.all()
+
+        self.assertEqual(len(stones), 3)
+
+        fields = self.expected_stones[0].keys()
+
+        for actual_stone, expected_stone in zip(stones, self.expected_stones):
+            for field in fields:
+                raw_actual_value = getattr(actual_stone, field)
+                actual_value = float(raw_actual_value) if type(raw_actual_value) == Decimal else raw_actual_value
+                expected_value = expected_stone[field]
+                self.assertEqual(actual_value, expected_value)

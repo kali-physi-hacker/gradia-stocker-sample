@@ -2,6 +2,7 @@ import os
 from datetime import datetime
 
 from django.contrib.auth.models import User
+from django.db.models import fields
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.shortcuts import render
 from django.urls import reverse
@@ -12,9 +13,9 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 
 from .models import Parcel, Receipt, ParcelTransfer, BasicGradingMixin
-from .forms import SarineUploadForm, BasicUploadForm
+from .forms import SarineUploadForm, BasicUploadForm, GWGradingDataUploadForm
 
-from stonegrading.mixins import SarineGradingMixin
+from stonegrading.mixins import SarineGradingMixin, GWGradingMixin
 
 from .forms import CSVImportForm
 
@@ -104,7 +105,6 @@ class AllUploadView(LoginRequiredMixin, View):
 
 def errors_page(request, title, form):
     template = "grading/csv_errors.html"
-
     context = {"form": form, "title": title}
     return render(request, template, context)
 
@@ -139,8 +139,8 @@ class SarineUploadView(LoginRequiredMixin, View):
         """
         form = SarineUploadForm(user=request.user, data={}, files=request.FILES)
         if not form.is_valid():
-            # get the csv errors and return them to some template as context variables and render as error page
-            HttpResponseRedirect(reverse("grading:sarine_data_upload_url"))
+            return errors_page(request=request, title="Sarine Grading", form=form)
+
         stones = form.save()
         split_id = stones[0].split_from.pk
 
@@ -164,23 +164,6 @@ class BasicGradingUploadView(LoginRequiredMixin, View):
             context["errors"] = kwargs["errors"]
         return render(request, "grading/upload.html", context)
 
-    # def _process_graders(self, data_dict):
-    #     """
-    #     Return the basic graders or None. Eg. {"basic_grader_1"}
-    #     """
-    #     # Will change this implementation later for a better way of giving error messages
-    #     graders = {"basic_grader_1": None, "basic_grader_2": None, "basic_grader_3": None}
-    #
-    #     for grader in graders:
-    #         try:
-    #             graders[grader] = User.objects.get(username=data_dict[grader])
-    #         except User.DoesNotExist:
-    #             pass
-    #
-    #     return graders
-
-    # Simple table for displaying the errors == form.errors = {"height": []}
-
     def post(self, request, *args, **kwargs):
         """
         Decouple file and do the splitting
@@ -191,10 +174,12 @@ class BasicGradingUploadView(LoginRequiredMixin, View):
         """
         form = BasicUploadForm(data={}, files=request.FILES)
         if not form.is_valid():
-            HttpResponseRedirect(reverse("grading:sarine_data_upload_url"))
+            return errors_page(request=request, title="Basic Grading", form=form)
 
-        form.save()
-        return HttpResponseRedirect(reverse("grading:basic_grading_data_upload_url"))
+        stones = form.save()
+        split_id = stones[0].split_from.pk
+
+        return HttpResponseRedirect(reverse("admin:grading_split_change", args=(split_id,)))
 
 
 """
@@ -214,3 +199,27 @@ class ConfirmTransferToGoldwayView(View):
         ParcelTransfer.confirm_received(parcel)
         return HttpResponseRedirect(reverse("admin:grading_parcel_change", args=[parcel.id]))
 """
+
+
+class GWGradingDataUploadView(LoginRequiredMixin, View):
+    fields = [field.name for field in GWGradingMixin._meta.get_fields()]
+    fields.append("internal_id")
+
+    def get(self, request, *args, **kwargs):
+
+        form = GWGradingDataUploadForm()
+        context = {"template_title": "Upload a csv file containing gold way grading data"}
+        if "errors" in kwargs:
+            context["errors"] = kwargs["errors"]
+        return render(request, "grading/upload.html", context)
+
+    def post(self, request, *args, **kwargs):
+
+        form = GWGradingDataUploadForm(data={}, files=request.FILES)
+        if not form.is_valid():
+            return errors_page(request=request, title="Goldway Grading", form=form)
+
+        stones = form.save()
+        split_id = stones[0].split_from.pk
+
+        return HttpResponseRedirect(reverse("admin:grading_split_change", args=(split_id,)))

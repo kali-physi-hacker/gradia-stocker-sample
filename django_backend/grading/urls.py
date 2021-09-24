@@ -12,4 +12,5 @@ urlpatterns = [
     path("upload/basic_grading/", views.BasicGradingUploadView.as_view(), name="basic_grading_data_upload_url"),
     path("upload/", views.BasicGradingUploadView.as_view(), name="upload_parcel_csv"),
     path("upload/errors/", views.errors_page, name="errors_page"),
+    path("gw_data_upload_url/", views.GWGradingDataUploadView.as_view(), name="gw_data_upload_url"),
 ]
