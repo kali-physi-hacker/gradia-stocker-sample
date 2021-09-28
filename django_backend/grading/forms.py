@@ -13,7 +13,7 @@ from stonegrading.grades import GirdleGrades
 from stonegrading.mixins import SarineGradingMixin, BasicGradingMixin, GWGradingMixin, GIAGradingMixin
 from stonegrading.models import Inclusion
 
-from .models import Parcel, Stone, Split
+from .models import Parcel, Stone, Split, GiaVerification
 
 User = get_user_model()
 
@@ -586,6 +586,7 @@ class GWGradingUploadForm(BaseUploadForm):
 class GIAUploadForm(BaseUploadForm):
     class Meta:
         mixin = GIAGradingMixin
+        gia_code = forms.CharField()
 
     def save(self):
         """
@@ -593,10 +594,22 @@ class GIAUploadForm(BaseUploadForm):
         :returns:
         """
         stones = []
+
         for data in self.cleaned_data:
+            stone_data = data.copy()
+
+            gia_code = stone_data["gia_code"]
+            del stone_data["gia_code"]
             stone = Stone.objects.get(internal_id=data["internal_id"])
-            for field, value in data.items():
+            for field, value in stone_data.items():
                 setattr(stone, field, value)
+
+                try:
+                    gia_verification = GiaVerification.objects.get(receipt_number=gia_code)
+                except GiaVerification.DoesNotExist:
+                    gia_verification = GiaVerification.objects.create(receipt_number=gia_code)
+
+                setattr(stone, "gia_verification", gia_verification)
 
             stone.save()
             stones.append(stone)
