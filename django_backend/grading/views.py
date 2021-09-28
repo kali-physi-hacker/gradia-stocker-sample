@@ -13,9 +13,9 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 
 from .models import Parcel, Receipt, ParcelTransfer, BasicGradingMixin
-from .forms import SarineUploadForm, BasicUploadForm, GWGradingDataUploadForm
+from .forms import SarineUploadForm, BasicUploadForm, GWGradingUploadForm, GIAUploadForm
 
-from stonegrading.mixins import SarineGradingMixin, GWGradingMixin
+from stonegrading.mixins import SarineGradingMixin, GWGradingMixin, GIAGradingMixin
 
 from .forms import CSVImportForm
 
@@ -202,7 +202,7 @@ class ConfirmTransferToGoldwayView(View):
 """
 
 
-class GWGradingDataUploadView(LoginRequiredMixin, View):
+class GWGradingUploadView(LoginRequiredMixin, View):
     fields = [field.name for field in GWGradingMixin._meta.get_fields()]
     fields.append("internal_id")
 
@@ -216,7 +216,7 @@ class GWGradingDataUploadView(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
 
-        form = GWGradingDataUploadForm(data={}, files=request.FILES)
+        form = GWGradingUploadForm(data={}, files=request.FILES)
         if not form.is_valid():
             return errors_page(request=request, title="Goldway Grading", form=form)
 
@@ -224,3 +224,36 @@ class GWGradingDataUploadView(LoginRequiredMixin, View):
         split_id = stones[0].split_from.pk
 
         return HttpResponseRedirect(reverse("admin:grading_split_change", args=(split_id,)))
+
+
+class GIAGradingUploadView(LoginRequiredMixin, View):
+    fields = [field.name for field in GIAGradingMixin._meta.get_fields()]
+    fields.append("internal_id")
+
+    def get(self, request, *args, **kwargs):
+        """
+        Page to return the HTML for sarine data upload
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        form = CSVImportForm()
+        context = {"template_title": "Upload a csv file containing gia grading data", "form": form}
+        return render(request, "grading/upload.html", context)
+
+    def post(self, request, *args, **kwargs):
+        """
+        Decouple file and do the splitting
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        form = GIAUploadForm(data={}, files=request.FILES)
+        if not form.is_valid():
+            HttpResponseRedirect(reverse("grading:gia_grading_data_upload_url"))
+
+        form.save()
+        # would have to wait
+        return HttpResponseRedirect(reverse("grading:basic_grading_data_upload_url"))

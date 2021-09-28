@@ -8,7 +8,7 @@ from django.contrib.messages.api import get_messages
 from stonegrading.models import Inclusion
 
 import pandas as pd
-from grading.views import BasicGradingUploadView, GWGradingDataUploadView
+from grading.views import BasicGradingUploadView, GWGradingUploadView
 
 from grading.models import Parcel, Split, Stone
 

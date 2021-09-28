@@ -10,10 +10,10 @@ from django.utils.datetime_safe import datetime
 
 from ownerships.models import ParcelTransfer, StoneTransfer
 from stonegrading.grades import GirdleGrades
-from stonegrading.mixins import SarineGradingMixin, BasicGradingMixin, GWGradingMixin
+from stonegrading.mixins import SarineGradingMixin, BasicGradingMixin, GWGradingMixin, GIAGradingMixin
 from stonegrading.models import Inclusion
 
-from .models import Parcel, Stone, Split
+from .models import Parcel, Stone, Split, GiaVerification
 
 User = get_user_model()
 
@@ -559,7 +559,7 @@ class BasicUploadForm(BaseUploadForm):
         return stones
 
 
-class GWGradingDataUploadForm(BaseUploadForm):
+class GWGradingUploadForm(BaseUploadForm):
     class Meta:
         mixin = GWGradingMixin
 
@@ -576,6 +576,40 @@ class GWGradingDataUploadForm(BaseUploadForm):
             stone = Stone.objects.get(internal_id=data["internal_id"])
             for field, value in data.items():
                 setattr(stone, field, value)
+
+            stone.save()
+            stones.append(stone)
+
+        return stones
+
+
+class GIAUploadForm(BaseUploadForm):
+    class Meta:
+        mixin = GIAGradingMixin
+        gia_code = forms.CharField()
+
+    def save(self):
+        """
+        Updates the existing stones with the results from GIA
+        :returns:
+        """
+        stones = []
+
+        for data in self.cleaned_data:
+            stone_data = data.copy()
+
+            gia_code = stone_data["gia_code"]
+            del stone_data["gia_code"]
+            stone = Stone.objects.get(internal_id=data["internal_id"])
+            for field, value in stone_data.items():
+                setattr(stone, field, value)
+
+                try:
+                    gia_verification = GiaVerification.objects.get(receipt_number=gia_code)
+                except GiaVerification.DoesNotExist:
+                    gia_verification = GiaVerification.objects.create(receipt_number=gia_code)
+
+                setattr(stone, "gia_verification", gia_verification)
 
             stone.save()
             stones.append(stone)
