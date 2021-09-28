@@ -5,17 +5,16 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.utils.datetime_safe import datetime
 from django.utils.timezone import utc
-
 from grading.forms import (
     UploadFormMetaClass,
     BaseUploadForm,
     SarineUploadForm,
     BasicUploadForm,
-    GWGradingDataUploadForm,
+    GWGradingUploadForm,
+    GIAUploadForm,
 )
-from grading.models import Stone
+from grading.models import Stone, GiaVerification
 from stonegrading.mixins import SarineGradingMixin
-from stonegrading.models import Inclusion
 
 User = get_user_model()
 
@@ -498,10 +497,14 @@ class BasicUploadFormTest(TestCase):
                 "basic_girdle_condition_2": "FAC",
                 "basic_girdle_condition_3": "FAC",
                 "basic_girdle_condition_final": "FAC",
-                "basic_inclusions_1": "Cld, Xtl",  # [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Cld, Xtl")],
-                "basic_inclusions_2": "Cld, Xtl, IndN",  # [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Cld, Xtl, IndN")],
-                "basic_inclusions_3": "Cld, IndN",  # [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Cld, IndN")],
-                "basic_inclusions_final": "Cld, IndN",  # [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Cld, IndN")],
+                "basic_inclusions_1": "Cld, Xtl",
+                # [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Cld, Xtl")],
+                "basic_inclusions_2": "Cld, Xtl, IndN",
+                # [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Cld, Xtl, IndN")],
+                "basic_inclusions_3": "Cld, IndN",
+                # [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Cld, IndN")],
+                "basic_inclusions_final": "Cld, IndN",
+                # [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Cld, IndN")],
                 "basic_polish_1": "GD",
                 "basic_polish_2": "GD",
                 "basic_polish_3": "VG",
@@ -541,7 +544,8 @@ class BasicUploadFormTest(TestCase):
                 "basic_girdle_condition_2": "FAC",
                 "basic_girdle_condition_3": "FAC",
                 "basic_girdle_condition_final": "FAC",
-                "basic_inclusions_1": "Xtl, Ftr",  # [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Xtl, Ftr")],
+                "basic_inclusions_1": "Xtl, Ftr",
+                # [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Xtl, Ftr")],
                 "basic_inclusions_2": "Xtl",  # Inclusion.objects.get(inclusion="Xtl"),
                 "basic_inclusions_3": "Cld",  # Inclusion.objects.get("Cld"),
                 "basic_inclusions_final": "Cld",  # Inclusion.objects.get(inclusion="Cld"),
@@ -584,10 +588,14 @@ class BasicUploadFormTest(TestCase):
                 "basic_girdle_condition_2": "FAC",
                 "basic_girdle_condition_3": "FAC",
                 "basic_girdle_condition_final": "FAC",
-                "basic_inclusions_1": "Xtl, Cld, IndN",  # [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Xtl, Cld, IndN")],
-                "basic_inclusions_2": "Xtl, Cld",  #  [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Xtl, Cld")],
-                "basic_inclusions_3": "Cld, Xtl",  # [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Cld, Xtl")],
-                "basic_inclusions_final": "Cld, Xtl",  # [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Cld, Xtl")],
+                "basic_inclusions_1": "Xtl, Cld, IndN",
+                # [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Xtl, Cld, IndN")],
+                "basic_inclusions_2": "Xtl, Cld",
+                # [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Xtl, Cld")],
+                "basic_inclusions_3": "Cld, Xtl",
+                # [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Cld, Xtl")],
+                "basic_inclusions_final": "Cld, Xtl",
+                # [Inclusion.objects.get(inclusion=inclusion) for inclusion in ("Cld, Xtl")],
                 "basic_polish_1": "EX",
                 "basic_polish_2": "EX",
                 "basic_polish_3": "EX",
@@ -664,7 +672,6 @@ def get_date_from_str(date_string):
 
 
 class GoldWayGradingDataTest(TestCase):
-
     fixtures = ("grading/fixtures/test_data.json",)
 
     def setUp(self):
@@ -729,7 +736,7 @@ class GoldWayGradingDataTest(TestCase):
     def test_save_updates_stones(self):
         self.do_initial_uploads()
 
-        form = GWGradingDataUploadForm(
+        form = GWGradingUploadForm(
             data={}, files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())}
         )
         self.assertTrue(form.is_valid())
@@ -746,4 +753,82 @@ class GoldWayGradingDataTest(TestCase):
                 raw_actual_value = getattr(actual_stone, field)
                 actual_value = float(raw_actual_value) if type(raw_actual_value) == Decimal else raw_actual_value
                 expected_value = expected_stone[field]
+                self.assertEqual(actual_value, expected_value)
+
+
+class GiaGradingUploadForm(TestCase):
+    fixtures = ("grading/fixtures/test_data.json",)
+
+    def setUp(self):
+        self.sarine_csv_file = open("grading/tests/fixtures/sarine-01.csv", "rb")
+        self.csv_file = open("grading/tests/fixtures/gia.csv", "rb")
+        self.csv_file_spaces = open("grading/tests/fixtures/basic-01-spaces.csv", "rb")
+
+        self.expected_stones = [
+            {
+                "internal_id": 1,
+                "date_from_gia": get_date_from_str("29/12/2020"),
+                # "nano_etch_inscription": "G00000011",
+                "gia_verification": "1379074279-926",
+                "gia_diamond_description": "natural",
+                "gia_color": "D-F",
+                "gia_remarks": "",
+            },
+            {
+                "internal_id": 5,
+                "date_from_gia": get_date_from_str("29/12/2020"),
+                # "nano_etch_inscription": "G00000012",
+                "gia_verification": "1379074279-428",
+                "gia_diamond_description": "natural",
+                "gia_color": "G-H",
+                "gia_remarks": "",
+            },
+            {
+                "internal_id": 6,
+                "date_from_gia": get_date_from_str("29/12/2020"),
+                # "nano_etch_inscription": "G00000013",
+                "gia_verification": "1379074279-926",
+                "gia_diamond_description": "natural",
+                "gia_color": "D-F",
+                "gia_remarks": "",
+            },
+        ]
+
+    def do_initial_upload(self):
+        Stone.objects.all().delete()
+        form = SarineUploadForm(
+            data={},
+            files={"file": SimpleUploadedFile(self.sarine_csv_file.name, self.sarine_csv_file.read())},
+            user=User.objects.get(username="gary"),
+        )
+        if form.is_valid():
+            form.save()
+
+    def test_save_updates_stones(self):
+        """
+        Tests that stones get updated when form.save() is called
+        :returns:
+        """
+        # /localhost:8000/profile?username='something'&password='something'
+        form = GIAUploadForm(data={}, files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())})
+        self.do_initial_upload()
+
+        self.assertTrue(form.is_valid())
+        form.save()
+
+        stones = Stone.objects.all()
+
+        self.assertEqual(len(stones), 3)
+
+        fields = self.expected_stones[0].keys()
+
+        for actual_stone, expected_stone in zip(stones, self.expected_stones):
+            for field in fields:
+                raw_actual_value = getattr(actual_stone, field)
+                actual_value = float(raw_actual_value) if type(raw_actual_value) == Decimal else raw_actual_value
+                expected_value = expected_stone[field]
+
+                if field == "gia_verification":
+                    expected_value = GiaVerification.objects.get(receipt_number=expected_value)
+
                 self.assertEqual(actual_value, expected_value)
