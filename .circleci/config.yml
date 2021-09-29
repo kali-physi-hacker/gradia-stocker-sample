@@ -30,6 +30,7 @@ commands:
         command: |
           python3 -m venv venv
           . venv/bin/activate
+          pip uninstall stone-grading -y
           pip install -r requirements39.txt
   linting:
     steps:

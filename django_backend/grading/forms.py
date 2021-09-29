@@ -9,11 +9,20 @@ from django.utils.timezone import utc
 from django.utils.datetime_safe import datetime
 
 from ownerships.models import ParcelTransfer, StoneTransfer
+
 from stonegrading.grades import GirdleGrades
-from stonegrading.mixins import SarineGradingMixin, BasicGradingMixin, GWGradingMixin, GIAGradingMixin
+from stonegrading.mixins import (
+    SarineGradingMixin,
+    BasicGradingMixin,
+    GWGradingMixin,
+    GIAGradingMixin,
+    GIAGradingAdjustMixin,
+    GWGradingAdjustMixin,
+    GIAGradingMixin,
+)
 from stonegrading.models import Inclusion
 
-from .models import Parcel, Stone, Split, GiaVerification
+from .models import Parcel, Stone, Split, GiaVerification, GoldwayVerification
 
 User = get_user_model()
 
@@ -565,11 +574,70 @@ class GWGradingUploadForm(BaseUploadForm):
 
         # extra_fields
         external_id = forms.CharField(max_length=11)
+        goldway_code = forms.CharField()
 
     def save(self):
         """
         Update the stone instance using data from the gw
         :returns:
+        """
+        stones = []
+        for data in self.cleaned_data:
+            stone_data = data.copy()
+
+            gw_code = stone_data["goldway_code"]
+            del stone_data["goldway_code"]
+
+            stone = Stone.objects.get(internal_id=data["internal_id"])
+            for field, value in stone_data.items():
+                setattr(stone, field, value)
+
+            try:
+                goldway_verification = GoldwayVerification.objects.get(invoice_number=gw_code)
+            except GoldwayVerification.DoesNotExist:
+                goldway_verification = GoldwayVerification.objects.create(invoice_number=gw_code)
+
+            stone.gw_verification = goldway_verification
+            stone.save()
+            stones.append(stone)
+
+        return stones
+
+
+class GWAdjustingUploadForm(BaseUploadForm):
+    class Meta:
+        mixin = GWGradingAdjustMixin
+
+    def __process_graders(self, stone_data, file_name):
+        """
+        Check that graders (user accounts) exists and raise validation error or return stone_data
+
+        Conditions
+        ----------
+        1. basic_grading_1, basic_grading_2, basic_grading_3 ===> Not required
+        2. Raise error instantly when any of them contains a user that does not exist
+        :param stone_data:
+        :param file_name:
+        :return:
+        """
+
+        errors = {}
+
+        for row, data in enumerate(stone_data):
+            for field, value in data.items():
+                if "_grader_" in field:
+                    try:
+                        data[field] = User.objects.get(username=value.lower())
+                    except User.DoesNotExist:
+                        errors[row] = {}
+                        errors[row][field] = f"Grader user `{value}` account does not exist"
+
+        return stone_data, errors
+
+    def save(self):
+        """
+        Updates stones with the results from GWGradingAdjust stage
+        :return:
         """
         stones = []
         for data in self.cleaned_data:

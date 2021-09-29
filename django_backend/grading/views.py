@@ -1,21 +1,24 @@
-import os
 from datetime import datetime
 
 from django.contrib.auth.models import User
-from django.db.models import fields
-from django.http import HttpResponse, HttpResponseRedirect, Http404
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils.timezone import utc
 from django.views import View
-from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 
+<<<<<<< HEAD
 from .models import Parcel, Receipt, ParcelTransfer, BasicGradingMixin
 from .forms import SarineUploadForm, BasicUploadForm, GWGradingUploadForm, GIAUploadForm
+=======
+from .models import Parcel, Receipt, ParcelTransfer
+>>>>>>> master
 
-from stonegrading.mixins import SarineGradingMixin, GWGradingMixin, GIAGradingMixin
+from .forms import SarineUploadForm, BasicUploadForm, GWGradingUploadForm, GWAdjustingUploadForm, GIAUploadForm
+
+from stonegrading.mixins import BasicGradingMixin, SarineGradingMixin, GWGradingMixin, GIAGradingMixin
 
 from .forms import CSVImportForm
 
@@ -179,6 +182,31 @@ class BasicGradingUploadView(LoginRequiredMixin, View):
 
         stones = form.save()
         split_id = stones[0].split_from.pk
+
+        return HttpResponseRedirect(reverse("admin:grading_split_change", args=(split_id,)))
+
+
+class GIAGradingAdjustView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        """
+        Return get page from uploading GIAGradingAdjust Results
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        context = {"template_title": "Upload a csv file containing basic grading data"}
+        if "errors" in kwargs:
+            context["errors"] = kwargs["errors"]
+        return render(request, "grading/upload.html", context)
+
+    def post(self, request, *args, **kwargs):
+        form = GWAdjustingUploadForm(data={}, files=request.FILES)
+        if not form.is_valid():
+            return errors_page(request=request, title="GIA Adjusting Grading", form=form)
+
+        stones = form.save()
+        split_id = stones[0].split_from_id
 
         return HttpResponseRedirect(reverse("admin:grading_split_change", args=(split_id,)))
 
