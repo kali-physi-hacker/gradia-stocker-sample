@@ -412,3 +412,90 @@ def parcels(admin_user):
     )
 
     return (valid_csv_parcel, invalid_dtype_csv)
+
+
+def setup_initial_stones(data_entry_user, receipt):
+    parcel = receipt.parcel_set.get(gradia_parcel_code="123456789")
+    split = Split.objects.create(original_parcel=parcel, split_by=data_entry_user)
+    sarine_stone_dict = {
+        "diameter_min": 2.9,
+        "diameter_max": 2.92,
+        "height": 1.77,
+        "table_size": 58.4,
+        "crown_angle": 33.59,
+        "pavilion_angle": 40.93,
+        "star_length": 44.6,
+        "lower_half": 79.8,
+        "girdle_thickness_number": 3.98,
+        "girdle_min_number": 1.85,
+        "girdle_max_number": 2.78,
+        "culet_size": 0.52,
+        "crown_height": 13.84,
+        "pavilion_depth": 43.1,
+        "total_depth": 60.92,
+        "table_size_rounded": 58,
+        "crown_angle_rounded": 33.5,
+        "pavilion_angle_rounded": 41.0,
+        "star_length_rounded": 45,
+        "lower_half_rounded": 80,
+        "girdle_thickness_rounded": 4,
+        "girdle_min_grade": "MED",
+        "girdle_max_grade": "STK",
+        "culet_size_description": "N/VS",
+        "crown_height_rounded": 14,
+        "pavilion_depth_rounded": 43,
+        "total_depth_rounded": 60.9,
+        "sarine_cut_pre_polish_symmetry": "EX",
+        "sarine_symmetry": "VG",
+        "roundness": 0.9,
+        "roundness_grade": "EX",
+        "table_size_dev": 0.6,
+        "table_size_dev_grade": "EX",
+        "crown_angle_dev": 1,
+        "crown_angle_dev_grade": "EX",
+        "pavilion_angle_dev": 0.9,
+        "pavilion_angle_dev_grade": "EX",
+        "star_length_dev": 3.9,
+        "star_length_dev_grade": "EX",
+        "lower_half_dev": 3.2,
+        "lower_half_dev_grade": "EX",
+        "girdle_thick_dev": 0.5,
+        "girdle_thick_dev_grade": "EX",
+        "crown_height_dev": 0.7,
+        "crown_height_dev_grade": "EX",
+        "pavilion_depth_dev": 0.7,
+        "pavilion_depth_dev_grade": "EX",
+        "misalignment": 1.9,
+        "misalignment_grade": "VG",
+        "table_edge_var": 3.6,
+        "table_edge_var_grade": "VG",
+        "table_off_center": 0.3,
+        "table_off_center_grade": "EX",
+        "culet_off_center": 0.5,
+        "culet_off_center_grade": "EX",
+        "table_off_culet": 0.5,
+        "table_off_culet_grade": "EX",
+        "star_angle": 2.5,
+        "star_angle_grade": "EX",
+        "upper_half_angle": 1.2,
+        "upper_half_angle_grade": "EX",
+        "lower_half_angle": 0.8,
+        "lower_half_angle_grade": "EX",
+    }
+
+    stones = []
+
+    internal_ids = (1, 5, 6)
+
+    for internal_id in internal_ids:
+        sarine_stone_dict["internal_id"] = internal_id
+        sarine_stone_dict["split_from"] = split
+        sarine_stone_dict["data_entry_user"] = data_entry_user
+        stones.append(Stone.objects.create(**sarine_stone_dict))
+
+    return stones
+
+
+@pytest.fixture
+def initial_stones(data_entry_clerk, receipt):
+    return setup_initial_stones(data_entry_user=data_entry_clerk, receipt=receipt)
