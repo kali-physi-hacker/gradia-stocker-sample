@@ -9,12 +9,7 @@ from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 
-<<<<<<< HEAD
-from .models import Parcel, Receipt, ParcelTransfer, BasicGradingMixin
-from .forms import SarineUploadForm, BasicUploadForm, GWGradingUploadForm, GIAUploadForm
-=======
 from .models import Parcel, Receipt, ParcelTransfer
->>>>>>> master
 
 from .forms import SarineUploadForm, BasicUploadForm, GWGradingUploadForm, GWAdjustingUploadForm, GIAUploadForm
 
