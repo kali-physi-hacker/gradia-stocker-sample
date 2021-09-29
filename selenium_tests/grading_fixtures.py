@@ -395,9 +395,10 @@ def parcel(admin_user):
         total_carats="50.000",
         total_pieces=50,
         reference_price_per_carat=5,
-        gradia_parcel_code="sarine-01"
-    ) 
-    return parcel 
+        gradia_parcel_code="sarine-01",
+    )
+    return parcel
+
 
 @pytest.fixture
 def invalid_parcel(admin_user):
@@ -412,6 +413,6 @@ def invalid_parcel(admin_user):
         total_carats="50.000",
         total_pieces=70,
         reference_price_per_carat=2,
-        gradia_parcel_code="sarine-01-type"
-    ) 
-    return invalid_parcel 
+        gradia_parcel_code="sarine-01-type",
+    )
+    return invalid_parcel

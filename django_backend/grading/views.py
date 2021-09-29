@@ -158,7 +158,7 @@ class BasicGradingUploadView(LoginRequiredMixin, View):
         :return:
         """
         form = CSVImportForm()
-        context = {"template_title": "Upload a csv file containing basic grading data", "form":form}
+        context = {"template_title": "Upload a csv file containing basic grading data", "form": form}
         if "errors" in kwargs:
             context["errors"] = kwargs["errors"]
         return render(request, "grading/upload.html", context)
@@ -232,7 +232,7 @@ class GWGradingUploadView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
 
         form = CSVImportForm()
-        context = {"template_title": "Upload a csv file containing gold way grading data", "form":form}
+        context = {"template_title": "Upload a csv file containing gold way grading data", "form": form}
         if "errors" in kwargs:
             context["errors"] = kwargs["errors"]
         return render(request, "grading/upload.html", context)
