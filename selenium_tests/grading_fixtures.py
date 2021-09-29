@@ -380,3 +380,35 @@ def inclusions():
     for inclusion in inclusions:
         Inclusion.objects.create(inclusion=inclusion)
     return inclusions
+
+
+@pytest.fixture
+def parcels(admin_user):
+    created_receipt = Receipt.objects.create(
+        entity=Entity.objects.create(name="Van Klaren", address="addressy", phone="12345678", email="vk@vk.com"),
+        code="VK-0011",
+        intake_by=admin_user,
+    )
+    valid_csv_parcel = Parcel.objects.create(
+        receipt=created_receipt,
+        customer_parcel_code="VK01",
+        total_carats="50.000",
+        total_pieces=50,
+        reference_price_per_carat=5,
+        gradia_parcel_code="sarine-01",
+    )
+    created_receipt = Receipt.objects.create(
+        entity=Entity.objects.create(name="Van Klaren", address="addressy", phone="12345678", email="vk@vk.com"),
+        code="VK-0012",
+        intake_by=admin_user,
+    )
+    invalid_dtype_csv = Parcel.objects.create(
+        receipt=created_receipt,
+        customer_parcel_code="VK04",
+        total_carats="50.000",
+        total_pieces=70,
+        reference_price_per_carat=2,
+        gradia_parcel_code="sarine-01-type",
+    )
+
+    return (valid_csv_parcel, invalid_dtype_csv)
