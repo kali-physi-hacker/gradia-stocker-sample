@@ -3,7 +3,7 @@ import pytest
 import time
 
 
-def test_user_can_upload_sarine_stone_data(browser, data_entry_clerk, parcel):
+def test_user_can_upload_sarine_stone_data(browser, data_entry_clerk, parcels):
 
     # kary goes to `pythonanywhere.erp...com` and is redirected to log in
     # kary enters username and password and clicks on login button to open admin dashboard.
