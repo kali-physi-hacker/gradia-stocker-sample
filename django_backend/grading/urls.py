@@ -2,12 +2,17 @@ from django.urls import path
 
 from . import views
 
-
 urlpatterns = [
     path("return_to_vault/<int:pk>/", views.ReturnToVaultView.as_view(), name="return_to_vault"),
     path("confirm_received/<int:pk>/", views.ConfirmReceivedView.as_view(), name="confirm_received"),
     path("close_receipt/<int:pk>/", views.CloseReceiptView.as_view(), name="close_receipt"),
     path("upload/all/", views.AllUploadView.as_view(), name="upload_all"),
     path("upload/sarine/", views.SarineUploadView.as_view(), name="sarine_data_upload_url"),
-    path("upload/", views.UploadBasicParcelCSVFile.as_view(), name="upload_parcel_csv"),
+    path("upload/basic_grading/", views.BasicGradingUploadView.as_view(), name="basic_grading_data_upload_url"),
+    path("upload/gia_adjusting/", views.GIAGradingAdjustView.as_view(), name="gia_adjusting_data_upload_url"),
+    path("upload/", views.BasicGradingUploadView.as_view(), name="upload_parcel_csv"),
+    path("upload/gia_grading/", views.GIAGradingUploadView.as_view(), name="gia_grading_data_upload_url"),
+    path("upload/errors/", views.errors_page, name="errors_page"),
+    path("gw_data_upload_url/", views.GWGradingUploadView.as_view(), name="gw_data_upload_url"),
+    path("upload/gia_grading/", views.GIAGradingUploadView.as_view(), name="gia_grading_data_upload_url"),
 ]

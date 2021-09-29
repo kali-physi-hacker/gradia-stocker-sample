@@ -1,0 +1,46 @@
+{% extends 'admin/base.html' %}
+{% block extrahead %}
+<style>
+    td,
+    th,
+    tr {
+        border-right: 1px solid #ddd;
+    }
+
+    td.error {
+        background-color: red;
+        color: white;
+    }
+
+    td {
+        text-align: center;
+    }
+
+    td i.fas {
+        color: green;
+    }
+
+    td,
+    th {
+        padding: 0 9px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h3>Data Upload Failed <i style="color: red" class="fas fa-times"></i></h3>
+
+<body>
+    <p>
+        Stone csv data upload failed. Check the table below to find out the problems with your csv file.
+        Fix them and <a style="text-decoration: underline" href="{% url 'grading:sarine_data_upload_url' %}">try
+            again</a>
+    </p>
+    {% if form.csv_errors %}
+
+    {{ form.errors_as_table | safe }}
+    {% else %}
+    <p style="color: red">{{ form.errors.file | first }}</p>
+    {% endif %}
+</body>
+{% endblock %}

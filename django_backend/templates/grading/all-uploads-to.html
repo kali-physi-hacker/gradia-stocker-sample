@@ -1,0 +1,33 @@
+{% extends 'admin/base.html' %}
+
+{% block content %}
+    <h1>Select stone upload stage</h1>
+    <ul>
+        <li>
+            <a style="margin-left: 15px;" href="{% url 'grading:sarine_data_upload_url' %}" class="addlink">
+                Sarine Stone
+            </a>
+        </li>
+        <li>
+            <a style="margin-left: 15px;" href="{% url 'grading:upload_parcel_csv' %}" class="addlink">
+                Basic Stone Data
+            </a>
+        </li>
+        <li>
+            <a style="margin-left: 15px;" href="{% url 'grading:gw_data_upload_url' %}" class="addlink">
+                Goldway Stone Data
+            </a>
+        </li>
+        <li>
+            <a style="margin-left: 15px;" href="{% url 'grading:gia_grading_data_upload_url' %}" class="addlink">
+                Gia Grading Data
+            </a>
+        </li>
+        <li>
+            <a style="margin-left: 15px;" href="{% url 'grading:gia_adjusting_data_upload_url' %}" class="addlink">
+                Gia Adjust Grading Data
+            </a>
+        </li>
+
+    </ul>
+{% endblock %}
