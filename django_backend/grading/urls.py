@@ -14,4 +14,5 @@ urlpatterns = [
     path("upload/errors/", views.errors_page, name="errors_page"),
     path("gw_data_upload_url/", views.GWGradingUploadView.as_view(), name="gw_data_upload_url"),
     path("upload/gia_grading/", views.GIAGradingUploadView.as_view(), name="gia_grading_data_upload_url"),
+    path("upload/gia_adjusting/", views.GIAAdjustGradingUploadView.as_view(), name="gia_adjusting_data_upload_url"),
 ]

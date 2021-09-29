@@ -10,7 +10,13 @@ from django.utils.datetime_safe import datetime
 
 from ownerships.models import ParcelTransfer, StoneTransfer
 from stonegrading.grades import GirdleGrades
-from stonegrading.mixins import SarineGradingMixin, BasicGradingMixin, GWGradingMixin, GIAGradingMixin
+from stonegrading.mixins import (
+    SarineGradingMixin,
+    BasicGradingMixin,
+    GWGradingMixin,
+    GIAGradingMixin,
+    GIAGradingAdjustMixin,
+)
 from stonegrading.models import Inclusion
 
 from .models import Parcel, Stone, Split, GiaVerification
@@ -610,6 +616,45 @@ class GIAUploadForm(BaseUploadForm):
                     gia_verification = GiaVerification.objects.create(receipt_number=gia_code)
 
                 setattr(stone, "gia_verification", gia_verification)
+
+            stone.save()
+            stones.append(stone)
+
+        return stones
+
+
+class GIAAdjustUploadForm(BaseUploadForm):
+    class Meta:
+        mixin = GIAGradingAdjustMixin
+
+    def __process_graders(self, stone_data, file_name):
+        """
+        Check that graders (user accounts) exists and raise validation error or return stone_data
+        :param stone_data:
+        :param file_name:
+        :return:
+        """
+
+        errors = {}
+
+        for row, data in enumerate(stone_data):
+            for field, value in data.items():
+                if "_grader_" in field:
+                    try:
+                        data[field] = User.objects.get(username=value.lower())
+                    except User.DoesNotExist:
+                        errors[row] = {}
+                        errors[row][field] = f"Grader user `{value}` account does not exist"
+
+        return stone_data, errors
+
+    def save(self):
+        stones = []
+
+        for data in self.cleaned_data:
+            stone = Stone.objects.get(internal_id=data["internal_id"])
+            for field, value in data.items():
+                setattr(stone, field, value)
 
             stone.save()
             stones.append(stone)

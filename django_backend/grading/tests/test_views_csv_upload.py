@@ -1,4 +1,4 @@
-from pdb import set_trace
+import re
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
@@ -163,6 +163,32 @@ class TestCSVUpload(TestCase):
         stone_1 = Stone.objects.get(internal_id=1)
         # # float() because django will return a Decimal of 0.090
         # self.assertEqual(float(stone_1.gold_ai_code), 0.091)
+
+    def test_gia_adjusting_upload_success(self):
+        """
+        Tests that GIAGrading Results can be uploaded successfully
+        :return:
+        """
+        csv_file = open("grading/tests/fixtures/gia-adjust.csv", "rb")
+        self.client.login(**self.grader)
+        self.setup_sarine_data()
+        response = self.client.post(reverse("grading:gia_adjusting_data_upload_url"), data={"file": csv_file})
+        self.assertEqual(response.status_code, 302)
+        self.assertIsNotNone(re.match(r"^/admin/grading/split/\d+/change/", response.url))
+
+    def test_gia_adjusting_upload_failed(self):
+        """
+        Tests that GIAGrading Results failed if invalid csv_file
+        :return:
+        """
+        invalid_csv_file = open("grading/tests/fixtures/gia-adjust-invalid.csv", "rb")
+        self.client.login(**self.grader)
+        self.setup_sarine_data()
+        response = self.client.post(
+            reverse("grading:gia_adjusting_data_upload_url"), data={"file": invalid_csv_file}
+        )
+        self.assertEqual(response.status_code, 200)
+        # Maybe more tests ==> Test for the actual content of the page (response.content.decode())
 
     def test_views_basic_grading_does_not_upload_and_returns_400_with_invalid_csv_file_field_values(self):
         pass
