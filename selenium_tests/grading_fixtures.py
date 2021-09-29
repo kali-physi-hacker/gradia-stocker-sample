@@ -411,7 +411,7 @@ def parcels(admin_user):
         gradia_parcel_code="sarine-01-type",
     )
 
-    return (valid_csv_parcel, invalid_dtype_csv)
+    return valid_csv_parcel, invalid_dtype_csv
 
 
 def setup_initial_stones(data_entry_user, receipt):
