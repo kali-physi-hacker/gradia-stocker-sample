@@ -12,6 +12,7 @@ from grading.forms import (
     BasicUploadForm,
     GWGradingUploadForm,
     GIAUploadForm,
+    GWAdjustingUploadForm,
 )
 from grading.models import Stone, GiaVerification
 from stonegrading.mixins import SarineGradingMixin
@@ -831,4 +832,110 @@ class GiaGradingUploadForm(TestCase):
                 if field == "gia_verification":
                     expected_value = GiaVerification.objects.get(receipt_number=expected_value)
 
+                self.assertEqual(actual_value, expected_value)
+
+
+class GWAdjustingUploadFormTest(TestCase):
+    fixtures = ("grading/fixtures/test_data.json",)
+
+    def setUp(self):
+        self.sarine_csv_file = open("grading/tests/fixtures/sarine-01.csv", "rb")
+        self.csv_file = open("grading/tests/fixtures/gia_adjusting.csv", "rb")
+
+        self.expected_stones = [
+            {
+                "internal_id": 1,
+                "gw_adjust_grader_1": User.objects.get(username="kary"),
+                "gw_adjust_grader_2": User.objects.get(username="tanly"),
+                "gw_adjust_grader_3": User.objects.get(username="gary"),
+                "gw_color_adjusted_1": "D",
+                "gw_color_adjusted_2": "F",
+                "gw_color_adjusted_3": "E",
+                "gw_color_adjusted_final": "D",
+                "gw_clarity_adjusted_1": "SI1",
+                "gw_clarity_adjusted_2": "SI1",
+                "gw_clarity_adjusted_3": "SI1+",
+                "gw_clarity_adjusted_final": "SI1",
+                "gw_fluorescence_adjusted_1": "N",
+                "gw_fluorescence_adjusted_2": "N",
+                "gw_fluorescence_adjusted_3": "N",
+                "gw_fluorescence_adjusted_final": "N",
+                "gw_adjust_remarks": "nothing really",
+            },
+            {
+                "internal_id": 5,
+                "gw_adjust_grader_1": User.objects.get(username="kary"),
+                "gw_adjust_grader_2": User.objects.get(username="tanly"),
+                "gw_adjust_grader_3": User.objects.get(username="gary"),
+                "gw_color_adjusted_1": "D",
+                "gw_color_adjusted_2": "F",
+                "gw_color_adjusted_3": "E",
+                "gw_color_adjusted_final": "D",
+                "gw_clarity_adjusted_1": "SI1",
+                "gw_clarity_adjusted_2": "SI1",
+                "gw_clarity_adjusted_3": "SI1+",
+                "gw_clarity_adjusted_final": "SI1",
+                "gw_fluorescence_adjusted_1": "N",
+                "gw_fluorescence_adjusted_2": "N",
+                "gw_fluorescence_adjusted_3": "N",
+                "gw_fluorescence_adjusted_final": "N",
+                "gw_adjust_remarks": "nothing really",
+            },
+            {
+                "internal_id": 6,
+                "gw_adjust_grader_1": User.objects.get(username="kary"),
+                "gw_adjust_grader_2": User.objects.get(username="tanly"),
+                "gw_adjust_grader_3": User.objects.get(username="gary"),
+                "gw_color_adjusted_1": "D",
+                "gw_color_adjusted_2": "F",
+                "gw_color_adjusted_3": "E",
+                "gw_color_adjusted_final": "D",
+                "gw_clarity_adjusted_1": "SI1",
+                "gw_clarity_adjusted_2": "SI1",
+                "gw_clarity_adjusted_3": "SI1+",
+                "gw_clarity_adjusted_final": "SI1",
+                "gw_fluorescence_adjusted_1": "N",
+                "gw_fluorescence_adjusted_2": "N",
+                "gw_fluorescence_adjusted_3": "N",
+                "gw_fluorescence_adjusted_final": "N",
+                "gw_adjust_remarks": "nothing really",
+            },
+        ]
+
+    def do_initial_upload(self):
+        """
+        Do initial uploads to create stones for updating
+        :return:
+        """
+        Stone.objects.all().delete()
+        form = SarineUploadForm(
+            data={},
+            files={"file": SimpleUploadedFile(self.sarine_csv_file.name, self.sarine_csv_file.read())},
+            user=User.objects.get(username="gary"),
+        )
+        if form.is_valid():
+            form.save()
+
+    def test_save_updates_stones(self):
+        """
+        Tests that save method updates stone correctly
+        :return:
+        """
+        self.do_initial_upload()
+        form = GWAdjustingUploadForm(
+            data={}, files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())}
+        )
+        self.assertTrue(form.is_valid())
+        form.save()
+        stones = Stone.objects.all()
+
+        self.assertEqual(len(stones), 3)
+
+        fields = self.expected_stones[0].keys()
+
+        for actual_stone, expected_stone in zip(stones, self.expected_stones):
+            for field in fields:
+                raw_actual_value = getattr(actual_stone, field)
+                actual_value = float(raw_actual_value) if type(raw_actual_value) == Decimal else raw_actual_value
+                expected_value = expected_stone[field]
                 self.assertEqual(actual_value, expected_value)
