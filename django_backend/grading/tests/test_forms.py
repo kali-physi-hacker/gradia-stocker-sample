@@ -12,7 +12,7 @@ from grading.forms import (
     BasicUploadForm,
     GWGradingUploadForm,
     GIAUploadForm,
-    GIAAdjustUploadForm,
+    GWAdjustingUploadForm,
 )
 from grading.models import Stone, GiaVerification
 from stonegrading.mixins import SarineGradingMixin
@@ -835,86 +835,78 @@ class GiaGradingUploadForm(TestCase):
                 self.assertEqual(actual_value, expected_value)
 
 
-class GIAAdjustUploadFormTest(TestCase):
+class GWAdjustingUploadFormTest(TestCase):
     fixtures = ("grading/fixtures/test_data.json",)
 
     def setUp(self):
         self.sarine_csv_file = open("grading/tests/fixtures/sarine-01.csv", "rb")
-        self.csv_file = open("grading/tests/fixtures/gia-adjust.csv", "rb")
+        self.csv_file = open("grading/tests/fixtures/gia_adjusting.csv", "rb")
 
         self.expected_stones = [
             {
                 "internal_id": 1,
-                "gia_adjust_grader_1": User.objects.get(username="tanly"),
-                "gia_adjust_grader_2": User.objects.get(username="kary"),
-                "gia_adjust_grader_3": User.objects.get(username="gary"),
-                "gia_color_adjusted_1": "E",
-                "gia_color_adjusted_2": "F",
-                "gia_color_adjusted_3": "D",
-                "gia_color_adjusted_final": "E",
-                "gia_polish_adjusted_1": "EX",
-                "gia_polish_adjusted_2": "GD",
-                "gia_polish_adjusted_3": "GD",
-                "gia_polish_adjusted_final": "VG",
-                "gia_culet_adjusted_1": "N",
-                "gia_culet_adjusted_2": "N",
-                "gia_culet_adjusted_3": "N",
-                "gia_culet_adjusted_final": "N",
-                "gia_culet_characteristic_1": "N",
-                "gia_culet_characteristic_2": "N",
-                "gia_culet_characteristic_3": "N",
-                "gia_culet_characteristic_final": "N",
-                "gia_adjust_remarks": "",
+                "gw_adjust_grader_1": User.objects.get(username="kary"),
+                "gw_adjust_grader_2": User.objects.get(username="tanly"),
+                "gw_adjust_grader_3": User.objects.get(username="gary"),
+                "gw_color_adjusted_1": "D",
+                "gw_color_adjusted_2": "F",
+                "gw_color_adjusted_3": "E",
+                "gw_color_adjusted_final": "D",
+                "gw_clarity_adjusted_1": "SI1",
+                "gw_clarity_adjusted_2": "SI1",
+                "gw_clarity_adjusted_3": "SI1+",
+                "gw_clarity_adjusted_final": "SI1",
+                "gw_fluorescence_adjusted_1": "N",
+                "gw_fluorescence_adjusted_2": "N",
+                "gw_fluorescence_adjusted_3": "N",
+                "gw_fluorescence_adjusted_final": "N",
+                "gw_adjust_remarks": "nothing really",
             },
             {
                 "internal_id": 5,
-                "gia_adjust_grader_1": User.objects.get(username="tanly"),
-                "gia_adjust_grader_2": User.objects.get(username="kary"),
-                "gia_adjust_grader_3": User.objects.get(username="gary"),
-                "gia_color_adjusted_1": "E",
-                "gia_color_adjusted_2": "F",
-                "gia_color_adjusted_3": "D",
-                "gia_color_adjusted_final": "E",
-                "gia_polish_adjusted_1": "EX",
-                "gia_polish_adjusted_2": "GD",
-                "gia_polish_adjusted_3": "GD",
-                "gia_polish_adjusted_final": "VG",
-                "gia_culet_adjusted_1": "N",
-                "gia_culet_adjusted_2": "N",
-                "gia_culet_adjusted_3": "N",
-                "gia_culet_adjusted_final": "N",
-                "gia_culet_characteristic_1": "N",
-                "gia_culet_characteristic_2": "N",
-                "gia_culet_characteristic_3": "N",
-                "gia_culet_characteristic_final": "N",
-                "gia_adjust_remarks": "",
+                "gw_adjust_grader_1": User.objects.get(username="kary"),
+                "gw_adjust_grader_2": User.objects.get(username="tanly"),
+                "gw_adjust_grader_3": User.objects.get(username="gary"),
+                "gw_color_adjusted_1": "D",
+                "gw_color_adjusted_2": "F",
+                "gw_color_adjusted_3": "E",
+                "gw_color_adjusted_final": "D",
+                "gw_clarity_adjusted_1": "SI1",
+                "gw_clarity_adjusted_2": "SI1",
+                "gw_clarity_adjusted_3": "SI1+",
+                "gw_clarity_adjusted_final": "SI1",
+                "gw_fluorescence_adjusted_1": "N",
+                "gw_fluorescence_adjusted_2": "N",
+                "gw_fluorescence_adjusted_3": "N",
+                "gw_fluorescence_adjusted_final": "N",
+                "gw_adjust_remarks": "nothing really",
             },
             {
                 "internal_id": 6,
-                "gia_adjust_grader_1": User.objects.get(username="tanly"),
-                "gia_adjust_grader_2": User.objects.get(username="kary"),
-                "gia_adjust_grader_3": User.objects.get(username="gary"),
-                "gia_color_adjusted_1": "E",
-                "gia_color_adjusted_2": "F",
-                "gia_color_adjusted_3": "D",
-                "gia_color_adjusted_final": "E",
-                "gia_polish_adjusted_1": "EX",
-                "gia_polish_adjusted_2": "GD",
-                "gia_polish_adjusted_3": "GD",
-                "gia_polish_adjusted_final": "VG",
-                "gia_culet_adjusted_1": "N",
-                "gia_culet_adjusted_2": "N",
-                "gia_culet_adjusted_3": "N",
-                "gia_culet_adjusted_final": "N",
-                "gia_culet_characteristic_1": "N",
-                "gia_culet_characteristic_2": "N",
-                "gia_culet_characteristic_3": "N",
-                "gia_culet_characteristic_final": "N",
-                "gia_adjust_remarks": "",
+                "gw_adjust_grader_1": User.objects.get(username="kary"),
+                "gw_adjust_grader_2": User.objects.get(username="tanly"),
+                "gw_adjust_grader_3": User.objects.get(username="gary"),
+                "gw_color_adjusted_1": "D",
+                "gw_color_adjusted_2": "F",
+                "gw_color_adjusted_3": "E",
+                "gw_color_adjusted_final": "D",
+                "gw_clarity_adjusted_1": "SI1",
+                "gw_clarity_adjusted_2": "SI1",
+                "gw_clarity_adjusted_3": "SI1+",
+                "gw_clarity_adjusted_final": "SI1",
+                "gw_fluorescence_adjusted_1": "N",
+                "gw_fluorescence_adjusted_2": "N",
+                "gw_fluorescence_adjusted_3": "N",
+                "gw_fluorescence_adjusted_final": "N",
+                "gw_adjust_remarks": "nothing really",
             },
         ]
 
     def do_initial_upload(self):
+        """
+        Do initial uploads to create stones for updating
+        :return:
+        """
         Stone.objects.all().delete()
         form = SarineUploadForm(
             data={},
@@ -926,19 +918,15 @@ class GIAAdjustUploadFormTest(TestCase):
 
     def test_save_updates_stones(self):
         """
-        Tests that stones get updated when form.save() is called
-        :returns:
+        Tests that save method updates stone correctly
+        :return:
         """
-        # /localhost:8000/profile?username='something'&password='something'
-        form = GIAAdjustUploadForm(
+        self.do_initial_upload()
+        form = GWAdjustingUploadForm(
             data={}, files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())}
         )
-        self.do_initial_upload()
-
-        # import pdb; pdb.set_trace()
         self.assertTrue(form.is_valid())
         form.save()
-
         stones = Stone.objects.all()
 
         self.assertEqual(len(stones), 3)
@@ -950,8 +938,4 @@ class GIAAdjustUploadFormTest(TestCase):
                 raw_actual_value = getattr(actual_stone, field)
                 actual_value = float(raw_actual_value) if type(raw_actual_value) == Decimal else raw_actual_value
                 expected_value = expected_stone[field]
-
-                if field == "gia_verification":
-                    expected_value = GiaVerification.objects.get(receipt_number=expected_value)
-
                 self.assertEqual(actual_value, expected_value)

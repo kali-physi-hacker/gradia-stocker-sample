@@ -2,13 +2,7 @@ import re
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
-from django.contrib import messages
 from django.contrib.messages.api import get_messages
-
-from stonegrading.models import Inclusion
-
-import pandas as pd
-from grading.views import BasicGradingUploadView, GWGradingUploadView
 
 from grading.models import Parcel, Split, Stone
 
@@ -169,7 +163,7 @@ class TestCSVUpload(TestCase):
         Tests that GIAGrading Results can be uploaded successfully
         :return:
         """
-        csv_file = open("grading/tests/fixtures/gia-adjust.csv", "rb")
+        csv_file = open("grading/tests/fixtures/gia_adjusting.csv", "rb")
         self.client.login(**self.grader)
         self.setup_sarine_data()
         response = self.client.post(reverse("grading:gia_adjusting_data_upload_url"), data={"file": csv_file})
@@ -181,7 +175,7 @@ class TestCSVUpload(TestCase):
         Tests that GIAGrading Results failed if invalid csv_file
         :return:
         """
-        invalid_csv_file = open("grading/tests/fixtures/gia-adjust-invalid.csv", "rb")
+        invalid_csv_file = open("grading/tests/fixtures/gia_adjusting_invalid.csv", "rb")
         self.client.login(**self.grader)
         self.setup_sarine_data()
         response = self.client.post(
