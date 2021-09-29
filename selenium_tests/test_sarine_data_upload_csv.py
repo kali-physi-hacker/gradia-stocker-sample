@@ -69,7 +69,7 @@ def test_sarine_data_csv_upload_fails_if_grader_parcel_code_is_incorrect(browser
         browser.assert_body_contains_text(text)
 
 
-def test_sarine_data_csv_upload_fails_if_invalid_data_type(browser, data_entry_clerk, invalid_parcel):
+def test_sarine_data_csv_upload_fails_if_invalid_data_type(browser, data_entry_clerk, parcels):
 
     # kary goes to `pythonanywhere.erp...com` and is redirected to log in
     # kary enters username and password and clicks on login button to open admin dashboard.
@@ -107,7 +107,7 @@ def test_sarine_data_csv_upload_fails_if_invalid_data_type(browser, data_entry_c
         browser.assert_body_contains_text(text)
 
 
-def test_field_names_are_not_correct(browser, data_entry_clerk, parcel):
+def test_field_names_are_not_correct(browser, data_entry_clerk, parcels):
 
     browser.login(data_entry_clerk.username, data_entry_clerk.raw_password)
 
@@ -202,7 +202,7 @@ def test_field_names_are_not_correct(browser, data_entry_clerk, parcel):
     pytest.fail(f"unable to find {i} in browser body: \n\n{browser.get_body_text()}")
 
 
-def test_uploading_the_same_stone_twice_should_error(browser, data_entry_clerk, parcel):
+def test_uploading_the_same_stone_twice_should_error(browser, data_entry_clerk, parcels):
     browser.login(data_entry_clerk.username, data_entry_clerk.raw_password)
 
     link = browser.find_element_by_link_text("Splits")

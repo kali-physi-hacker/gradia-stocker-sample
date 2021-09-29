@@ -383,13 +383,13 @@ def inclusions():
 
 
 @pytest.fixture
-def parcel(admin_user):
+def parcels(admin_user):
     created_receipt = Receipt.objects.create(
         entity=Entity.objects.create(name="Van Klaren", address="addressy", phone="12345678", email="vk@vk.com"),
         code="VK-0011",
         intake_by=admin_user,
     )
-    parcel = Parcel.objects.create(
+    valid_csv_parcel = Parcel.objects.create(
         receipt=created_receipt,
         customer_parcel_code="VK01",
         total_carats="50.000",
@@ -397,17 +397,12 @@ def parcel(admin_user):
         reference_price_per_carat=5,
         gradia_parcel_code="sarine-01",
     )
-    return parcel
-
-
-@pytest.fixture
-def invalid_parcel(admin_user):
     created_receipt = Receipt.objects.create(
         entity=Entity.objects.create(name="Van Klaren", address="addressy", phone="12345678", email="vk@vk.com"),
         code="VK-0012",
         intake_by=admin_user,
     )
-    invalid_parcel = Parcel.objects.create(
+    invalid_dtype_csv = Parcel.objects.create(
         receipt=created_receipt,
         customer_parcel_code="VK04",
         total_carats="50.000",
@@ -415,4 +410,5 @@ def invalid_parcel(admin_user):
         reference_price_per_carat=2,
         gradia_parcel_code="sarine-01-type",
     )
-    return invalid_parcel
+
+    return (valid_csv_parcel, invalid_dtype_csv)
