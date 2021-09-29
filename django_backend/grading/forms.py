@@ -651,6 +651,53 @@ class GWAdjustingUploadForm(BaseUploadForm):
         return stones
 
 
+class GIAAdjustingUploadForm(BaseUploadForm):
+    class Meta:
+        mixin = GIAGradingAdjustMixin
+
+    def save(self):
+        """
+        Updates stones with the results from GWGradingAdjust stage
+        :return:
+        """
+        stones = []
+        for data in self.cleaned_data:
+            stone = Stone.objects.get(internal_id=data["internal_id"])
+            for field, value in data.items():
+                setattr(stone, field, value)
+
+            stone.save()
+            stones.append(stone)
+
+        return stones
+
+    def __process_graders(self, stone_data, file_name):
+        """
+        Check that graders (user accounts) exists and raise validation error or return stone_data
+
+        Conditions
+        ----------
+        1. basic_grading_1, basic_grading_2, basic_grading_3 ===> Not required
+        2. Raise error instantly when any of them contains a user that does not exist
+        :param stone_data:
+        :param file_name:
+        :return:
+        """
+        # import pdb; pdb.set_trace()
+        errors = {}
+
+        for row, data in enumerate(stone_data):
+            for field, value in data.items():
+                if "_grader_" in field:
+                    try:
+                        data[field] = User.objects.get(username=value.lower())
+                    except User.DoesNotExist:
+                        errors[row] = {}
+                        errors[row][field] = f"Grader user `{value}` account does not exist"
+
+        return stone_data, errors
+
+
 class GIAUploadForm(BaseUploadForm):
     class Meta:
         mixin = GIAGradingMixin
