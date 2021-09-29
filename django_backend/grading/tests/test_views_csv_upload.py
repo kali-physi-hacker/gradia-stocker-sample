@@ -158,7 +158,7 @@ class TestCSVUpload(TestCase):
         # # float() because django will return a Decimal of 0.090
         # self.assertEqual(float(stone_1.gold_ai_code), 0.091)
 
-    def test_gw_adjusting_upload_success(self):
+    def test_gia_adjusting_upload_success(self):
         """
         Tests that GIAGrading Results can be uploaded successfully
         :return:
@@ -170,7 +170,7 @@ class TestCSVUpload(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertIsNotNone(re.match(r"^/admin/grading/split/\d+/change/", response.url))
 
-    def test_gw_adjusting_upload_failed(self):
+    def test_gia_adjusting_upload_failed(self):
         """
         Tests that GIAGrading Results failed if invalid csv_file
         :return:

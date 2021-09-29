@@ -15,12 +15,14 @@ from stonegrading.mixins import (
     SarineGradingMixin,
     BasicGradingMixin,
     GWGradingMixin,
+    GIAGradingMixin,
+    GIAGradingAdjustMixin,
     GWGradingAdjustMixin,
     GIAGradingMixin,
 )
 from stonegrading.models import Inclusion
 
-from .models import Parcel, Stone, Split, GiaVerification
+from .models import Parcel, Stone, Split, GiaVerification, GoldwayVerification
 
 User = get_user_model()
 
@@ -572,6 +574,7 @@ class GWGradingUploadForm(BaseUploadForm):
 
         # extra_fields
         external_id = forms.CharField(max_length=11)
+        goldway_code = forms.CharField()
 
     def save(self):
         """
@@ -580,10 +583,21 @@ class GWGradingUploadForm(BaseUploadForm):
         """
         stones = []
         for data in self.cleaned_data:
+            stone_data = data.copy()
+
+            gw_code = stone_data["goldway_code"]
+            del stone_data["goldway_code"]
+
             stone = Stone.objects.get(internal_id=data["internal_id"])
-            for field, value in data.items():
+            for field, value in stone_data.items():
                 setattr(stone, field, value)
 
+            try:
+                goldway_verification = GoldwayVerification.objects.get(invoice_number=gw_code)
+            except GoldwayVerification.DoesNotExist:
+                goldway_verification = GoldwayVerification.objects.create(invoice_number=gw_code)
+
+            stone.gw_verification = goldway_verification
             stone.save()
             stones.append(stone)
 
