@@ -290,8 +290,8 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
         # Clean date fields
         for field in data:
             if "date" in field:
-                day, month, year = [int(value) for value in data[field].split("/")]
                 try:
+                    day, month, year = [int(value) for value in data[field].split("/")]
                     data[field] = datetime(year, month, day)
                 except:
                     pass
