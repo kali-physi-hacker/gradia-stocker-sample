@@ -265,11 +265,11 @@ class StoneAdmin(admin.ModelAdmin):
         return [
             "external_id",
             "current_location",
-            # "carat_weight",
-            "basic_final_color",
-            "basic_final_clarity",
-            "basic_fluorescence",
-            "basic_culet",
+            "basic_carat",
+            "basic_color_final",
+            "basic_clarity_final",
+            "basic_fluorescence_final",
+            "basic_culet_final",
             "split_from",
         ]
 
