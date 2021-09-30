@@ -34,14 +34,31 @@ def vault_manager(django_user_model, erp):
     return user_setup(django_user_model, "vault_manager")
 
 
+@pytest.fixture
+def kary(django_user_model, erp):
+    return user_setup(django_user_model, group_name="kary", grader=True)
+
+
+@pytest.fixture
+def gary(django_user_model, erp):
+    return user_setup(django_user_model, group_name="gary", grader=True)
+
+
+@pytest.fixture
+def tanly(django_user_model, erp):
+    return user_setup(django_user_model, group_name="tanly", grader=True)
+
+
 # have this separate non-fixture function
 # so that we can call it to setup non pytest data
-def user_setup(django_user_model, group_name):
+def user_setup(django_user_model, group_name, grader=False):
     email = group_name + "@test.com"
     username = group_name
     password = group_name + "password"
 
     user = django_user_model.objects.create_user(username, email=email, password=password, is_staff=True)
+    if grader:
+        group_name = "grader"
     group = Group.objects.get(name=group_name)
     user.groups.add(group)
 
