@@ -56,9 +56,12 @@ def test_gia_data_upload_fails_if_date_from_gia_is_not_provided(browser, data_en
 
     # Kary clicks on the `Upload Csv` button to upload the csv file
     # Kary is redirected to the split page.
+    # import pdb; pdb.set_trace()
     sarine_upload_link = browser.find_element_by_class_name("default")
     browser.slowly_click(sarine_upload_link)
 
     # Kary is redirected to error page
-    browser.assert_body_contains_text("ValueError")
-    browser.assert_body_contains_text("invalid literal for int() with base 10:")
+    browser.assert_body_contains_text("Data Upload Failed")
+    browser.assert_body_contains_text(
+        "Select a valid choice. bar is not one of the available choices."
+    )  # Some error message
