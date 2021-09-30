@@ -499,3 +499,16 @@ def setup_initial_stones(data_entry_user, receipt):
 @pytest.fixture
 def initial_stones(data_entry_clerk, receipt):
     return setup_initial_stones(data_entry_user=data_entry_clerk, receipt=receipt)
+
+def setup_basic_graders(user_model):
+    usernames = ("tanly", "kary", "gary")
+
+    users = []
+
+    for username in usernames:
+        users.append(user_model.objects.create(username=username))
+    return users
+
+@pytest.fixture 
+def graders(django_user_model):
+    return setup_basic_graders(user_model=django_user_model)
