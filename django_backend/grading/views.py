@@ -231,6 +231,30 @@ class ConfirmTransferToGoldwayView(View):
 """
 
 
+class GWGradingAdjustView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        """
+        Return get page from uploading GoldwayGradingAdjust Results
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        form = CSVImportForm()
+        context = {"template_title": "Upload a csv file containing basic goldway data", "form": form}
+        return render(request, "grading/upload.html", context)
+
+    def post(self, request, *args, **kwargs):
+        form = GWAdjustingUploadForm(data={}, files=request.FILES)
+        if not form.is_valid():
+            return errors_page(request=request, title="GW Adjusting Grading", form=form)
+
+        stones = form.save()
+        split_id = stones[0].split_from_id
+
+        return HttpResponseRedirect(reverse("admin:grading_split_change", args=(split_id,)))
+
+
 class GWGradingUploadView(LoginRequiredMixin, View):
     fields = [field.name for field in GWGradingMixin._meta.get_fields()]
     fields.append("internal_id")
