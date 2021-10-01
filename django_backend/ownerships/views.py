@@ -6,7 +6,7 @@ from django.views import View
 from django.shortcuts import render, redirect
 from django.urls import reverse
 
-from .forms import CSVImportForm, GWStoneTransferForm
+from .forms import CSVImportForm, GWStoneTransferForm, GiaStoneTransferForm
 
 from grading.views import errors_page
 
@@ -57,3 +57,8 @@ class TransferView(LoginRequiredMixin, View):
 class GoldwayTransferView(TransferView):
     transfer_form = GWStoneTransferForm
     title = "Goldway Stone Transfer"
+
+
+class GiaTransferView(TransferView):
+    transfer_form = GiaStoneTransferForm
+    title = "GIA Stone Transfer"
