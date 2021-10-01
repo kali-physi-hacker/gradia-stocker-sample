@@ -27,7 +27,16 @@ class AllUploadView(LoginRequiredMixin, View):
         return render(request, template, context)
 
 
-class GoldwayTransferView(LoginRequiredMixin, View):
+class TransferView(LoginRequiredMixin, View):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if not hasattr(self, "transfer_form"):
+            raise ValueError("`transfer_from` required")
+
+        if not hasattr(self, "title"):
+            raise ValueError("`title` required")
+
     def get(self, request, *args, **kwargs):
         template = "transfer/upload.html"
         context = {
@@ -37,9 +46,14 @@ class GoldwayTransferView(LoginRequiredMixin, View):
         return render(request, template, context)
 
     def post(self, request, *args, **kwargs):
-        form = GWStoneTransferForm(user=request.user, data={}, files=request.FILES)
+        form = self.transfer_form(user=request.user, data={}, files=request.FILES)
         if not form.is_valid():
-            return errors_page(request=request, title="Goldway Stone Transfer", form=form)
+            return errors_page(request=request, title=self.title, form=form)
 
         form.save()
         return redirect("/admin/ownerships/stonetransfer/")
+
+
+class GoldwayTransferView(TransferView):
+    transfer_form = GWStoneTransferForm
+    title = "Goldway Stone Transfer"
