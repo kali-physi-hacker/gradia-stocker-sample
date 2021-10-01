@@ -1,0 +1,12 @@
+{% extends 'admin/base.html' %}
+
+{% block content %}
+    <h1>Select which transfer upload you want to do</h1>
+    <ul>
+        <li>
+            <a style="margin-left: 15px;" href="{% url 'ownerships:goldway_transfer_upload_url' %}" class="addlink">
+                Goldway Transfer
+            </a>
+        </li>
+    </ul>
+{% endblock %}
