@@ -129,3 +129,17 @@ class GWStoneTransferForm(BaseTransferUploadForm):
             transfers.append(transfer)
 
         return transfers
+
+
+class GiaStoneTransferForm(BaseTransferUploadForm):
+    def save(self):
+        stone_ids = self.cleaned_data
+
+        transfers = []
+
+        for stone_id in stone_ids:
+            gia_user = User.objects.get(username="gia")
+            transfer = self.transfer_to(to_user=gia_user, stone_id=stone_id)
+            transfers.append(transfer)
+
+        return transfers
