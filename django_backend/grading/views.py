@@ -178,7 +178,7 @@ class BasicGradingUploadView(LoginRequiredMixin, View):
         :param kwargs:
         :return:
         """
-        form = BasicUploadForm(data={}, files=request.FILES)
+        form = BasicUploadForm(data={}, user=request.user, files=request.FILES)
         if not form.is_valid():
             return errors_page(request=request, title="Basic Grading", form=form)
 
@@ -269,7 +269,7 @@ class GWGradingUploadView(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
 
-        form = GWGradingUploadForm(data={}, files=request.FILES)
+        form = GWGradingUploadForm(data={}, user=request.user, files=request.FILES)
         if not form.is_valid():
             return errors_page(request=request, title="Goldway Grading", form=form)
 
@@ -303,7 +303,7 @@ class GIAGradingUploadView(LoginRequiredMixin, View):
         :param kwargs:
         :return:
         """
-        form = GIAUploadForm(data={}, files=request.FILES)
+        form = GIAUploadForm(data={}, user=request.user, files=request.FILES)
         if not form.is_valid():
             return errors_page(request=request, title="GIA Grading", form=form)
 
