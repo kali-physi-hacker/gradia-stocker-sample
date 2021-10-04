@@ -28,7 +28,7 @@ def get_list_of_stones(file):
 
 
 class BaseTransferUploadForm(forms.Form):
-    file = forms.FileField()
+    file = forms.FileField(required=False)
 
     def __init__(self, user, *args, **kwargs):
         self.user = user
@@ -68,7 +68,13 @@ class BaseTransferUploadForm(forms.Form):
             self.__csv_errors = error_dict
             raise forms.ValidationError({"file": "The CSV file content is invalid"})
 
-        self.error_dict = {}
+        self.__csv_errors = {}
+
+        # Get customer id for external transfer
+        customer = self.cleaned_data.get("customer")
+
+        if customer is not None:
+            return data, customer
 
         return data
 
@@ -99,20 +105,20 @@ class BaseTransferUploadForm(forms.Form):
         html_string = f"<table>{table_head}{table_body}</table>"
         return html_string
 
-    def transfer_to(self, to_user, stone_id):
+    def transfer_to(self, stone_id, to_user, from_user=None):
         item = Stone.objects.get(internal_id=stone_id)
         created_by = self.user
         confirmed_date = (datetime.utcnow().replace(tzinfo=utc),)
-        from_user = item.stonetransfer_set.last().to_user
 
-        transfer = StoneTransfer.objects.create(
-            item=item,
-            created_by=created_by,
-            from_user=from_user,
-            to_user=to_user,
-            confirmed_date=datetime.now(),
-            fresh=False,
+        if from_user is None:
+            from_user = StoneTransfer.most_recent_transfer(item=item).to_user
+
+        transfer = StoneTransfer.initiate_transfer(
+            item=item, from_user=from_user, to_user=to_user, created_by=created_by
         )
+
+        # TODO: Remove Confirm stone received temporal
+        StoneTransfer.confirm_received(item=item)
 
         return transfer
 
@@ -140,6 +146,26 @@ class GiaStoneTransferForm(BaseTransferUploadForm):
         for stone_id in stone_ids:
             gia_user = User.objects.get(username="gia")
             transfer = self.transfer_to(to_user=gia_user, stone_id=stone_id)
+            transfers.append(transfer)
+
+        return transfers
+
+
+class ExternalStoneTransferForm(BaseTransferUploadForm):
+    customer = forms.CharField()
+
+    def save(self):
+        """
+        Transfer to customer
+        :return:
+        """
+        transfers = []
+        stone_ids, customer_id = self.cleaned_data
+
+        customer = User.objects.get(pk=customer_id)
+
+        for stone_id in stone_ids:
+            transfer = self.transfer_to(stone_id=stone_id, to_user=customer)
             transfers.append(transfer)
 
         return transfers

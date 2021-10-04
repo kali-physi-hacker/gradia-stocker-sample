@@ -30,6 +30,7 @@ class StoneTransferViews(TestCase):
         basic_file = open("grading/tests/fixtures/basic-01.csv", "rb")
         form = BasicUploadForm(
             data={},
+            user=user,
             files={"file": SimpleUploadedFile(basic_file.name, basic_file.read())},
         )
         form.is_valid()
@@ -37,8 +38,6 @@ class StoneTransferViews(TestCase):
 
     def test_transfer_to_goldway_success(self):
         self.do_initial_uploads()
-        # Create goldway user
-        User.objects.create_user(username="goldway", password="password")
 
         csv_file = open("ownerships/tests/resources/gw.csv")
         self.client.login(**self.grader_user)
@@ -58,8 +57,6 @@ class StoneTransferViews(TestCase):
 
     def test_transfer_to_gia_success(self):
         self.do_initial_uploads()
-        # Create gia user
-        User.objects.create_user(username="gia", password="password")
 
         csv_file = open("ownerships/tests/resources/gia.csv")
         self.client.login(**self.grader_user)
@@ -71,6 +68,31 @@ class StoneTransferViews(TestCase):
         csv_file = open("ownerships/tests/resources/gia.csv")
         self.client.login(**self.grader_user)
         response = self.client.post(reverse("ownerships:gia_transfer_upload_url"), data={"file": csv_file})
+        self.assertEqual(response.status_code, 200)
+
+        matches = re.findall(r"Stone With ID `\d+` does not exist", response.content.decode())
+
+        self.assertEqual(len(matches), 3)
+
+    def test_transfer_to_customer_success(self):
+        self.do_initial_uploads()
+        customer = User.objects.create(username="Test")
+        csv_file = open("ownerships/tests/resources/gia.csv")
+        self.client.login(**self.grader_user)
+        response = self.client.post(
+            reverse("ownerships:external_transfer_url"), data={"file": csv_file, "customer": customer.pk}
+        )
+        # import pdb; pdb.set_trace()
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, "/admin/ownerships/stonetransfer/")
+
+    def transfer_to_customer_fail(self):
+        customer = User.objects.create(username="Test")
+        csv_file = open("ownerships/tests/resources/gia.csv")
+        self.client.login(**self.grader_user)
+        response = self.client.post(
+            reverse("ownerships:external_transfer_url"), data={"file": csv_file, "customer": customer.pk}
+        )
         self.assertEqual(response.status_code, 200)
 
         matches = re.findall(r"Stone With ID `\d+` does not exist", response.content.decode())
