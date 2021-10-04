@@ -501,6 +501,8 @@ class SarineUploadForm(BaseUploadForm):
                 to_user=parcel_owner,
                 confirmed_date=datetime.utcnow().replace(tzinfo=utc),
             )
+            # TODO: Remove Confirm stone received temporal
+            # StoneTransfer.confirm_received(item=stone)
 
             stones.append(stone)
 
@@ -508,6 +510,10 @@ class SarineUploadForm(BaseUploadForm):
 
 
 class BasicUploadForm(BaseUploadForm):
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
+
     class Meta:
         mixin = BasicGradingMixin
 
@@ -563,12 +569,23 @@ class BasicUploadForm(BaseUploadForm):
 
             stone.generate_basic_external_id()
             stone.save()
+
+            split = User.objects.get(username="split")
+            vault = User.objects.get(username="vault")
+            StoneTransfer.initiate_transfer(item=stone, from_user=split, to_user=vault, created_by=self.user)
+
+            # TODO: Remove Confirm stone received temporal
+            StoneTransfer.confirm_received(item=stone)
             stones.append(stone)
 
         return stones
 
 
 class GWGradingUploadForm(BaseUploadForm):
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
+
     class Meta:
         mixin = GWGradingMixin
 
@@ -599,6 +616,15 @@ class GWGradingUploadForm(BaseUploadForm):
 
             stone.gw_verification = goldway_verification
             stone.save()
+
+            # Transfer to vault
+            goldway = User.objects.get(username="goldway")
+            vault = User.objects.get(username="vault")
+
+            StoneTransfer.initiate_transfer(item=stone, from_user=goldway, to_user=vault, created_by=self.user)
+
+            # TODO: Remove Confirm stone received temporal
+            StoneTransfer.confirm_received(item=stone)
             stones.append(stone)
 
         return stones
@@ -683,7 +709,6 @@ class GIAAdjustingUploadForm(BaseUploadForm):
         :param file_name:
         :return:
         """
-        # import pdb; pdb.set_trace()
         errors = {}
 
         for row, data in enumerate(stone_data):
@@ -699,6 +724,10 @@ class GIAAdjustingUploadForm(BaseUploadForm):
 
 
 class GIAUploadForm(BaseUploadForm):
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
+
     class Meta:
         mixin = GIAGradingMixin
         gia_code = forms.CharField()
@@ -727,6 +756,14 @@ class GIAUploadForm(BaseUploadForm):
                 setattr(stone, "gia_verification", gia_verification)
 
             stone.save()
+            stones.append(stone)
+
+            gia = User.objects.get(username="gia")
+            vault = User.objects.get(username="vault")
+            StoneTransfer.initiate_transfer(item=stone, from_user=gia, to_user=vault, created_by=self.user)
+
+            # TODO: Remove Confirm stone received temporal
+            StoneTransfer.confirm_received(item=stone)
             stones.append(stone)
 
         return stones
