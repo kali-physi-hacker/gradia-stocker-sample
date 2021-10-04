@@ -250,8 +250,7 @@ class MetaClassTest(TestCase):
 
 
 class BaseUploadFormClassTest(TestCase):
-    """
-    """
+    """"""
 
     fixtures = ("grading/fixtures/test_data.json",)
 
