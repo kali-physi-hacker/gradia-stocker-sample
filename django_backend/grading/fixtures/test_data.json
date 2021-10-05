@@ -39,17 +39,17 @@
     "model": "auth.user",
     "pk": 3,
     "fields": {
-      "password": "pbkdf2_sha256$216000$c8hsuoCCDB3a$aYp7q+GwA10yKgiYwDb/RS7/U31WadMGLBdU75hZRf4=",
+      "password": "pbkdf2_sha256$216000$MRUEd1GPXK8F$I1tJEntSIVtdi0+q1s+wwTa/wtJmD98+nlqLQf+IzNM=",
       "last_login": null,
       "is_superuser": false,
       "username": "vault",
       "first_name": "",
       "last_name": "",
       "email": "",
-      "is_staff": false,
+      "is_staff": true,
       "is_active": true,
-      "date_joined": "2021-02-04T19:24:52.046Z",
-      "groups": [],
+      "date_joined": "2021-02-04T19:24:52Z",
+      "groups": [1],
       "user_permissions": []
     }
   },
@@ -123,6 +123,63 @@
       "date_joined": "2020-12-04T06:00:35.918Z",
       "groups": [],
       "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 8,
+    "fields": {
+      "password": "pbkdf2_sha256$216000$c8hsuoCCDB3a$aYp7q+GwA10yKgiYwDb/RS7/U31WadMGLBdU75hZRf4=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "goldway",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2021-02-04T19:24:52.046Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 9,
+    "fields": {
+      "password": "pbkdf2_sha256$216000$c8hsuoCCDB3a$aYp7q+GwA10yKgiYwDb/RS7/U31WadMGLBdU75hZRf4=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "gia",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2021-02-04T19:24:52.046Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.group",
+    "pk": 1,
+    "fields": {
+      "name": "vault_manager",
+      "permissions": [
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        81,
+        82,
+        83,
+        84
+      ]
     }
   },
   {

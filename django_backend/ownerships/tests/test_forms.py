@@ -1,22 +1,23 @@
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.contrib.auth import get_user_model
 from django.test import TestCase
+from ownerships.models import StoneTransfer
 
-from ownerships.forms import GWStoneTransferForm, GiaStoneTransferForm
+from ownerships.forms import GWStoneTransferForm, GiaStoneTransferForm, ExternalStoneTransferForm
 from grading.forms import SarineUploadForm, BasicUploadForm
 
 User = get_user_model()
 
 
-class GWStoneTransferFormTest(TestCase):
+class p(TestCase):
 
     fixtures = ("grading/fixtures/test_data.json",)
 
     def setUp(self):
         self.gw_file = open("ownerships/tests/resources/gw.csv", "rb")
 
-        self.goldway_user = User.objects.create_user(username="goldway", password="goldway")
-        self.user = created_by_user = User.objects.get(username="kary")
+        self.goldway_user = User.objects.get(username="goldway")
+        self.user = User.objects.get(username="kary")
 
     def do_initial_uploads(self):
         # Do Sarine upload
@@ -31,6 +32,7 @@ class GWStoneTransferFormTest(TestCase):
         basic_file = open("grading/tests/fixtures/basic-01.csv", "rb")
         form = BasicUploadForm(
             data={},
+            user=self.user,
             files={"file": SimpleUploadedFile(basic_file.name, basic_file.read())},
         )
         form.is_valid()
@@ -47,14 +49,13 @@ class GWStoneTransferFormTest(TestCase):
             data={}, user=self.user, files={"file": SimpleUploadedFile(self.gw_file.name, self.gw_file.read())}
         )
 
-        # import pdb; pdb.set_trace()
         self.assertTrue(form.is_valid())
 
         stone_transfers = form.save()
 
         # Check here that stones have been transferred to gw
         for transfer in stone_transfers:
-            current_owner = transfer.item.stonetransfer_set.last().to_user
+            current_owner = StoneTransfer.most_recent_transfer(item=transfer.item).to_user
             self.assertEqual(current_owner, self.goldway_user)
 
         self.assertEqual(len(stone_transfers), 3)
@@ -81,8 +82,8 @@ class GiaTransferFormTest(TestCase):
 
     def setUp(self):
         self.gia_file = open("ownerships/tests/resources/gia.csv", "rb")
-        self.gia_user = User.objects.create_user(username="gia", password="gia")
-        self.user = created_by_user = User.objects.get(username="kary")
+        self.user = User.objects.get(username="kary")
+        self.gia_user = User.objects.get(username="gia")
 
     def do_initial_uploads(self):
         # Do Sarine upload
@@ -97,6 +98,7 @@ class GiaTransferFormTest(TestCase):
         basic_file = open("grading/tests/fixtures/basic-01.csv", "rb")
         form = BasicUploadForm(
             data={},
+            user=self.user,
             files={"file": SimpleUploadedFile(basic_file.name, basic_file.read())},
         )
         form.is_valid()
@@ -113,14 +115,13 @@ class GiaTransferFormTest(TestCase):
             data={}, user=self.user, files={"file": SimpleUploadedFile(self.gia_file.name, self.gia_file.read())}
         )
 
-        # import pdb; pdb.set_trace()
         self.assertTrue(form.is_valid())
 
         stone_transfers = form.save()
 
         # Check here that stones have been transferred to gw
         for transfer in stone_transfers:
-            current_owner = transfer.item.stonetransfer_set.last().to_user
+            current_owner = StoneTransfer.most_recent_transfer(item=transfer.item).to_user
             self.assertEqual(current_owner, self.gia_user)
 
         self.assertEqual(len(stone_transfers), 3)
@@ -132,6 +133,72 @@ class GiaTransferFormTest(TestCase):
         """
         form = GiaStoneTransferForm(
             data={}, user=self.user, files={"file": SimpleUploadedFile(self.gia_file.name, self.gia_file.read())}
+        )
+
+        self.assertFalse(form.is_valid())
+
+        ids = (1, 5, 6)
+        for id, (_, error) in zip(ids, form.csv_errors.items()):
+            self.assertEqual(error["internal_id"][0], f"Stone With ID `{id}` does not exist")
+
+
+class ExternalStoneTransferFormTest(TestCase):
+
+    fixtures = ("grading/fixtures/test_data.json",)
+
+    def setUp(self):
+        self.gia_file = open("ownerships/tests/resources/gia.csv", "rb")
+        self.user = User.objects.get(username="kary")
+        self.gia_user = User.objects.get(username="gia")
+
+        self.customer = User.objects.create(username="Test")
+
+    def do_initial_uploads(self):
+        # Do Sarine upload
+        sarine_file = open("grading/tests/fixtures/sarine-01.csv", "rb")
+        form = SarineUploadForm(
+            data={}, user=self.user, files={"file": SimpleUploadedFile(sarine_file.name, sarine_file.read())}
+        )
+        form.is_valid()
+        form.save()
+
+        # Do basic upload
+        basic_file = open("grading/tests/fixtures/basic-01.csv", "rb")
+        form = BasicUploadForm(
+            data={},
+            user=self.user,
+            files={"file": SimpleUploadedFile(basic_file.name, basic_file.read())},
+        )
+        form.is_valid()
+        form.save()
+
+    def test_form_is_valid_if_valid_csv_file(self):
+        """
+        Tests that form is valid if valid csv
+        :returns:
+        """
+        self.do_initial_uploads()
+        form = ExternalStoneTransferForm(
+            data={"customer": self.customer.pk},
+            user=self.user,
+            files={"file": SimpleUploadedFile(self.gia_file.name, self.gia_file.read())},
+        )
+        self.assertTrue(form.is_valid())
+
+        stone_transfers = form.save()
+
+        for transfer in stone_transfers:
+            current_owner = StoneTransfer.most_recent_transfer(item=transfer.item).to_user
+            self.assertEqual(current_owner, self.customer)
+
+    def test_form_invalid_if_invalid_csv_file(self):
+        """
+        Tests that  form is invalid if there is/are invalid stone ids in the csv file
+        """
+        form = ExternalStoneTransferForm(
+            data={"customer": self.customer.pk},
+            user=self.user,
+            files={"file": SimpleUploadedFile(self.gia_file.name, self.gia_file.read())},
         )
 
         self.assertFalse(form.is_valid())

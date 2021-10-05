@@ -1,3 +1,7 @@
+from datetime import datetime
+
+from django.utils.timezone import utc
+
 import pytest
 from customers.models import Entity
 from grading.models import (
@@ -414,9 +418,10 @@ def parcels(admin_user):
     return valid_csv_parcel, invalid_dtype_csv
 
 
-def setup_initial_stones(data_entry_user, receipt):
+def setup_initial_stones(data_entry_user, receipt, tanly, split_user):
     parcel = receipt.parcel_set.get(gradia_parcel_code="123456789")
     split = Split.objects.create(original_parcel=parcel, split_by=data_entry_user)
+
     sarine_stone_dict = {
         "diameter_min": 2.9,
         "diameter_max": 2.92,
@@ -491,11 +496,51 @@ def setup_initial_stones(data_entry_user, receipt):
         sarine_stone_dict["internal_id"] = internal_id
         sarine_stone_dict["split_from"] = split
         sarine_stone_dict["data_entry_user"] = data_entry_user
-        stones.append(Stone.objects.create(**sarine_stone_dict))
+        stone = Stone.objects.create(**sarine_stone_dict)
+        stones.append(stone)
+
+        # Transfer stones
+        StoneTransfer.objects.create(
+            item=stone,
+            from_user=split_user,
+            created_by=tanly,
+            to_user=split_user,
+            confirmed_date=datetime.utcnow().replace(tzinfo=utc),
+        )
 
     return stones
 
 
 @pytest.fixture
-def initial_stones(data_entry_clerk, receipt):
-    return setup_initial_stones(data_entry_user=data_entry_clerk, receipt=receipt)
+def initial_stones(django_user_model, data_entry_clerk, receipt, erp, tanly):
+    split_user = django_user_model.objects.get(username="split")
+    return setup_initial_stones(
+        data_entry_user=data_entry_clerk, receipt=receipt, tanly=tanly, split_user=split_user
+    )
+
+
+@pytest.fixture
+def basic_transfer(django_user_model, initial_stones, erp, tanly):
+    split = django_user_model.objects.get(username="split")
+    vault = django_user_model.objects.get(username="vault")
+    for stone in initial_stones:
+        StoneTransfer.initiate_transfer(item=stone, from_user=split, to_user=vault, created_by=tanly)
+        StoneTransfer.confirm_received(item=stone)
+
+
+@pytest.fixture
+def gia_transfer(django_user_model, basic_transfer, initial_stones, erp, tanly):
+    vault = django_user_model.objects.get(username="vault")
+    gia = django_user_model.objects.get(username="gia")
+    for stone in initial_stones:
+        StoneTransfer.initiate_transfer(item=stone, from_user=vault, to_user=gia, created_by=vault)
+        StoneTransfer.confirm_received(item=stone)
+
+
+@pytest.fixture
+def goldway_transfer(django_user_model, basic_transfer, initial_stones, erp, tanly):
+    vault = django_user_model.objects.get(username="vault")
+    goldway = django_user_model.objects.get(username="goldway")
+    for stone in initial_stones:
+        StoneTransfer.initiate_transfer(item=stone, from_user=vault, to_user=goldway, created_by=vault)
+        StoneTransfer.confirm_received(item=stone)

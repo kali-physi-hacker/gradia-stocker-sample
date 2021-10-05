@@ -1,0 +1,47 @@
+{# comment {% extends 'admin/change_list.html' %} #}
+{% extends 'admin/base.html' %}
+{% load static %}
+{% block extrastyle %}
+    <link rel="stylesheet" href="{% static 'admin/css/forms.css' %}">
+{% endblock %}
+
+{% block content %}
+    <h1>Transfer to Customer</h1>
+    <div id="content-main">
+        <form action="" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <p>Enter customer name and click on <b>Transfer</b> button to transfer to customer</p>
+            <div>
+                <fieldset class="module aligned wide">
+                    <div class="form-row">
+                        <div>
+                            <label class="requier" for="id_customer">Customer Name</label>
+                            <select style="width: 20em" name="customer" id="id_customer">
+                                <option value="">---- Select a user to transfer to ----</option>
+                                {% for user in users %}
+                                    <option value="{{ user.pk }}">{{ user.username }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="help">
+                                Customer Name should be a registered user
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div>
+                            <label for="id_file">CSV File</label>
+                            <input type="file" name="file" id="id_file"
+                                   class="vTextField" required/>
+                            <div class="help">
+                                Click to upload csv file containing list of stones
+                            </div>
+                        </div>
+                    </div>
+
+                </fieldset>
+            </div>
+            <input type="submit" value="Transfer"/>
+        </form>
+    </div>
+
+{% endblock %}
