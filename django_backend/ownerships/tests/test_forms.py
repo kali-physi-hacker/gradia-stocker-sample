@@ -49,7 +49,6 @@ class p(TestCase):
             data={}, user=self.user, files={"file": SimpleUploadedFile(self.gw_file.name, self.gw_file.read())}
         )
 
-        # import pdb; pdb.set_trace()
         self.assertTrue(form.is_valid())
 
         stone_transfers = form.save()
