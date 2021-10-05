@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from django.db import OperationalError
 from django.utils.timezone import utc
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
@@ -83,7 +84,10 @@ class ExternalTransferView(TransferView):
     title = "External"
 
     not_external = ("vault", "goldway", "gia")  # And some other ones
-    users = [
-        user for user in User.objects.all() if user.username not in ("vault", "goldway", "gia", "split", "admin")
-    ]
+    try:
+        users = [
+            user for user in User.objects.all() if user.username not in ("vault", "goldway", "gia", "split", "admin")
+        ]
+    except OperationalError:
+        users = {}
     context = {"users": users}
