@@ -5,6 +5,7 @@ from django.urls import reverse
 from django.contrib.messages.api import get_messages
 
 from grading.models import Parcel, Split, Stone
+from ownerships.models import StoneTransfer
 
 
 User = get_user_model()
@@ -20,6 +21,8 @@ class TestCSVUpload(TestCase):
         self.gw_data_upload_url = reverse("grading:gw_data_upload_url")
 
         self.sarine_upload_csv_file = open("grading/tests/fixtures/sarine-01.csv", "r")
+        self.basic_upload_csv_file = open("grading/tests/fixtures/basic-01.csv", "r")
+
         self.gradia_parcel_code = "sarine-01"
         self.invalid_csv_file = open("grading/tests/fixtures/no-parcel.csv", "r")
 
@@ -28,12 +31,16 @@ class TestCSVUpload(TestCase):
 
         self.parcel = Parcel.objects.get(gradia_parcel_code=self.gradia_parcel_code)
 
-        self.grader = {"username": "gary", "password": "password"}
+        self.grader = {"username": "vault", "password": "password"}
 
     def setup_sarine_data(self):
         Stone.objects.all().delete()
         self.client.login(**self.grader)
         response = self.client.post(self.sarine_data_upload_url, {"file": self.sarine_upload_csv_file})
+
+    def setup_basic_data(self):
+        self.client.login(**self.grader)
+        response = self.client.post(self.basic_grading_data_upload_url, {"file": self.basic_upload_csv_file})
 
     def test_sarine_data_upload_get_page(self):
         """
@@ -149,14 +156,21 @@ class TestCSVUpload(TestCase):
 
         Stone.objects.all().delete()
         self.setup_sarine_data()
+        self.setup_basic_data()
         self.client.login(**self.grader)
+
+        # Confirm and transfer stones
+        for stone_id in (1, 5, 6):
+            stone = Stone.objects.get(internal_id=stone_id)
+            vault = User.objects.get(username="vault")
+            goldway = User.objects.get(username="goldway")
+
+            StoneTransfer.initiate_transfer(item=stone, from_user=vault, to_user=goldway, created_by=vault)
+            StoneTransfer.confirm_received(item=stone)
+
         response = self.client.post(self.gw_data_upload_url, {"file": self.gw_data_upload_csv_file})
-        # import pdb;
-        # pdb.set_trace()
         self.assertEqual(response.status_code, 302)
         stone_1 = Stone.objects.get(internal_id=1)
-        # # float() because django will return a Decimal of 0.090
-        # self.assertEqual(float(stone_1.gold_ai_code), 0.091)
 
     def test_gia_adjusting_upload_success(self):
         """

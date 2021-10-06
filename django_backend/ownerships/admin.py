@@ -42,3 +42,5 @@ class ParcelTransferAdmin(ItemTransferAdmin):
 @admin.register(StoneTransfer)
 class StoneTransferAdmin(ItemTransferAdmin):
     model = StoneTransfer
+
+    change_list_template = "transfer/change_list.html"

@@ -396,3 +396,6 @@ class Stone(
         except IntegrityError:
             # Send an email to everyone
             raise IntegrityError("External Id Already Exists")
+
+    def __str__(self):
+        return f"{self.internal_id}"

@@ -290,8 +290,8 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
         # Clean date fields
         for field in data:
             if "date" in field:
-                day, month, year = [int(value) for value in data[field].split("/")]
                 try:
+                    day, month, year = [int(value) for value in data[field].split("/")]
                     data[field] = datetime(year, month, day)
                 except:
                     pass
@@ -501,6 +501,8 @@ class SarineUploadForm(BaseUploadForm):
                 to_user=parcel_owner,
                 confirmed_date=datetime.utcnow().replace(tzinfo=utc),
             )
+            # TODO: Remove Confirm stone received temporal
+            # StoneTransfer.confirm_received(item=stone)
 
             stones.append(stone)
 
@@ -508,6 +510,10 @@ class SarineUploadForm(BaseUploadForm):
 
 
 class BasicUploadForm(BaseUploadForm):
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
+
     class Meta:
         mixin = BasicGradingMixin
 
@@ -563,12 +569,23 @@ class BasicUploadForm(BaseUploadForm):
 
             stone.generate_basic_external_id()
             stone.save()
+
+            split = User.objects.get(username="split")
+            vault = User.objects.get(username="vault")
+            StoneTransfer.initiate_transfer(item=stone, from_user=split, to_user=vault, created_by=self.user)
+
+            # TODO: Remove Confirm stone received temporal
+            StoneTransfer.confirm_received(item=stone)
             stones.append(stone)
 
         return stones
 
 
 class GWGradingUploadForm(BaseUploadForm):
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
+
     class Meta:
         mixin = GWGradingMixin
 
@@ -599,6 +616,15 @@ class GWGradingUploadForm(BaseUploadForm):
 
             stone.gw_verification = goldway_verification
             stone.save()
+
+            # Transfer to vault
+            goldway = User.objects.get(username="goldway")
+            vault = User.objects.get(username="vault")
+
+            StoneTransfer.initiate_transfer(item=stone, from_user=goldway, to_user=vault, created_by=self.user)
+
+            # TODO: Remove Confirm stone received temporal
+            StoneTransfer.confirm_received(item=stone)
             stones.append(stone)
 
         return stones
@@ -651,7 +677,57 @@ class GWAdjustingUploadForm(BaseUploadForm):
         return stones
 
 
+class GIAAdjustingUploadForm(BaseUploadForm):
+    class Meta:
+        mixin = GIAGradingAdjustMixin
+
+    def save(self):
+        """
+        Updates stones with the results from GWGradingAdjust stage
+        :return:
+        """
+        stones = []
+        for data in self.cleaned_data:
+            stone = Stone.objects.get(internal_id=data["internal_id"])
+            for field, value in data.items():
+                setattr(stone, field, value)
+
+            stone.save()
+            stones.append(stone)
+
+        return stones
+
+    def __process_graders(self, stone_data, file_name):
+        """
+        Check that graders (user accounts) exists and raise validation error or return stone_data
+
+        Conditions
+        ----------
+        1. basic_grading_1, basic_grading_2, basic_grading_3 ===> Not required
+        2. Raise error instantly when any of them contains a user that does not exist
+        :param stone_data:
+        :param file_name:
+        :return:
+        """
+        errors = {}
+
+        for row, data in enumerate(stone_data):
+            for field, value in data.items():
+                if "_grader_" in field:
+                    try:
+                        data[field] = User.objects.get(username=value.lower())
+                    except User.DoesNotExist:
+                        errors[row] = {}
+                        errors[row][field] = f"Grader user `{value}` account does not exist"
+
+        return stone_data, errors
+
+
 class GIAUploadForm(BaseUploadForm):
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
+
     class Meta:
         mixin = GIAGradingMixin
         gia_code = forms.CharField()
@@ -680,6 +756,14 @@ class GIAUploadForm(BaseUploadForm):
                 setattr(stone, "gia_verification", gia_verification)
 
             stone.save()
+            stones.append(stone)
+
+            gia = User.objects.get(username="gia")
+            vault = User.objects.get(username="vault")
+            StoneTransfer.initiate_transfer(item=stone, from_user=gia, to_user=vault, created_by=self.user)
+
+            # TODO: Remove Confirm stone received temporal
+            StoneTransfer.confirm_received(item=stone)
             stones.append(stone)
 
         return stones

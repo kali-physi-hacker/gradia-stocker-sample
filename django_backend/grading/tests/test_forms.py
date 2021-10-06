@@ -13,9 +13,11 @@ from grading.forms import (
     GWGradingUploadForm,
     GIAUploadForm,
     GWAdjustingUploadForm,
+    GIAAdjustingUploadForm,
 )
 from grading.models import Stone, GiaVerification
 from stonegrading.mixins import SarineGradingMixin
+from ownerships.models import StoneTransfer
 
 User = get_user_model()
 
@@ -248,18 +250,7 @@ class MetaClassTest(TestCase):
 
 
 class BaseUploadFormClassTest(TestCase):
-    """
-    Question is how is this form class (BaseUploadForm) to be used?
-    - It is supposed to be used only by subclassing
-    - It is supposed to be provided an inner class (Meta) with mixin and fields as attributes
-
-    Possible test cases:
-    -------------------
-    1. csv processing and cleaning for:
-        - missing csv header / column
-        - invalid type
-        - save() -- maybe
-    """
+    """"""
 
     fixtures = ("grading/fixtures/test_data.json",)
 
@@ -455,6 +446,9 @@ class SarineUploadFormTest(TestCase):
                 actual_value = float(raw_actual_value) if type(raw_actual_value) == Decimal else raw_actual_value
                 expected_value = expected_stone[field]
                 self.assertEqual(actual_value, expected_value)
+                holder = StoneTransfer.most_recent_transfer(item=actual_stone).to_user
+                split = User.objects.get(username="split")
+                self.assertEqual(holder, split)
 
 
 class BasicUploadFormTest(TestCase):
@@ -465,6 +459,8 @@ class BasicUploadFormTest(TestCase):
 
         self.csv_file = open("grading/tests/fixtures/basic-01.csv", "rb")
         self.csv_file_spaces = open("grading/tests/fixtures/basic-01-spaces.csv", "rb")
+
+        self.grader = User.objects.get(username="tanly")
 
         self.expected_stones = [
             {
@@ -629,6 +625,7 @@ class BasicUploadFormTest(TestCase):
         # No column spaces
         form = BasicUploadForm(
             data={},
+            user=self.grader,
             files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())},
         )
         self.assertTrue(form.is_valid())
@@ -637,6 +634,7 @@ class BasicUploadFormTest(TestCase):
         # With column spaces
         form = BasicUploadForm(
             data={},
+            user=self.grader,
             files={"file": SimpleUploadedFile(self.csv_file_spaces.name, self.csv_file_spaces.read())},
         )
         self.assertTrue(form.is_valid())
@@ -646,6 +644,7 @@ class BasicUploadFormTest(TestCase):
 
         form = BasicUploadForm(
             data={},
+            user=self.grader,
             files={"file": SimpleUploadedFile(self.csv_file_spaces.name, self.csv_file_spaces.read())},
         )
         self.assertTrue(form.is_valid())
@@ -666,6 +665,11 @@ class BasicUploadFormTest(TestCase):
                 if "inclusion" not in field:
                     self.assertEqual(actual_value, expected_value)
 
+                holder = StoneTransfer.most_recent_transfer(item=actual_stone).to_user
+                vault = User.objects.get(username="vault")
+
+                self.assertEqual(holder, vault)
+
 
 def get_date_from_str(date_string):
     day, month, year = [int(value) for value in date_string.split("/")]
@@ -679,6 +683,10 @@ class GoldWayGradingDataTest(TestCase):
         self.sarine_csv_file = open("grading/tests/fixtures/sarine-01.csv", "rb")
         self.basic_csv_file = open("grading/tests/fixtures/basic-01-spaces.csv", "rb")
         self.csv_file = open("grading/tests/fixtures/gold_way-01.csv", "rb")
+
+        self.grader = User.objects.get(username="tanly")
+
+        self.do_initial_uploads()
 
         self.expected_stones = [
             {
@@ -729,17 +737,27 @@ class GoldWayGradingDataTest(TestCase):
 
         # Basic Upload setup
         form = BasicUploadForm(
-            data={}, files={"file": SimpleUploadedFile(self.basic_csv_file.name, self.basic_csv_file.read())}
+            data={},
+            user=self.grader,
+            files={"file": SimpleUploadedFile(self.basic_csv_file.name, self.basic_csv_file.read())},
         )
         if form.is_valid():
             form.save()
 
     def test_save_updates_stones(self):
-        self.do_initial_uploads()
-
         form = GWGradingUploadForm(
-            data={}, files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())}
+            data={}, user=self.grader, files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())}
         )
+
+        for stone_id in (1, 5, 6):
+            stone = Stone.objects.get(internal_id=stone_id)
+            vault = User.objects.get(username="vault")
+            goldway = User.objects.get(username="goldway")
+
+            # Transfer stones
+            StoneTransfer.initiate_transfer(item=stone, from_user=vault, to_user=goldway, created_by=self.grader)
+            StoneTransfer.confirm_received(item=stone)
+
         self.assertTrue(form.is_valid())
         form.save()
 
@@ -756,14 +774,26 @@ class GoldWayGradingDataTest(TestCase):
                 expected_value = expected_stone[field]
                 self.assertEqual(actual_value, expected_value)
 
+                holder = StoneTransfer.most_recent_transfer(item=actual_stone).to_user
+                vault = User.objects.get(username="vault")
+                self.assertEqual(holder, vault)
+
 
 class GiaGradingUploadForm(TestCase):
     fixtures = ("grading/fixtures/test_data.json",)
 
     def setUp(self):
         self.sarine_csv_file = open("grading/tests/fixtures/sarine-01.csv", "rb")
+        self.basic_csv_file = open("grading/tests/fixtures/basic-01.csv", "rb")
         self.csv_file = open("grading/tests/fixtures/gia.csv", "rb")
         self.csv_file_spaces = open("grading/tests/fixtures/basic-01-spaces.csv", "rb")
+
+        self.do_initial_upload()
+
+        """
+        """
+
+        self.user = User.objects.get(username="vault")
 
         self.expected_stones = [
             {
@@ -805,14 +835,30 @@ class GiaGradingUploadForm(TestCase):
         if form.is_valid():
             form.save()
 
+        form = BasicUploadForm(
+            data={},
+            user=User.objects.get(username="gary"),
+            files={"file": SimpleUploadedFile(self.basic_csv_file.name, self.basic_csv_file.read())},
+        )
+        if form.is_valid():
+            form.save()
+
     def test_save_updates_stones(self):
         """
         Tests that stones get updated when form.save() is called
         :returns:
         """
-        # /localhost:8000/profile?username='something'&password='something'
-        form = GIAUploadForm(data={}, files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())})
-        self.do_initial_upload()
+        # Send stones to GIA
+        for stone_id in (1, 5, 6):
+            stone = Stone.objects.get(internal_id=stone_id)
+            vault = User.objects.get(username="vault")
+            gia = User.objects.get(username="gia")
+            StoneTransfer.initiate_transfer(item=stone, from_user=vault, to_user=gia, created_by=self.user)
+            StoneTransfer.confirm_received(item=stone)
+
+        form = GIAUploadForm(
+            data={}, user=self.user, files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())}
+        )
 
         self.assertTrue(form.is_valid())
         form.save()
@@ -840,7 +886,7 @@ class GWAdjustingUploadFormTest(TestCase):
 
     def setUp(self):
         self.sarine_csv_file = open("grading/tests/fixtures/sarine-01.csv", "rb")
-        self.csv_file = open("grading/tests/fixtures/gia_adjusting.csv", "rb")
+        self.csv_file = open("grading/tests/fixtures/gw_adjust.csv", "rb")
 
         self.expected_stones = [
             {
@@ -923,6 +969,124 @@ class GWAdjustingUploadFormTest(TestCase):
         """
         self.do_initial_upload()
         form = GWAdjustingUploadForm(
+            data={}, files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())}
+        )
+        self.assertTrue(form.is_valid())
+        form.save()
+        stones = Stone.objects.all()
+
+        self.assertEqual(len(stones), 3)
+
+        fields = self.expected_stones[0].keys()
+
+        for actual_stone, expected_stone in zip(stones, self.expected_stones):
+            for field in fields:
+                raw_actual_value = getattr(actual_stone, field)
+                actual_value = float(raw_actual_value) if type(raw_actual_value) == Decimal else raw_actual_value
+                expected_value = expected_stone[field]
+                self.assertEqual(actual_value, expected_value)
+
+
+class GiaAdjustGradingUploadFormTest(TestCase):
+    fixtures = ("grading/fixtures/test_data.json",)
+
+    def setUp(self):
+        self.sarine_csv_file = open("grading/tests/fixtures/sarine-01.csv", "rb")
+        self.csv_file = open("grading/tests/fixtures/gia_adjusting.csv", "rb")
+
+        self.expected_stones = [
+            {
+                "internal_id": 1,
+                "gia_adjust_grader_1": User.objects.get(username="tanly"),
+                "gia_adjust_grader_2": User.objects.get(username="kary"),
+                "gia_adjust_grader_3": User.objects.get(username="gary"),
+                "gia_color_adjusted_1": "E",
+                "gia_color_adjusted_2": "F",
+                "gia_color_adjusted_3": "D",
+                "gia_color_adjusted_final": "E",
+                "gia_polish_adjusted_1": "EX",
+                "gia_polish_adjusted_2": "GD",
+                "gia_polish_adjusted_3": "GD",
+                "gia_polish_adjusted_final": "VG",
+                "gia_culet_adjusted_1": "N",
+                "gia_culet_adjusted_2": "N",
+                "gia_culet_adjusted_3": "N",
+                "gia_culet_adjusted_final": "N",
+                "gia_culet_characteristic_1": "N",
+                "gia_culet_characteristic_2": "N",
+                "gia_culet_characteristic_3": "N",
+                "gia_culet_characteristic_final": "N",
+                "gia_adjust_remarks": "",
+            },
+            {
+                "internal_id": 5,
+                "gia_adjust_grader_1": User.objects.get(username="tanly"),
+                "gia_adjust_grader_2": User.objects.get(username="kary"),
+                "gia_adjust_grader_3": User.objects.get(username="gary"),
+                "gia_color_adjusted_1": "E",
+                "gia_color_adjusted_2": "F",
+                "gia_color_adjusted_3": "D",
+                "gia_color_adjusted_final": "E",
+                "gia_polish_adjusted_1": "EX",
+                "gia_polish_adjusted_2": "GD",
+                "gia_polish_adjusted_3": "GD",
+                "gia_polish_adjusted_final": "VG",
+                "gia_culet_adjusted_1": "N",
+                "gia_culet_adjusted_2": "N",
+                "gia_culet_adjusted_3": "N",
+                "gia_culet_adjusted_final": "N",
+                "gia_culet_characteristic_1": "N",
+                "gia_culet_characteristic_2": "N",
+                "gia_culet_characteristic_3": "N",
+                "gia_culet_characteristic_final": "N",
+                "gia_adjust_remarks": "",
+            },
+            {
+                "internal_id": 6,
+                "gia_adjust_grader_1": User.objects.get(username="tanly"),
+                "gia_adjust_grader_2": User.objects.get(username="kary"),
+                "gia_adjust_grader_3": User.objects.get(username="gary"),
+                "gia_color_adjusted_1": "E",
+                "gia_color_adjusted_2": "F",
+                "gia_color_adjusted_3": "D",
+                "gia_color_adjusted_final": "E",
+                "gia_polish_adjusted_1": "EX",
+                "gia_polish_adjusted_2": "GD",
+                "gia_polish_adjusted_3": "GD",
+                "gia_polish_adjusted_final": "VG",
+                "gia_culet_adjusted_1": "N",
+                "gia_culet_adjusted_2": "N",
+                "gia_culet_adjusted_3": "N",
+                "gia_culet_adjusted_final": "N",
+                "gia_culet_characteristic_1": "N",
+                "gia_culet_characteristic_2": "N",
+                "gia_culet_characteristic_3": "N",
+                "gia_culet_characteristic_final": "N",
+                "gia_adjust_remarks": "",
+            },
+        ]
+
+    def do_initial_upload(self):
+        """
+        Do initial uploads to create stones for updating
+        :return:
+        """
+        Stone.objects.all().delete()
+        form = SarineUploadForm(
+            data={},
+            files={"file": SimpleUploadedFile(self.sarine_csv_file.name, self.sarine_csv_file.read())},
+            user=User.objects.get(username="gary"),
+        )
+        if form.is_valid():
+            form.save()
+
+    def test_save_updates_stones(self):
+        """
+        Tests that save method updates stone correctly
+        :return:
+        """
+        self.do_initial_upload()
+        form = GIAAdjustingUploadForm(
             data={}, files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())}
         )
         self.assertTrue(form.is_valid())

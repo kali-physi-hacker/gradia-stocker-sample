@@ -11,7 +11,14 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .models import Parcel, Receipt, ParcelTransfer
 
-from .forms import SarineUploadForm, BasicUploadForm, GWGradingUploadForm, GWAdjustingUploadForm, GIAUploadForm
+from .forms import (
+    SarineUploadForm,
+    BasicUploadForm,
+    GWGradingUploadForm,
+    GWAdjustingUploadForm,
+    GIAUploadForm,
+    GIAAdjustingUploadForm,
+)
 
 from stonegrading.mixins import BasicGradingMixin, SarineGradingMixin, GWGradingMixin, GIAGradingMixin
 
@@ -157,7 +164,8 @@ class BasicGradingUploadView(LoginRequiredMixin, View):
         :param kwargs:
         :return:
         """
-        context = {"template_title": "Upload a csv file containing basic grading data"}
+        form = CSVImportForm()
+        context = {"template_title": "Upload a csv file containing basic grading data", "form": form}
         if "errors" in kwargs:
             context["errors"] = kwargs["errors"]
         return render(request, "grading/upload.html", context)
@@ -170,7 +178,7 @@ class BasicGradingUploadView(LoginRequiredMixin, View):
         :param kwargs:
         :return:
         """
-        form = BasicUploadForm(data={}, files=request.FILES)
+        form = BasicUploadForm(data={}, user=request.user, files=request.FILES)
         if not form.is_valid():
             return errors_page(request=request, title="Basic Grading", form=form)
 
@@ -189,13 +197,12 @@ class GIAGradingAdjustView(LoginRequiredMixin, View):
         :param kwargs:
         :return:
         """
-        context = {"template_title": "Upload a csv file containing basic grading data"}
-        if "errors" in kwargs:
-            context["errors"] = kwargs["errors"]
+        form = CSVImportForm()
+        context = {"template_title": "Upload a csv file containing basic grading data", "form": form}
         return render(request, "grading/upload.html", context)
 
     def post(self, request, *args, **kwargs):
-        form = GWAdjustingUploadForm(data={}, files=request.FILES)
+        form = GIAAdjustingUploadForm(data={}, files=request.FILES)
         if not form.is_valid():
             return errors_page(request=request, title="GIA Adjusting Grading", form=form)
 
@@ -224,21 +231,45 @@ class ConfirmTransferToGoldwayView(View):
 """
 
 
+class GWGradingAdjustView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        """
+        Return get page from uploading GoldwayGradingAdjust Results
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        form = CSVImportForm()
+        context = {"template_title": "Upload a csv file containing basic goldway data", "form": form}
+        return render(request, "grading/upload.html", context)
+
+    def post(self, request, *args, **kwargs):
+        form = GWAdjustingUploadForm(data={}, files=request.FILES)
+        if not form.is_valid():
+            return errors_page(request=request, title="GW Adjusting Grading", form=form)
+
+        stones = form.save()
+        split_id = stones[0].split_from_id
+
+        return HttpResponseRedirect(reverse("admin:grading_split_change", args=(split_id,)))
+
+
 class GWGradingUploadView(LoginRequiredMixin, View):
     fields = [field.name for field in GWGradingMixin._meta.get_fields()]
     fields.append("internal_id")
 
     def get(self, request, *args, **kwargs):
 
-        form = GWGradingUploadForm()
-        context = {"template_title": "Upload a csv file containing gold way grading data"}
+        form = CSVImportForm()
+        context = {"template_title": "Upload a csv file containing gold way grading data", "form": form}
         if "errors" in kwargs:
             context["errors"] = kwargs["errors"]
         return render(request, "grading/upload.html", context)
 
     def post(self, request, *args, **kwargs):
 
-        form = GWGradingUploadForm(data={}, files=request.FILES)
+        form = GWGradingUploadForm(data={}, user=request.user, files=request.FILES)
         if not form.is_valid():
             return errors_page(request=request, title="Goldway Grading", form=form)
 
@@ -272,10 +303,11 @@ class GIAGradingUploadView(LoginRequiredMixin, View):
         :param kwargs:
         :return:
         """
-        form = GIAUploadForm(data={}, files=request.FILES)
+        form = GIAUploadForm(data={}, user=request.user, files=request.FILES)
         if not form.is_valid():
-            HttpResponseRedirect(reverse("grading:gia_grading_data_upload_url"))
+            return errors_page(request=request, title="GIA Grading", form=form)
 
-        form.save()
-        # would have to wait
-        return HttpResponseRedirect(reverse("grading:basic_grading_data_upload_url"))
+        stones = form.save()
+        split_id = stones[0].split_from.pk
+
+        return HttpResponseRedirect(reverse("admin:grading_split_change", args=(split_id,)))
