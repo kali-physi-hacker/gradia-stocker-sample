@@ -107,6 +107,20 @@ class StoneManager(models.Manager):
 
         return generate_csv(filename, dir_name, field_names, queryset)
 
+    def generate_adjust_GIA_csv(self, queryset):
+        filename = "Adjust_GIA" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
+        dir_name = settings.MEDIA_ROOT + "/csv_downloads/adjust_gia/"
+        field_names = [
+            "nano_etch_inscription",
+            "gw_color_adjusted_final",
+            "gia_color",
+            "basic_polish_final",
+            "basic_culet_final",
+            "basic_culet_characteristic_final",
+        ]
+
+        return generate_csv(filename, dir_name, field_names, queryset)
+
     def generate_basic_report_csv(self, queryset):
         filename = "Basic_Report" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
         dir_name = settings.MEDIA_ROOT + "/csv_downloads/Basic_Report/"
