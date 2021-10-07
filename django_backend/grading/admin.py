@@ -306,7 +306,7 @@ class StoneAdmin(admin.ModelAdmin):
     download_ids.short_description = "Download Diamond(s) External Nanotech IDs"
 
     def download_to_goldway_csv(self, request, queryset):
-        file_path = Stone.objects.generate_to_goldway_csv(queryset)
+        file_path = Stone.objects.generate_to_goldway_csv(request, queryset)
         with open(file_path, mode="r") as file:
             response = HttpResponse(file, content_type="text/csv")
             response["Content-Disposition"] = "attachment; filename=%s" % file_path
