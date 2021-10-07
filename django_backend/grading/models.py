@@ -67,31 +67,70 @@ def generate_csv(filename, dir_name, field_names, queryset):
 
 class StoneManager(models.Manager):
     def generate_id_csv(self, queryset):
-        filename = (
-            "Gradia_id_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
-        )
+        filename = "Gradia_id_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
         dir_name = settings.MEDIA_ROOT + "/csv_downloads/download_ids/"
         field_names = ["internal_id"]
 
         return generate_csv(filename, dir_name, field_names, queryset)
 
     def generate_master_report_csv(self, queryset):
-        filename = (
-            "Master_report_"
-            + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S"))
-            + ".csv"
-        )
+        filename = "Master_report_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
         dir_name = settings.MEDIA_ROOT + "/csv_downloads/master_reports/"
         field_names = get_stone_fields(Stone)
 
         return generate_csv(filename, dir_name, field_names, queryset)
 
+    def generate_basic_grading_template(self, request, queryset):
+        filename = "Basic_Grading_Template_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
+        dir_name = settings.MEDIA_ROOT + "/csv_downloads/basic_grading_template/"
+        field_names = [
+            "internal_id",
+            "basic_diamond_description",
+            "basic_grader_1",
+            "basic_grader_2",
+            "basic_grader_3",
+            "basic_carat",
+            "basic_color_1",
+            "basic_color_2",
+            "basic_color_3",
+            "basic_color_final",
+            "basic_clarity_1",
+            "basic_clarity_2",
+            "basic_clarity_3",
+            "basic_clarity_final",
+            "basic_fluorescence_1",
+            "basic_fluorescence_2",
+            "basic_fluorescence_3",
+            "basic_fluorescence_final",
+            "basic_culet_1",
+            "basic_culet_2",
+            "basic_culet_3",
+            "basic_culet_final",
+            "basic_culet_characteristic_1",
+            "basic_culet_characteristic_2",
+            "basic_culet_characteristic_3",
+            "basic_culet_characteristic_final",
+            "basic_girdle_condition_1",
+            "basic_girdle_condition_2",
+            "basic_girdle_condition_3",
+            "basic_girdle_condition_final",
+            "basic_inclusions_1",
+            "basic_inclusions_2",
+            "basic_inclusions_3",
+            "basic_inclusions_final",
+            "basic_polish_1",
+            "basic_polish_2",
+            "basic_polish_3",
+            "basic_polish_final",
+            "girdle_min_grade",
+            "basic_girdle_min_grade_final",
+            "basic_remarks",
+        ]
+
+        return generate_csv(filename, dir_name, field_names, queryset)
+
     def generate_to_goldway_csv(self, request, queryset):
-        filename = (
-            "To_Goldway_"
-            + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S"))
-            + ".csv"
-        )
+        filename = "To_Goldway_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
         dir_name = settings.MEDIA_ROOT + "/csv_downloads/to_goldway/"
         field_names = [
             "date_to_GW",
@@ -103,11 +142,7 @@ class StoneManager(models.Manager):
         return generate_csv(filename, dir_name, field_names, queryset)
 
     def generate_adjust_goldway_csv(self, queryset):
-        filename = (
-            "Adjust_Goldway"
-            + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S"))
-            + ".csv"
-        )
+        filename = "Adjust_Goldway" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
         dir_name = settings.MEDIA_ROOT + "/csv_downloads/adjust_goldway/"
         field_names = [
             "internal_id",
@@ -138,9 +173,7 @@ class StoneManager(models.Manager):
         return generate_csv(filename, dir_name, field_names, queryset)
 
     def generate_to_GIA_csv(self, queryset):
-        filename = (
-            "To_GIA_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
-        )
+        filename = "To_GIA_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
         dir_name = settings.MEDIA_ROOT + "/csv_downloads/to_GIA/"
         field_names = [
             "date_to_GIA",
@@ -152,9 +185,7 @@ class StoneManager(models.Manager):
         return generate_csv(filename, dir_name, field_names, queryset)
 
     def generate_adjust_GIA_csv(self, queryset):
-        filename = (
-            "Adjust_GIA" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
-        )
+        filename = "Adjust_GIA" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
         dir_name = settings.MEDIA_ROOT + "/csv_downloads/adjust_gia/"
         field_names = [
             "gia_code" "nano_etch_inscription",
@@ -188,11 +219,7 @@ class StoneManager(models.Manager):
         return generate_csv(filename, dir_name, field_names, queryset)
 
     def generate_basic_report_csv(self, queryset):
-        filename = (
-            "Basic_Report"
-            + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S"))
-            + ".csv"
-        )
+        filename = "Basic_Report" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
         dir_name = settings.MEDIA_ROOT + "/csv_downloads/Basic_Report/"
 
         field_names = [
@@ -265,11 +292,7 @@ class StoneManager(models.Manager):
         return generate_csv(filename, dir_name, field_names, queryset)
 
     def generate_triple_report_csv(self, queryset):
-        filename = (
-            "Triple_Report"
-            + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S"))
-            + ".csv"
-        )
+        filename = "Triple_Report" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
         dir_name = settings.MEDIA_ROOT + "/csv_downloads/Triple_Report/"
 
         field_names = [
@@ -313,9 +336,7 @@ class StoneManager(models.Manager):
 
 
 class Split(models.Model):
-    original_parcel = models.OneToOneField(
-        "Parcel", on_delete=models.PROTECT, primary_key=True
-    )
+    original_parcel = models.OneToOneField("Parcel", on_delete=models.PROTECT, primary_key=True)
 
     split_by = models.ForeignKey(User, on_delete=models.PROTECT)
     split_date = models.DateTimeField(auto_now_add=True)
@@ -341,9 +362,7 @@ class AbstractReceipt(models.Model):
     code = models.CharField(max_length=15)
     intake_date = models.DateTimeField(auto_now_add=True)
     release_date = models.DateTimeField(null=True, blank=True)
-    intake_by = models.ForeignKey(
-        User, on_delete=models.PROTECT, related_name="signed_off_on_stone_intake"
-    )
+    intake_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name="signed_off_on_stone_intake")
     release_by = models.ForeignKey(
         User,
         on_delete=models.PROTECT,
@@ -419,9 +438,7 @@ class AbstractParcel(models.Model):
 
 
 class Parcel(AbstractParcel):
-    split_from = models.ForeignKey(
-        Split, on_delete=models.PROTECT, blank=True, null=True
-    )
+    split_from = models.ForeignKey(Split, on_delete=models.PROTECT, blank=True, null=True)
     gradia_parcel_code = models.CharField(max_length=15)
 
     def __str__(self):
@@ -514,16 +531,10 @@ class Stone(
     GIAGradingAdjustMixin,
     AutoGradeMixin,
 ):
-    data_entry_user = models.ForeignKey(
-        User, on_delete=models.PROTECT, related_name="entered_data_for_stone"
-    )
+    data_entry_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="entered_data_for_stone")
     split_from = models.ForeignKey(Split, on_delete=models.PROTECT)
-    gia_verification = models.ForeignKey(
-        GiaVerification, on_delete=models.PROTECT, blank=True, null=True
-    )
-    gw_verification = models.ForeignKey(
-        GoldwayVerification, on_delete=models.PROTECT, blank=True, null=True
-    )
+    gia_verification = models.ForeignKey(GiaVerification, on_delete=models.PROTECT, blank=True, null=True)
+    gw_verification = models.ForeignKey(GoldwayVerification, on_delete=models.PROTECT, blank=True, null=True)
 
     remarks = models.TextField(blank=True, null=True)
     internal_id = models.IntegerField(unique=True)

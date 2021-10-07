@@ -279,7 +279,7 @@ class StoneAdmin(admin.ModelAdmin):
         "transfer_to_vault",
         "confirm_received_stones",
         "download_ids",
-        "download_basic_grading_csv",  # generate id and girdle_min_grade
+        "download_basic_grading_template",  # generate id and girdle_min_grade
         "download_to_goldway_csv",
         "download_adjust_goldway_csv",
         "download_master_reports",
@@ -304,6 +304,15 @@ class StoneAdmin(admin.ModelAdmin):
             return response
 
     download_ids.short_description = "Download Diamond(s) External Nanotech IDs"
+
+    def download_basic_grading_template(self, request, queryset):
+        file_path = Stone.objects.generate_basic_grading_template(request, queryset)
+        with open(file_path, mode="r") as file:
+            response = HttpResponse(file, content_type="text/csv")
+            response["Content-Disposition"] = "attachment; filename=%s" % file_path
+            return response
+
+    download_basic_grading_template.short_description = "Download Basic Grading CSV Template"
 
     def download_to_goldway_csv(self, request, queryset):
         file_path = Stone.objects.generate_to_goldway_csv(request, queryset)
