@@ -162,10 +162,11 @@ class TestCSVUpload(TestCase):
         # Confirm and transfer stones
         for stone_id in (1, 5, 6):
             stone = Stone.objects.get(internal_id=stone_id)
-            vault = User.objects.get(username="vault")
+            split = User.objects.get(username="split")
             goldway = User.objects.get(username="goldway")
+            vault = User.objects.get(username="vault")
 
-            StoneTransfer.initiate_transfer(item=stone, from_user=vault, to_user=goldway, created_by=vault)
+            StoneTransfer.initiate_transfer(item=stone, from_user=split, to_user=goldway, created_by=vault)
             StoneTransfer.confirm_received(item=stone)
 
         response = self.client.post(self.gw_data_upload_url, {"file": self.gw_data_upload_csv_file})

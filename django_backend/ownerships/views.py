@@ -6,6 +6,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
 from django.shortcuts import render, redirect
 from django.contrib.auth import get_user_model
+from django.views.generic.base import TemplateResponseMixin
 
 from .forms import CSVImportForm, GWStoneTransferForm, GiaStoneTransferForm, ExternalStoneTransferForm
 
@@ -83,11 +84,9 @@ class ExternalTransferView(TransferView):
     transfer_form = ExternalStoneTransferForm
     title = "External"
 
-    not_external = ("vault", "goldway", "gia")  # And some other ones
-    try:
+    def get(self, request, *args, **kwargs):
         users = [
             user for user in User.objects.all() if user.username not in ("vault", "goldway", "gia", "split", "admin")
         ]
-    except OperationalError:
-        users = {}
-    context = {"users": users}
+        context = {"users": users}
+        return render(request=request, template_name=self.template_name, context=context)

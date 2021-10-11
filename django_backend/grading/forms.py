@@ -492,7 +492,7 @@ class SarineUploadForm(BaseUploadForm):
             if parcel_transfer is None:
                 parcel_owner = User.objects.get(username="split")
             else:
-                parcel_owner = parcel_transfer.from_user
+                parcel_owner = parcel_transfer.to_user
 
             StoneTransfer.objects.create(
                 item=stone,
@@ -501,8 +501,6 @@ class SarineUploadForm(BaseUploadForm):
                 to_user=parcel_owner,
                 confirmed_date=datetime.utcnow().replace(tzinfo=utc),
             )
-            # TODO: Remove Confirm stone received temporal
-            # StoneTransfer.confirm_received(item=stone)
 
             stones.append(stone)
 
@@ -570,12 +568,6 @@ class BasicUploadForm(BaseUploadForm):
             stone.generate_basic_external_id()
             stone.save()
 
-            split = User.objects.get(username="split")
-            vault = User.objects.get(username="vault")
-            StoneTransfer.initiate_transfer(item=stone, from_user=split, to_user=vault, created_by=self.user)
-
-            # TODO: Remove Confirm stone received temporal
-            StoneTransfer.confirm_received(item=stone)
             stones.append(stone)
 
         return stones

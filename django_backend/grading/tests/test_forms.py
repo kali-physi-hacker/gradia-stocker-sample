@@ -665,11 +665,6 @@ class BasicUploadFormTest(TestCase):
                 if "inclusion" not in field:
                     self.assertEqual(actual_value, expected_value)
 
-                holder = StoneTransfer.most_recent_transfer(item=actual_stone).to_user
-                vault = User.objects.get(username="vault")
-
-                self.assertEqual(holder, vault)
-
 
 def get_date_from_str(date_string):
     day, month, year = [int(value) for value in date_string.split("/")]
@@ -751,11 +746,11 @@ class GoldWayGradingDataTest(TestCase):
 
         for stone_id in (1, 5, 6):
             stone = Stone.objects.get(internal_id=stone_id)
-            vault = User.objects.get(username="vault")
+            split = User.objects.get(username="split")
             goldway = User.objects.get(username="goldway")
 
             # Transfer stones
-            StoneTransfer.initiate_transfer(item=stone, from_user=vault, to_user=goldway, created_by=self.grader)
+            StoneTransfer.initiate_transfer(item=stone, from_user=split, to_user=goldway, created_by=self.grader)
             StoneTransfer.confirm_received(item=stone)
 
         self.assertTrue(form.is_valid())
@@ -851,9 +846,9 @@ class GiaGradingUploadForm(TestCase):
         # Send stones to GIA
         for stone_id in (1, 5, 6):
             stone = Stone.objects.get(internal_id=stone_id)
-            vault = User.objects.get(username="vault")
+            split = User.objects.get(username="split")
             gia = User.objects.get(username="gia")
-            StoneTransfer.initiate_transfer(item=stone, from_user=vault, to_user=gia, created_by=self.user)
+            StoneTransfer.initiate_transfer(item=stone, from_user=split, to_user=gia, created_by=self.user)
             StoneTransfer.confirm_received(item=stone)
 
         form = GIAUploadForm(
