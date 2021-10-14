@@ -1,9 +1,12 @@
 from datetime import datetime
+from os import read
+import pandas as pd
 
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.contrib.auth.models import User
 from django.utils.timezone import utc
 from django.http import HttpResponse
+from django.shortcuts import redirect
 
 from ownerships.models import ParcelTransfer, StoneTransfer
 
@@ -279,9 +282,12 @@ class StoneAdmin(admin.ModelAdmin):
         "transfer_to_vault",
         "confirm_received_stones",
         "download_ids",
+        "download_basic_grading_template",  # generate id and girdle_min_grade
         "download_to_goldway_csv",
+        "download_adjust_goldway_csv",
         "download_master_reports",
         "download_to_GIA_csv",
+        "download_adjust_GIA_csv",
         "download_to_basic_report_csv",
         "download_to_triple_report_csv",
     ]
@@ -302,23 +308,57 @@ class StoneAdmin(admin.ModelAdmin):
 
     download_ids.short_description = "Download Diamond(s) External Nanotech IDs"
 
-    def download_to_goldway_csv(self, request, queryset):
-        file_path = Stone.objects.generate_to_goldway_csv(queryset)
+    def download_basic_grading_template(self, request, queryset):
+        file_path = Stone.objects.generate_basic_grading_template(request, queryset)
         with open(file_path, mode="r") as file:
             response = HttpResponse(file, content_type="text/csv")
             response["Content-Disposition"] = "attachment; filename=%s" % file_path
             return response
 
-    download_to_goldway_csv.short_description = "Download Goldway CV Transfer"
+    download_basic_grading_template.short_description = "Download Basic Grading CSV Template"
+
+    def download_to_goldway_csv(self, request, queryset):
+        file_path = Stone.objects.generate_to_goldway_csv(request, queryset)
+        with open(file_path, mode="r") as file:
+            response = HttpResponse(file, content_type="text/csv")
+            response["Content-Disposition"] = "attachment; filename=%s" % file_path
+            return response
+
+    download_to_goldway_csv.short_description = "Download Goldway CSV Transfer"
+
+    def download_adjust_goldway_csv(self, request, queryset):
+        file_path = Stone.objects.generate_adjust_goldway_csv(queryset)
+        with open(file_path, mode="r") as file:
+            response = HttpResponse(file, content_type="text/csv")
+            response["Content-Disposition"] = "attachment; filename=%s" % file_path
+            return response
+
+    download_adjust_goldway_csv.short_description = "Download Adjust Goldway CSV"
 
     def download_to_GIA_csv(self, request, queryset):
         file_path = Stone.objects.generate_to_GIA_csv(queryset)
+        read_file = pd.read_csv(file_path)
+        data_frame = pd.DataFrame(read_file)
+        field = data_frame["nano_etch_inscription"].to_dict()[0]
+        if pd.isna(field):
+            messages.warning(request, "There is not enough data to download")
+            return redirect(request.path)
+
         with open(file_path, mode="r") as file:
             response = HttpResponse(file, content_type="text/csv")
             response["Content-Disposition"] = "attachment; filename=%s" % file_path
             return response
 
-    download_to_GIA_csv.short_description = "Download GIA CV Transfer"
+    download_to_GIA_csv.short_description = "Download GIA CSV Transfer"
+
+    def download_adjust_GIA_csv(self, request, queryset):
+        file_path = Stone.objects.generate_adjust_GIA_csv(queryset)
+        with open(file_path, mode="r") as file:
+            response = HttpResponse(file, content_type="text/csv")
+            response["Content-Disposition"] = "attachment; filename=%s" % file_path
+            return response
+
+    download_adjust_GIA_csv.short_description = "Download Adjust GIA CSV"
 
     def download_to_basic_report_csv(self, request, queryset):
         file_path = Stone.objects.generate_basic_report_csv(queryset)

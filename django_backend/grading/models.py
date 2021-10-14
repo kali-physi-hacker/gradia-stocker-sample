@@ -45,17 +45,28 @@ from ownerships.models import ParcelTransfer, StoneTransfer
 from .helpers import get_stone_fields
 
 
-def generate_csv(filename, dir_name, field_names, queryset):
+def generate_csv(filename, dir_name, field_names, queryset, field_map={}):
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
     file_path = dir_name + filename
+
     with open(file_path, "w") as file:
         writer = csv.writer(file, delimiter=",")
         writer.writerow(field_names)
         for stone in reversed(queryset.all()):
             values = []
             for field in field_names:
-                value = getattr(stone, field)
+                try:
+                    _field = field_map.get(field)
+                    if _field is None:
+                        value = getattr(stone, field)
+                    else:
+                        value = getattr(stone, _field)
+                except:
+                    value = ""
+
+                if "inclusion" in field and value != "":
+                    value = ", ".join([instance.inclusion for instance in value.all()])
                 values.append(value)
             writer.writerow(values)
 
@@ -77,17 +88,144 @@ class StoneManager(models.Manager):
 
         return generate_csv(filename, dir_name, field_names, queryset)
 
-    def generate_to_goldway_csv(self, queryset):
+    def generate_basic_grading_template(self, request, queryset):
+        filename = "Basic_Grading_Template_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
+        dir_name = settings.MEDIA_ROOT + "/csv_downloads/basic_grading_template/"
+        field_names = [
+            "internal_id",
+            "basic_diamond_description",
+            "basic_grader_1",
+            "basic_grader_2",
+            "basic_grader_3",
+            "basic_carat",
+            "basic_color_1",
+            "basic_color_2",
+            "basic_color_3",
+            "basic_color_final",
+            "basic_clarity_1",
+            "basic_clarity_2",
+            "basic_clarity_3",
+            "basic_clarity_final",
+            "basic_fluorescence_1",
+            "basic_fluorescence_2",
+            "basic_fluorescence_3",
+            "basic_fluorescence_final",
+            "basic_culet_1",
+            "basic_culet_2",
+            "basic_culet_3",
+            "basic_culet_final",
+            "basic_culet_characteristic_1",
+            "basic_culet_characteristic_2",
+            "basic_culet_characteristic_3",
+            "basic_culet_characteristic_final",
+            "basic_girdle_condition_1",
+            "basic_girdle_condition_2",
+            "basic_girdle_condition_3",
+            "basic_girdle_condition_final",
+            "basic_inclusions_1",
+            "basic_inclusions_2",
+            "basic_inclusions_3",
+            "basic_inclusions_final",
+            "basic_polish_1",
+            "basic_polish_2",
+            "basic_polish_3",
+            "basic_polish_final",
+            "girdle_min_grade",
+            "basic_girdle_min_grade_final",
+            "basic_remarks",
+        ]
+
+        return generate_csv(filename, dir_name, field_names, queryset)
+
+    def generate_to_goldway_csv(self, request, queryset):
         filename = "To_Goldway_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
         dir_name = settings.MEDIA_ROOT + "/csv_downloads/to_goldway/"
-        field_names = ["date_to_GW", "internal_id", "basic_carat"]
+        field_names = [
+            "date_to_GW",
+            "internal_id",
+            "nano_etch_inscription",
+            "basic_carat_final",
+        ]
+
+        return generate_csv(filename, dir_name, field_names, queryset)
+
+    def generate_adjust_goldway_csv(self, queryset):
+        filename = "Adjust_Goldway" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
+        dir_name = settings.MEDIA_ROOT + "/csv_downloads/adjust_goldway/"
+        field_names = [
+            "internal_id",
+            "nano_etch_inscription",
+            "gw_adjust_grader_1",
+            "gw_adjust_grader_2",
+            "gw_adjust_grader_3",
+            "basic_color_final",
+            "gw_color",
+            "gw_color_adjusted_1",
+            "gw_color_adjusted_2",
+            "gw_color_adjusted_3",
+            "gw_color_adjusted_final",
+            "basic_clarity_final",
+            "gw_clarity",
+            "gw_clarity_adjusted_1",
+            "gw_clarity_adjusted_2",
+            "gw_clarity_adjusted_3",
+            "gw_clarity_adjusted_final",
+            "basic_fluorescence_final",
+            "gw_fluorescence",
+            "gw_fluorescence_adjusted_1",
+            "gw_fluorescence_adjusted_2",
+            "gw_fluorescence_adjusted_3",
+            "gw_fluorescence_adjusted_final",
+            "gw_adjust_remarks",
+        ]
 
         return generate_csv(filename, dir_name, field_names, queryset)
 
     def generate_to_GIA_csv(self, queryset):
         filename = "To_GIA_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
         dir_name = settings.MEDIA_ROOT + "/csv_downloads/to_GIA/"
-        field_names = ["date_to_GIA", "external_id", "carat_weight", "color"]
+        field_names = [
+            "date_to_GIA",
+            "nano_etch_inscription",
+            "basic_carat_final",
+            "basic_color_final",
+        ]
+
+        return generate_csv(
+            filename, dir_name, field_names, queryset, field_map={"nano_etch_inscription": "external_id"}
+        )
+
+    def generate_adjust_GIA_csv(self, queryset):
+        filename = "Adjust_GIA" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
+        dir_name = settings.MEDIA_ROOT + "/csv_downloads/adjust_gia/"
+        field_names = [
+            "gia_code" "nano_etch_inscription",
+            "gia_adjust_grader_1",
+            "gia_adjust_grader_2",
+            "gia_adjust_grader_3",
+            "gw_color_adjusted_final",
+            "gia_color",
+            "gia_color_adjusted_1",
+            "gia_color_adjusted_2",
+            "gia_color_adjusted_3",
+            "gia_color_adjusted_final",
+            "basic_polish_final",
+            "gia_polish_adjusted_1",
+            "gia_polish_adjusted_2",
+            "gia_polish_adjusted_3",
+            "gia_polish_adjusted_final",
+            "basic_culet_final",
+            "gia_culet_adjusted_1",
+            "gia_culet_adjusted_2",
+            "gia_culet_adjusted_3",
+            "gia_culet_adjusted_final",
+            "basic_culet_characteristic_final",
+            "gia_culet_characteristic_1",
+            "gia_culet_characteristic_2",
+            "gia_culet_characteristic_3",
+            "gia_culet_characteristic_final",
+            "gia_adjust_remarks",
+        ]
 
         return generate_csv(filename, dir_name, field_names, queryset)
 
@@ -95,14 +233,115 @@ class StoneManager(models.Manager):
         filename = "Basic_Report" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
         dir_name = settings.MEDIA_ROOT + "/csv_downloads/Basic_Report/"
 
-        field_names = Stone.basic_grading_fields
+        field_names = [
+            "internal_id",
+            "diameter_min",
+            "diameter_max",
+            "height",
+            "table_size",
+            "crown_angle",
+            "pavilion_angle",
+            "star_length",
+            "lower_half",
+            "girdle_thickness_number",
+            "girdle_min_number",
+            "girdle_max_number",
+            "culet_size",
+            "crown_height",
+            "pavilion_depth",
+            "total_depth",
+            "table_size_rounded",
+            "crown_angle_rounded",
+            "pavilion_angle_rounded",
+            "star_length_rounded",
+            "lower_half_rounded",
+            "girdle_thickness_rounded",
+            "girdle_min_grade",
+            "girdle_max_grade",
+            "culet_size_description",
+            "crown_height_rounded",
+            "pavilion_depth_rounded",
+            "total_depth_rounded",
+            "sarine_cut_pre_polish_symmetry",
+            "sarine_symmetry",
+            "roundness",
+            "roundness_grade",
+            "table_size_dev",
+            "table_size_dev_grade",
+            "crown_angle_dev",
+            "crown_angle_dev_grade",
+            "pavilion_angle_dev",
+            "pavilion_angle_dev_grade",
+            "star_length_dev",
+            "star_length_dev_grade",
+            "lower_half_dev",
+            "lower_half_dev_grade",
+            "girdle_thick_dev",
+            "girdle_thick_dev_grade",
+            "crown_height_dev",
+            "crown_height_dev_grade",
+            "pavilion_depth_dev",
+            "pavilion_depth_dev_grade",
+            "misalignment",
+            "misalignment_grade",
+            "table_edge_var",
+            "table_edge_var_grade",
+            "table_off_center",
+            "table_off_center_grade",
+            "culet_off_center",
+            "culet_off_center_grade",
+            "table_off_culet",
+            "table_off_culet_grade",
+            "star_angle",
+            "star_angle_grade",
+            "upper_half_angle",
+            "upper_half_angle_grade",
+            "lower_half_angle",
+            "lower_half_angle_grade",
+        ]
 
         return generate_csv(filename, dir_name, field_names, queryset)
 
     def generate_triple_report_csv(self, queryset):
         filename = "Triple_Report" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
         dir_name = settings.MEDIA_ROOT + "/csv_downloads/Triple_Report/"
-        field_names = ["internal_id", "external_id", "carat_weight", "color", "clarity"]
+
+        field_names = [
+            "internal_id",
+            "goldway_code",
+            "gia_code",
+            "basic_carat_final",
+            "gw_color_adjusted_final",
+            "gw_clarity_adjusted_final",
+            "gw_fluorescence_adjusted_final",
+            "gia_culet_characteristic_final",
+            "gia_culet_adjusted_final",
+            "basic_inclusions_final",
+            "basic_inclusions_final",
+            "gia_polish_adjusted_final",
+            "diameter_min",
+            "diameter_max",
+            "height",
+            "table_size",
+            "crown_angle",
+            "pavilion_angle",
+            "star_length",
+            "lower_half",
+            "girdle_thickness_number",
+            "girdle_min_number",
+            "girdle_max_number",
+            "crown_height",
+            "pavilion_depth",
+            "total_depth",
+            "sarine_cut_pre_polish_symmetry",
+            "sarine_symmetry",
+            "blockchain_address",
+            "basic_remarks",
+            "gw_remarks",
+            "gw_adjust_remarks",
+            "gia_remarks",
+            "post_gia_remarks",
+        ]
 
         return generate_csv(filename, dir_name, field_names, queryset)
 
@@ -136,7 +375,11 @@ class AbstractReceipt(models.Model):
     release_date = models.DateTimeField(null=True, blank=True)
     intake_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name="signed_off_on_stone_intake")
     release_by = models.ForeignKey(
-        User, on_delete=models.PROTECT, related_name="signed_off_on_stone_release", null=True, blank=True
+        User,
+        on_delete=models.PROTECT,
+        related_name="signed_off_on_stone_release",
+        null=True,
+        blank=True,
     )
 
     admin_url = "admin:grading_receipt_change"
@@ -366,6 +609,3 @@ class Stone(
         except IntegrityError:
             # Send an email to everyone
             raise IntegrityError("External Id Already Exists")
-
-    def __str__(self):
-        return f"{self.internal_id}"
