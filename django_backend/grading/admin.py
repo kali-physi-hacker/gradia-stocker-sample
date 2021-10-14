@@ -1,9 +1,12 @@
 from datetime import datetime
+from os import read
+import pandas as pd
 
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.contrib.auth.models import User
 from django.utils.timezone import utc
 from django.http import HttpResponse
+from django.shortcuts import redirect
 
 from ownerships.models import ParcelTransfer, StoneTransfer
 
@@ -334,6 +337,13 @@ class StoneAdmin(admin.ModelAdmin):
 
     def download_to_GIA_csv(self, request, queryset):
         file_path = Stone.objects.generate_to_GIA_csv(queryset)
+        read_file = pd.read_csv(file_path)
+        data_frame = pd.DataFrame(read_file)
+        field = data_frame["nano_etch_inscription"].to_dict()[0]
+        if pd.isna(field):
+            messages.warning(request, "There is not enough data to download")
+            return redirect(request.path)
+
         with open(file_path, mode="r") as file:
             response = HttpResponse(file, content_type="text/csv")
             response["Content-Disposition"] = "attachment; filename=%s" % file_path

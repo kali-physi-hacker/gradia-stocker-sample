@@ -193,13 +193,11 @@ def test_field_names_are_not_correct(browser, data_entry_clerk, parcels):
         "LOWER HALF ANGLE",
         "LOWER HALF ANGLE GRADE",
     )
-    for i in filed_names:
-        fmt_text = " ".join(i.split("_"))
+    for text in filed_names:
+        fmt_text = " ".join(text.split("_"))
         body_text = browser.get_body_text()
-        if fmt_text in body_text:
-            return
-
-    pytest.fail(f"unable to find {i} in browser body: \n\n{browser.get_body_text()}")
+        if fmt_text not in body_text:
+            raise AssertionError(f"unable to find the text, {text} in browser body: \n\n{browser.get_body_text()}")
 
 
 def test_uploading_the_same_stone_twice_should_error(browser, data_entry_clerk, parcels):

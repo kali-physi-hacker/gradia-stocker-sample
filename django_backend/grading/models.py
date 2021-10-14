@@ -45,10 +45,11 @@ from ownerships.models import ParcelTransfer, StoneTransfer
 from .helpers import get_stone_fields
 
 
-def generate_csv(filename, dir_name, field_names, queryset):
+def generate_csv(filename, dir_name, field_names, queryset, field_map={}):
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
     file_path = dir_name + filename
+
     with open(file_path, "w") as file:
         writer = csv.writer(file, delimiter=",")
         writer.writerow(field_names)
@@ -56,9 +57,16 @@ def generate_csv(filename, dir_name, field_names, queryset):
             values = []
             for field in field_names:
                 try:
-                    value = getattr(stone, field)
+                    _field = field_map.get(field)
+                    if _field is None:
+                        value = getattr(stone, field)
+                    else:
+                        value = getattr(stone, _field)
                 except:
                     value = ""
+
+                if "inclusion" in field and value != "":
+                    value = ", ".join([instance.inclusion for instance in value.all()])
                 values.append(value)
             writer.writerow(values)
 
@@ -155,7 +163,8 @@ class StoneManager(models.Manager):
             "gw_color_adjusted_1",
             "gw_color_adjusted_2",
             "gw_color_adjusted_3",
-            "gw_color_adjusted_final" "basic_clarity_final",
+            "gw_color_adjusted_final",
+            "basic_clarity_final",
             "gw_clarity",
             "gw_clarity_adjusted_1",
             "gw_clarity_adjusted_2",
@@ -182,7 +191,9 @@ class StoneManager(models.Manager):
             "basic_color_final",
         ]
 
-        return generate_csv(filename, dir_name, field_names, queryset)
+        return generate_csv(
+            filename, dir_name, field_names, queryset, field_map={"nano_etch_inscription": "external_id"}
+        )
 
     def generate_adjust_GIA_csv(self, queryset):
         filename = "Adjust_GIA" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
@@ -213,7 +224,7 @@ class StoneManager(models.Manager):
             "gia_culet_characteristic_2",
             "gia_culet_characteristic_3",
             "gia_culet_characteristic_final",
-            "post_gia_remarks",
+            "gia_adjust_remarks",
         ]
 
         return generate_csv(filename, dir_name, field_names, queryset)
