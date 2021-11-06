@@ -570,9 +570,9 @@ class Stone(
             f" {self.sarine_cut_pre_polish_symmetry}, {self.culet_size}"
         )
 
-        hashed = hashlib.blake2b(digest_size=4)
+        hashed = hashlib.blake2b(digest_size=3)
         hashed.update(payload.encode("utf-8"))
-        return f"G{hashed.hexdigest()}"
+        return f"G{hashed.hexdigest()}-{self.internal_id}"
 
     def generate_basic_external_id(self):
         """
