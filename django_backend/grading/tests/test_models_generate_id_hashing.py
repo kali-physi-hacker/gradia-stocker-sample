@@ -12,6 +12,7 @@ class TestIDHashGeneration(TestCase):
     def setUp(self):
 
         # Create some stone entries
+
         basic_grading_url = reverse("grading:upload_parcel_csv")
         csv_file = open("grading/tests/fixtures/sarine-01.csv", "r")
         self.client.login(username="graderuser", password="Passw0rd!")
@@ -19,7 +20,8 @@ class TestIDHashGeneration(TestCase):
 
         self.stones = Stone.objects.all()  # Stones created
 
-    def xtest_generated_hashed_id_format_correct(self):
+
+    def test_generated_hashed_id_format_correct(self):
         """
         Tests that the format of the generated hash ID is of the format
         G9d8495d
@@ -31,7 +33,7 @@ class TestIDHashGeneration(TestCase):
         hashed = stone.external_id
         self.assertEqual(hashed[0], "G")
 
-    def xtest_basic_hashed_id_is_saved_to_stone(self):
+    def test_basic_hashed_id_is_saved_to_stone(self):
         """
         Tests that the basic generated id is saved to stone (DB)
         :return:
@@ -39,21 +41,21 @@ class TestIDHashGeneration(TestCase):
 
         stone = self.stones[0]
         stone.generate_basic_external_id()
-        self.assertEqual(len(stone.external_id), 11)  # This is true for basic id
+        self.assertEqual(len(stone.external_id), 13)  # This is true for basic id
         self.assertIn("G", stone.external_id)
         self.assertIn("-B", stone.external_id)
 
-    def xtest_triple_hashed_id_is_saved_to_stone(self):
+    def test_triple_hashed_id_is_saved_to_stone(self):
         """
         Tests that the triple generated id is saved to stone (DB)
         :return:
         """
         stone = self.stones[0]
         stone.generate_triple_verified_external_id()
-        self.assertEqual(len(stone.external_id), 9)  # This is true for triple id
+        self.assertEqual(len(stone.external_id), 11)  # This is true for triple id
         self.assertIn("G", stone.external_id)
 
-    def xtest_basic_id_hashing_deterministic(self):
+    def test_basic_id_hashing_deterministic(self):
         """
         Tests that the same basic id hash is generated for the same stone
         :return:
@@ -66,7 +68,7 @@ class TestIDHashGeneration(TestCase):
             self.assertIn("-B", stone.external_id)
             self.assertEqual(hashed_1, hashed_2)
 
-    def xtest_triple_verified_hashing_deterministic(self):
+    def test_triple_verified_hashing_deterministic(self):
         """
         Test that same triple verified hash is generated for the same stone
         :return:
@@ -78,7 +80,7 @@ class TestIDHashGeneration(TestCase):
             hashed_2 = stone.external_id
             self.assertEqual(hashed_1, hashed_2)
 
-    def xtest_complain_loudly_if_collision(self):
+    def test_complain_loudly_if_collision(self):
         """
         Tests that loud complain is made (email) d
         :return:
