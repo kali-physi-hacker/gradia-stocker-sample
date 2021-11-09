@@ -239,6 +239,14 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
 
         return data
 
+    def __to_db_name_culet_characteristics(self, data):
+        culet_characteristics_choices_map = {"CHIPPED": "CH", "SL ABR": "SAB", "NONE": "N"}
+        for field, value in data.items():
+            if "culet_characteristics" in field:
+                data[field] = (
+                    culet_characteristics_choices_map[value.upper()] if value in culet_characteristics_map else value
+                )
+
     def __make_caps(self, data):
         # Make uppercase
         fields = (
