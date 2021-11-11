@@ -51,9 +51,9 @@ class BaseTransferUploadForm(forms.Form):
     def clean(self):
         file = self.cleaned_data["file"]
 
-        # Get name of file 
+        # Get name of file
         file_name = os.path.splitext(file.name)[0]
-        
+
         data = get_list_of_stones(file)  # [G00001, G00002, G00003]
 
         """
@@ -130,7 +130,7 @@ class BaseTransferUploadForm(forms.Form):
 class GWStoneTransferForm(BaseTransferUploadForm):
     def save(self):
         stone_ids, invoice_number = self.cleaned_data
-        
+
         goldway_verification = GoldwayVerification.objects.create(invoice_number=invoice_number)
         transfers = []
 
@@ -139,7 +139,7 @@ class GWStoneTransferForm(BaseTransferUploadForm):
             transfer = self.transfer_to(to_user=goldway_user, stone_id=stone_id)
             transfers.append(transfer)
 
-            # Create the GoldwayVerification instance and assign to stone 
+            # Create the GoldwayVerification instance and assign to stone
             stone = Stone.objects.get(internal_id=stone_id)
             stone.gw_verification = goldway_verification
             stone.save()

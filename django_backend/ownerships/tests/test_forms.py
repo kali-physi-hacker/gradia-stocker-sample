@@ -81,7 +81,7 @@ class p(TestCase):
     def test_form_contains_invoice_number(self):
         self.do_initial_uploads()
 
-        stone_ids =(1, 5, 6)
+        stone_ids = (1, 5, 6)
 
         form = GWStoneTransferForm(
             data={}, user=self.user, files={"file": SimpleUploadedFile(self.gw_file.name, self.gw_file.read())}
@@ -90,7 +90,7 @@ class p(TestCase):
         form.save()
 
         invoice_number = os.path.splitext(self.gw_file.name)[0]
-        invoice_number = invoice_number.split('/')[-1:]
+        invoice_number = invoice_number.split("/")[-1:]
 
         expected_goldway_verification = GoldwayVerification.objects.create(invoice_number=invoice_number)
         expected_goldway_verification = expected_goldway_verification.invoice_number[0]
@@ -101,6 +101,7 @@ class p(TestCase):
 
             self.assertTrue(invoice_number, str())
             self.assertEqual(invoice_number_gw, expected_goldway_verification)
+
 
 class GiaTransferFormTest(TestCase):
 
