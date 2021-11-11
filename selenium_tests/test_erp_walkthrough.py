@@ -126,4 +126,4 @@ def test_walk_through(browser, django_user_model, erp, admin_user, tanly, kary, 
     browser.find_element_by_name("customer").click()
     customer_user = django_user_model.objects.get(username=customer_name)
     browser.find_element_by_css_selector(f"option[value='{customer_user.pk}']").click()
-    upload_file_transfer(browser=browser, file_name="gw.csv")
+    upload_file_transfer(browser=browser, file_name="G048RV.csv")
