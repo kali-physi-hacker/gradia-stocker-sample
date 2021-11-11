@@ -1,10 +1,13 @@
+import os
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.contrib.auth import get_user_model
 from django.test import TestCase
+import pandas as pd
 from ownerships.models import StoneTransfer
 
 from ownerships.forms import GWStoneTransferForm, GiaStoneTransferForm, ExternalStoneTransferForm
 from grading.forms import SarineUploadForm, BasicUploadForm
+from grading.models import GoldwayVerification, Stone
 
 User = get_user_model()
 
@@ -14,7 +17,7 @@ class p(TestCase):
     fixtures = ("grading/fixtures/test_data.json",)
 
     def setUp(self):
-        self.gw_file = open("ownerships/tests/resources/gw.csv", "rb")
+        self.gw_file = open("ownerships/tests/resources/G048RV.csv", "rb")
 
         self.goldway_user = User.objects.get(username="goldway")
         self.user = User.objects.get(username="kary")
@@ -75,6 +78,29 @@ class p(TestCase):
         for id, (_, error) in zip(ids, form.csv_errors.items()):
             self.assertEqual(error["internal_id"][0], f"Stone With ID `{id}` does not exist")
 
+    def test_form_contains_invoice_number(self):
+        self.do_initial_uploads()
+
+        stone_ids =(1, 5, 6)
+
+        form = GWStoneTransferForm(
+            data={}, user=self.user, files={"file": SimpleUploadedFile(self.gw_file.name, self.gw_file.read())}
+        )
+        self.assertTrue(form.is_valid())
+        form.save()
+
+        invoice_number = os.path.splitext(self.gw_file.name)[0]
+        invoice_number = invoice_number.split('/')[-1:]
+
+        expected_goldway_verification = GoldwayVerification.objects.create(invoice_number=invoice_number)
+        expected_goldway_verification = expected_goldway_verification.invoice_number[0]
+
+        for stone_id in stone_ids:
+            stone = Stone.objects.get(internal_id=stone_id)
+            invoice_number_gw = stone.gw_verification.invoice_number
+
+            self.assertTrue(invoice_number, str())
+            self.assertEqual(invoice_number_gw, expected_goldway_verification)
 
 class GiaTransferFormTest(TestCase):
 

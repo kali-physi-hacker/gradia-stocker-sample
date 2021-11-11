@@ -1,10 +1,11 @@
+import os
 from datetime import datetime
 
 from django import forms
 from django.utils.timezone import utc
 from django.contrib.auth import get_user_model
 
-from grading.models import Stone
+from grading.models import GoldwayVerification, Stone
 from grading.forms import get_error_headers
 
 from .models import StoneTransfer
@@ -50,6 +51,9 @@ class BaseTransferUploadForm(forms.Form):
     def clean(self):
         file = self.cleaned_data["file"]
 
+        # Get name of file 
+        file_name = os.path.splitext(file.name)[0]
+        
         data = get_list_of_stones(file)  # [G00001, G00002, G00003]
 
         """
@@ -74,9 +78,9 @@ class BaseTransferUploadForm(forms.Form):
         customer = self.cleaned_data.get("customer")
 
         if customer is not None:
-            return data, customer
+            return data, customer, file_name
 
-        return data
+        return data, file_name
 
     def errors_as_table(self):
         """
@@ -125,8 +129,9 @@ class BaseTransferUploadForm(forms.Form):
 
 class GWStoneTransferForm(BaseTransferUploadForm):
     def save(self):
-        stone_ids = self.cleaned_data
-
+        stone_ids, invoice_number = self.cleaned_data
+        
+        goldway_verification = GoldwayVerification.objects.create(invoice_number=invoice_number)
         transfers = []
 
         for stone_id in stone_ids:
@@ -134,12 +139,17 @@ class GWStoneTransferForm(BaseTransferUploadForm):
             transfer = self.transfer_to(to_user=goldway_user, stone_id=stone_id)
             transfers.append(transfer)
 
+            # Create the GoldwayVerification instance and assign to stone 
+            stone = Stone.objects.get(internal_id=stone_id)
+            stone.gw_verification = goldway_verification
+            stone.save()
+
         return transfers
 
 
 class GiaStoneTransferForm(BaseTransferUploadForm):
     def save(self):
-        stone_ids = self.cleaned_data
+        stone_ids, _ = self.cleaned_data
 
         transfers = []
 
@@ -160,7 +170,7 @@ class ExternalStoneTransferForm(BaseTransferUploadForm):
         :return:
         """
         transfers = []
-        stone_ids, customer_id = self.cleaned_data
+        stone_ids, customer_id, _ = self.cleaned_data
 
         customer = User.objects.get(pk=customer_id)
 
