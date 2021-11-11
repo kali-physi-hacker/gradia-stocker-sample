@@ -98,7 +98,7 @@ def test_walk_through(browser, django_user_model, erp, admin_user, tanly, kary, 
     browser.find_element_by_link_text("Stone transfers").click()
     browser.find_element_by_link_text("TRANSFER STONES").click()
     browser.find_element_by_link_text("Goldway Transfer").click()
-    upload_file_transfer(browser=browser, file_name="gw.csv")
+    upload_file_transfer(browser=browser, file_name="G048RV.csv")
 
     # Upload Goldway results
     browser.find_element_by_link_text("Splits").click()
