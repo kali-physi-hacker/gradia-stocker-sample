@@ -10,7 +10,14 @@ from django.utils.datetime_safe import datetime
 
 from ownerships.models import ParcelTransfer, StoneTransfer
 
-from stonegrading.grades import GirdleGrades
+from stonegrading.grades import (
+    GirdleGrades,
+    GeneralGrades,
+    FluorescenceGrades,
+    CuletCharacteristics,
+    GirdleCondition,
+    CuletGrades,
+)
 from stonegrading.mixins import (
     SarineGradingMixin,
     BasicGradingMixin,
@@ -207,7 +214,7 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
             if field in grade_fields:
                 grade_fields.remove(field)
 
-        choices_display_name_map = {"EXCELLENT": "EX", "VERY GOOD": "VG", "GOOD": "GD", "FAIR": "F", "POOR": "P"}
+        choices_display_name_map = {key.upper(): value for (value, key) in GeneralGrades.CHOICES}
 
         for field in grade_fields:
             if data.get(field) is not None:
@@ -219,8 +226,7 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
         return data
 
     def __to_db_name_fluorescence(self, data):
-        fluorescence_choices_map = {"Very Strong": "S", "Faint": "F", "Medium": "M", "Strong": "S", "None": "N"}
-
+        fluorescence_choices_map = {key: value for (value, key) in FluorescenceGrades.CHOICES}
         for field, value in data.items():
             if "fluorescence" in field:
                 data[field] = fluorescence_choices_map[value] if value in fluorescence_choices_map else value
@@ -240,11 +246,14 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
         return data
 
     def __to_db_name_culet_characteristics(self, data):
-        culet_characteristics_choices_map = {"CHIPPED": "CH", "SL ABR": "SAB", "NONE": "N"}
+        culet_characteristics_choices_map = {key.upper(): value for (value, key) in CuletCharacteristics.CHOICES}
+        culet_characteristics_choices_map.update({"SL ABR": "SAB"})
         for field, value in data.items():
             if "culet_characteristics" in field:
                 data[field] = (
-                    culet_characteristics_choices_map[value.upper()] if value in culet_characteristics_map else value
+                    culet_characteristics_choices_map[value.upper()]
+                    if value in culet_characteristics_choices_map
+                    else value
                 )
 
     def __make_caps(self, data):
@@ -265,8 +274,7 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
         return data
 
     def __to_db_name_girdles(self, data):
-        girdle_conditions_choices_map = {"FACETED": "FAC", "POLISHED": "POL", "BRUTED": "BRU"}
-
+        girdle_conditions_choices_map = {key.upper(): value for (value, key) in GirdleCondition.CHOICES}
         for field, value in data.items():
             if "girdle_condition" in field:
                 data[field] = (
@@ -276,16 +284,7 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
         return data
 
     def __to_db_name_culet_descriptions(self, data):
-        culet_choices_display_map = {
-            "NONE": "N",
-            "VERY SMALL": "VS",
-            "SMALL": "S",
-            "MEDIUM": "M",
-            "SLIGHTLY LARGE": "SL",
-            "LARGE": "L",
-            "VERY LARGE": "VL",
-            "EXTREMELY LARGE": "XL",
-        }
+        culet_choices_display_map = {key.upper(): value for (value, key) in CuletGrades.CHOICES}
 
         if "culet_size_description" in data:
             data["culet_size_description"] = "/".join(
