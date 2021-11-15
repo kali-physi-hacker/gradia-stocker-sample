@@ -19,7 +19,6 @@ class TestIDHashGeneration(TestCase):
 
         self.stones = Stone.objects.all()  # Stones created
 
-
     def test_generated_hashed_id_format_correct(self):
         """
         Tests that the format of the generated hash ID is of the format
