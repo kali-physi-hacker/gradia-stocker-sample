@@ -120,7 +120,7 @@ class DownloadCSVAdminTest(TestCase):
         field_names = (
             "date_to_GIA",
             "nano_etch_inscription",
-            "basic_carat_final",
+            "basic_carat",
             "basic_color_final",
         )
         for field in field_names:
