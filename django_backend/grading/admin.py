@@ -264,6 +264,14 @@ class StoneAdmin(admin.ModelAdmin):
 
     list_filter = [StoneOwnerFilter]
 
+    def customer_receipt_number(self, obj):
+        """
+        returns the customer receipt number
+        :param obj:
+        :return:
+        """
+        return obj.split_from.original_parcel.receipt.code
+
     def get_list_display(self, request):
         return [
             "external_id",
@@ -274,6 +282,7 @@ class StoneAdmin(admin.ModelAdmin):
             "basic_fluorescence_final",
             "basic_culet_final",
             "split_from",
+            "customer_receipt_number",
         ]
 
     actions = [
