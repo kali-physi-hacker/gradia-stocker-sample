@@ -198,7 +198,7 @@ def test_user_can_download_to_gia_csv_success(browser, data_entry_clerk, initial
     csv_file_content = (
         "date_to_GIA",
         "nano_etch_inscription",
-        "basic_carat_final",
+        "basic_carat",
         "basic_color_final",
     )
     read_file = pd.read_csv(csv_file_path)
