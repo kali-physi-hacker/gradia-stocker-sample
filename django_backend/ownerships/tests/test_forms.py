@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.contrib.auth import get_user_model
 from django.test import TestCase
@@ -89,17 +90,18 @@ class p(TestCase):
         self.assertTrue(form.is_valid())
         form.save()
 
-        invoice_number = os.path.splitext(self.gw_file.name)[0]
-        invoice_number = invoice_number.split("/")[-1:]
-
-        expected_goldway_verification = GoldwayVerification.objects.create(invoice_number=invoice_number)
-        expected_goldway_verification = expected_goldway_verification.invoice_number[0]
+        # file_name = os.path.splitext(self.gw_file.name)[0]
+        # invoice_number = file_name.split("/")[-1:][0]
+        invoice_number = Path("ownerships/tests/resources/G048RV.csv").stem
+        
+        goldway_verification_number = GoldwayVerification.objects.create(invoice_number=invoice_number)
+        expected_goldway_verification = goldway_verification_number.invoice_number
 
         for stone_id in stone_ids:
             stone = Stone.objects.get(internal_id=stone_id)
             invoice_number_gw = stone.gw_verification.invoice_number
 
-            self.assertTrue(invoice_number, str())
+            self.assertTrue(invoice_number_gw, str())
             self.assertEqual(invoice_number_gw, expected_goldway_verification)
 
 
