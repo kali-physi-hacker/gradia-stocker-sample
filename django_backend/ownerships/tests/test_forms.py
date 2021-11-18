@@ -93,7 +93,7 @@ class p(TestCase):
         # file_name = os.path.splitext(self.gw_file.name)[0]
         # invoice_number = file_name.split("/")[-1:][0]
         invoice_number = Path("ownerships/tests/resources/G048RV.csv").stem
-        
+
         goldway_verification_number = GoldwayVerification.objects.create(invoice_number=invoice_number)
         expected_goldway_verification = goldway_verification_number.invoice_number
 
