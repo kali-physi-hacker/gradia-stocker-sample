@@ -199,7 +199,8 @@ class StoneManager(models.Manager):
         filename = "Adjust_GIA" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
         dir_name = settings.MEDIA_ROOT + "/csv_downloads/adjust_gia/"
         field_names = [
-            "gia_code" "nano_etch_inscription",
+            "gia_code",
+            "nano_etch_inscription",
             "gia_adjust_grader_1",
             "gia_adjust_grader_2",
             "gia_adjust_grader_3",
@@ -210,10 +211,6 @@ class StoneManager(models.Manager):
             "gia_color_adjusted_3",
             "gia_color_adjusted_final",
             "basic_polish_final",
-            "gia_polish_adjusted_1",
-            "gia_polish_adjusted_2",
-            "gia_polish_adjusted_3",
-            "gia_polish_adjusted_final",
             "basic_culet_final",
             "gia_culet_adjusted_1",
             "gia_culet_adjusted_2",
