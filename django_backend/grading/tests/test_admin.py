@@ -145,12 +145,12 @@ class DownloadCSVAdminTest(TestCase):
 
         headers, content = [row for row in response.content.decode().split("\n") if row != ""]
         headers = headers.split(",")
-        self.assertEqual(len(headers), 26)
+        self.assertEqual(len(headers), 22)
 
-        for field in [field.name for field in GIAGradingAdjustMixin._meta.get_fields()]:
+        for field in [
+            field.name for field in GIAGradingAdjustMixin._meta.get_fields() if "polish" not in field.name
+        ]:
             self.assertIn(field, headers)
-
-        self.assertIn("gia_codenano_etch_inscription", headers)
 
     def test_download_to_basic_report_csv_success(self):
         response = self.admin.download_to_basic_report_csv(request=self.request, queryset=self.queryset)
