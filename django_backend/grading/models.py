@@ -553,6 +553,10 @@ class Stone(
 
     objects = StoneManager()
 
+    @property
+    def customer_receipt_number(self):
+        return self.split_from.original_parcel.receipt.code
+
     def current_location(self):
         return StoneTransfer.get_current_location(self)
 
