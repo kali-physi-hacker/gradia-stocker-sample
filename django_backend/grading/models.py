@@ -210,7 +210,6 @@ class StoneManager(models.Manager):
             "gia_color_adjusted_2",
             "gia_color_adjusted_3",
             "gia_color_adjusted_final",
-            "basic_polish_final",
             "basic_culet_final",
             "gia_culet_adjusted_1",
             "gia_culet_adjusted_2",
