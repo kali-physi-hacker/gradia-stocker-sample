@@ -34,12 +34,9 @@ class TestIDHashGeneration(TestCase):
         """
         stone = self.stones[0]
         stone.generate_triple_verified_external_id()
-        external_id  = stone.external_id
+        external_id = stone.external_id
         self.assertEqual(len(external_id), 9)
-        self.assertEqual(external_id[0],'G')
-        
-        
-        
+        self.assertEqual(external_id[0], "G")
 
     def test_triple_verified_external_id_generation_is_deterministic(self):
         """
@@ -50,22 +47,22 @@ class TestIDHashGeneration(TestCase):
         stone = self.stones[0]
         stone.generate_triple_verified_external_id()
         external_id = stone.external_id
-        stone.external_id = None 
+        stone.external_id = None
         stone.save()
-        
+
         stone.generate_triple_verified_external_id()
-        
+
         self.assertEqual(stone.external_id, external_id)
 
     def test_triple_verified_external_id_generation_raises_error_if_exists(self):
         stone = self.stones[0]
         stone.generate_triple_verified_external_id()
-        external_id = stone.external_id 
+        external_id = stone.external_id
         stone.external_id = None
         stone.save()
 
         new_stone = self.stones[1]
-        new_stone.external_id = external_id  
+        new_stone.external_id = external_id
         new_stone.save()
 
         with self.assertRaises(IntegrityError):
@@ -84,7 +81,6 @@ class TestIDHashGeneration(TestCase):
 
         self.assertEqual(len(external_id), 9)
         self.assertEqual(external_id[:2], "GB")
-        
 
     def test_basic_external_id_generation_is_deterministic(self):
         """
@@ -96,22 +92,22 @@ class TestIDHashGeneration(TestCase):
         stone.generate_basic_external_id()
         external_id = stone.external_id
 
-        stone.external_id = None 
+        stone.external_id = None
         stone.save()
-        
+
         stone.generate_basic_external_id()
-        
+
         self.assertEqual(stone.external_id, external_id)
 
     def test_basic_external_id_generation_raises_error_if_exists(self):
         stone = self.stones[0]
         stone.generate_basic_external_id()
-        external_id = stone.external_id 
+        external_id = stone.external_id
         stone.external_id = None
         stone.save()
 
         new_stone = self.stones[1]
-        new_stone.external_id = external_id  
+        new_stone.external_id = external_id
         new_stone.save()
 
         with self.assertRaises(IntegrityError):
