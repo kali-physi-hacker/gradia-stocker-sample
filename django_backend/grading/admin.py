@@ -123,6 +123,7 @@ class ItemOwnerFilter(admin.SimpleListFilter):
             ("goldway", "With Goldway"),
             ("gia", "With GIA"),
             ("include", "Including splits and exited"),
+            ("customer_receipt_number", "Customer Receipt Number"),
         )
 
     def queryset(self, request, queryset):
@@ -264,13 +265,7 @@ class StoneAdmin(admin.ModelAdmin):
 
     list_filter = [StoneOwnerFilter]
 
-    def customer_receipt_number(self, obj):
-        """
-        returns the customer receipt number
-        :param obj:
-        :return:
-        """
-        return obj.split_from.original_parcel.receipt.code
+    search_fields = ["split_from__original_parcel__receipt__code"]
 
     def get_list_display(self, request):
         return [
