@@ -556,56 +556,57 @@ class Stone(
     def current_location(self):
         return StoneTransfer.get_current_location(self)
 
-    def __generate_id(self):
+    def generate_id_later_part(self):
         """
-        Generates a hashed id of the stone.
-        Format of string byte hashed:
-        internal_id, basic_final_color, basic_final_clarity, sarine_cut,
-        culet_size, gia_returned_date, gia_material_testing, gw_ai_code
-        :return:
+        Returns the internal_id of a particular format
+        :returns:
         """
-        # This is still undergoing refactoring because of the whole Stone refactoring stuff
-        payload = (
-            f" {self.internal_id}, {self.basic_color_final}, {self.basic_clarity_final},"
-            f" {self.sarine_cut_pre_polish_symmetry}, {self.culet_size}"
-        )
-
-        hashed = hashlib.blake2b(digest_size=4)
-        hashed.update(payload.encode("utf-8"))
-        return f"G{hashed.hexdigest()}"
-
-    def generate_basic_external_id(self):
-        """
-        Returns a basic ID. i.e ID with -B append to it
-        :return:
-        """
-        self.external_id = f"{self.__generate_id()}-B"
-        try:
-            self.save()
-        except IntegrityError:
-            # Set external_id to None
-            self.external_id = None
-
-            # Send an email to everyone
-            raise IntegrityError("External Id Already Exists")
+        # if internal_id is 1 === 001
+        internal_id = self.internal_id
+        if len(str(internal_id)) > 3:
+                internal_id = internal_id[:4]
+        return f"{internal_id:03d}"
 
     def generate_triple_verified_external_id(self):
         """
-        Returns an ID
-        :return:
+        Generates full triple verified external_id and updates the stone's external_id value
+        :returns:
         """
-        basic_hash_id = self.__generate_id()
-        # This applies to triple verification. i.e It will not apply to basic
-        if self.gw_verification is not None:
-            payload = f", {self.gw_verification.code}, {self.gw_verification.started}"
+        # initial part 
+        basic_fields = [attr for attr in dir(self) if "basic_" in attr]
+        payload = ", ".join(basic_fields)
+        
+        hashed = hashlib.blake2b(digest_size=3) # 6 characters
+        # hashed.update(payload.encode("utf-8"))
+        # import pdb; pdb.set_trace()
 
-            hashed = hashlib.blake2b(digest_size=3)
-            hashed.update(payload.encode("utf-8"))
-            hashed_value = f"G{hashed.hexdigest()}"
-
-        self.external_id = self.__generate_id()
+        # G starts the ID
+        later_part = self.generate_id_later_part()
+        external_id = f"G{hashed.hexdigest()[:-1]}{later_part}"
+        self.external_id = external_id 
         try:
             self.save()
         except IntegrityError:
-            # Send an email to everyone
-            raise IntegrityError("External Id Already Exists")
+            # email error to everyone
+            raise IntegrityError("External Id already exists")
+    
+    def generate_basic_external_id(self):
+        """
+        Generates full basic external_id 
+        :returns:
+        """
+        basic_fields = [attr for attr in dir(self) if "basic_" in attr]
+        payload = ", ".join(basic_fields)
+        
+        hashed = hashlib.blake2b(digest_size=2) # 4 characters
+        # hashed.update(payload.encode("utf-8"))
+
+        # GB starts the ID
+        later_part = self.generate_id_later_part()
+        external_id = f"GB{hashed.hexdigest()}{later_part}"
+        self.external_id = external_id 
+        try:
+            self.save()
+        except IntegrityError:
+            # email error to everyone
+            raise IntegrityError("External Id already exists")

@@ -7,7 +7,7 @@ from grading.models import Stone
 
 
 class TestIDHashGeneration(TestCase):
-    fixtures = ("data_migration/test_data.json",)
+    fixtures = ("grading/fixtures/test_data.json",)
 
     def setUp(self):
 
@@ -17,95 +17,102 @@ class TestIDHashGeneration(TestCase):
         self.client.login(username="graderuser", password="Passw0rd!")
         self.client.post(basic_grading_url, {"file": csv_file})
 
+        stone = Stone.objects.first()
+        new_stone = stone
+        new_stone.id = 4
+        new_stone.internal_id = 3
+        new_stone.save()
+
         self.stones = Stone.objects.all()  # Stones created
 
-    def xtest_generated_hashed_id_format_correct(self):
+    def test_triple_verified_external_id_generation_valid_format(self):
         """
-        Tests that the format of the generated hash ID is of the format
-        G9d8495d
-        :return:
-        """
-        # Get a stone
-        stone = self.stones[0]
-        stone.generate_basic_external_id()
-        hashed = stone.external_id
-        self.assertEqual(hashed[0], "G")
-
-    def xtest_basic_hashed_id_is_saved_to_stone(self):
-        """
-        Tests that the basic generated id is saved to stone (DB)
-        :return:
-        """
-
-        stone = self.stones[0]
-        stone.generate_basic_external_id()
-        self.assertEqual(len(stone.external_id), 11)  # This is true for basic id
-        self.assertIn("G", stone.external_id)
-        self.assertIn("-B", stone.external_id)
-
-    def xtest_triple_hashed_id_is_saved_to_stone(self):
-        """
-        Tests that the triple generated id is saved to stone (DB)
-        :return:
+        Tests that the format of the generated ID is in Triple Format
+        1. length == 9
+        2. should start with a G
+        :returns:
         """
         stone = self.stones[0]
         stone.generate_triple_verified_external_id()
-        self.assertEqual(len(stone.external_id), 9)  # This is true for triple id
-        self.assertIn("G", stone.external_id)
+        external_id  = stone.external_id
+        self.assertEqual(len(external_id), 9)
+        self.assertEqual(external_id[0],'G')
+        
+        
+        
 
-    def xtest_basic_id_hashing_deterministic(self):
+    def test_triple_verified_external_id_generation_is_deterministic(self):
         """
-        Tests that the same basic id hash is generated for the same stone
-        :return:
+        Tests that triple verified external_id generation is the same no matter when it
+        is generated
+        :returns:
         """
-        for stone in self.stones:
-            stone.generate_basic_external_id()
-            hashed_1 = stone.external_id
-            stone.generate_basic_external_id()
-            hashed_2 = stone.external_id
-            self.assertIn("-B", stone.external_id)
-            self.assertEqual(hashed_1, hashed_2)
+        stone = self.stones[0]
+        stone.generate_triple_verified_external_id()
+        external_id = stone.external_id
+        stone.external_id = None 
+        stone.save()
+        
+        stone.generate_triple_verified_external_id()
+        
+        self.assertEqual(stone.external_id, external_id)
 
-    def xtest_triple_verified_hashing_deterministic(self):
-        """
-        Test that same triple verified hash is generated for the same stone
-        :return:
-        """
-        for stone in self.stones:
-            stone.generate_triple_verified_external_id()
-            hashed_1 = stone.external_id
-            stone.generate_triple_verified_external_id()
-            hashed_2 = stone.external_id
-            self.assertEqual(hashed_1, hashed_2)
+    def test_triple_verified_external_id_generation_raises_error_if_exists(self):
+        stone = self.stones[0]
+        stone.generate_triple_verified_external_id()
+        external_id = stone.external_id 
+        stone.external_id = None
+        stone.save()
 
-    def xtest_complain_loudly_if_collision(self):
-        """
-        Tests that loud complain is made (email) d
-        :return:
-        """
-        stone_1 = self.stones[0]
-        stone_2 = self.stones[1]
-
-        # We assuming a collision has occurred during generation
-
-        # Generate a basic external id some stone and clear back
-        stone_1.generate_basic_external_id()
-        stone_1_external_id = stone_1.external_id
-        stone_1.external_id = None
-        stone_1.save()
-
-        # Assign saved hashed ID to stone_2
-        stone_2.external_id = stone_1_external_id
-        stone_2.save()
+        new_stone = self.stones[1]
+        new_stone.external_id = external_id  
+        new_stone.save()
 
         with self.assertRaises(IntegrityError):
-            stone_1.generate_basic_external_id()
+            stone.generate_triple_verified_external_id()
 
-        # Making sure that stone_2 stone_1 have different value for external_id
-        self.assertNotEqual(stone_1.external_id, stone_2.external_id)
+    def test_basic_external_id_generation_valid_format(self):
+        """
+        Tests that the format of the generated ID is of the following ID
+        1. length = 9
+        2. should start with GB
+        :returns:
+        """
+        stone = self.stones[0]
+        stone.generate_basic_external_id()
+        external_id = stone.external_id
 
-    def xtest_basic_hashing_hashes_with_the_correct_payload(self):
-        pass
+        self.assertEqual(len(external_id), 9)
+        self.assertEqual(external_id[:2], "GB")
+        
 
-    def xtest_triple_hashing_hashes_with_the_correct_payload(self):
-        pass
+    def test_basic_external_id_generation_is_deterministic(self):
+        """
+        Tests that basic external_id generation is the same no matter when it
+        is generated
+        :returns:
+        """
+        stone = self.stones[0]
+        stone.generate_basic_external_id()
+        external_id = stone.external_id
+
+        stone.external_id = None 
+        stone.save()
+        
+        stone.generate_basic_external_id()
+        
+        self.assertEqual(stone.external_id, external_id)
+
+    def test_basic_external_id_generation_raises_error_if_exists(self):
+        stone = self.stones[0]
+        stone.generate_basic_external_id()
+        external_id = stone.external_id 
+        stone.external_id = None
+        stone.save()
+
+        new_stone = self.stones[1]
+        new_stone.external_id = external_id  
+        new_stone.save()
+
+        with self.assertRaises(IntegrityError):
+            stone.generate_basic_external_id()
