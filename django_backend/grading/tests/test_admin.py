@@ -150,7 +150,7 @@ class DownloadCSVAdminTest(TestCase):
         for field in [field.name for field in GIAGradingAdjustMixin._meta.get_fields()]:
             self.assertIn(field, headers)
 
-        self.assertIn("gia_code",headers)
+        self.assertIn("gia_code", headers)
         self.assertIn("nano_etch_inscription", headers)
 
     def test_download_to_basic_report_csv_success(self):
