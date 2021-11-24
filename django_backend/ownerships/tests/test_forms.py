@@ -90,19 +90,16 @@ class p(TestCase):
         self.assertTrue(form.is_valid())
         form.save()
 
-        # file_name = os.path.splitext(self.gw_file.name)[0]
-        # invoice_number = file_name.split("/")[-1:][0]
         invoice_number = Path("ownerships/tests/resources/G048RV.csv").stem
 
-        goldway_verification_number = GoldwayVerification.objects.create(invoice_number=invoice_number)
-        expected_goldway_verification = goldway_verification_number.invoice_number
+        expected_goldway_verification = GoldwayVerification.objects.create(invoice_number=invoice_number)
 
         for stone_id in stone_ids:
             stone = Stone.objects.get(internal_id=stone_id)
             invoice_number_gw = stone.gw_verification.invoice_number
 
             self.assertTrue(invoice_number_gw, str())
-            self.assertEqual(invoice_number_gw, expected_goldway_verification)
+            self.assertEqual(invoice_number_gw, expected_goldway_verification.invoice_number)
 
 
 class GiaTransferFormTest(TestCase):
