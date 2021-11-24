@@ -83,7 +83,7 @@ class TestIDHashGeneration(TestCase):
 
         self.assertEqual(len(external_id), 11)
         self.assertEqual(external_id[:2], "GB")
-        self.assertEqual(external_id[10:],"-B")
+        self.assertEqual(external_id[10:], "-B")
 
     def test_basic_external_id_generation_is_deterministic(self):
         """
