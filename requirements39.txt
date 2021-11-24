@@ -46,7 +46,7 @@ sqlparse==0.4.1
 stone-grading @ git+https://github.com/gradia-exchange/StoneGrading@2d9062d1c10b65f58ace0b1f8df33445df4823a0
 toml==0.10.2
 traitlets==5.0.5
-typed-ast==1.4.1
+typed-ast==1.5.0
 typing-extensions==3.7.4.3
 urllib3==1.26.2
 wcwidth==0.2.5
