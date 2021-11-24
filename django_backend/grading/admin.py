@@ -7,6 +7,8 @@ from django.contrib.auth.models import User
 from django.utils.timezone import utc
 from django.http import HttpResponse
 from django.shortcuts import redirect
+from django.forms.models import BaseInlineFormSet
+from django.forms import ValidationError
 
 from ownerships.models import ParcelTransfer, StoneTransfer
 
@@ -30,8 +32,16 @@ class StoneInline(admin.TabularInline):
     max_num = 50
 
 
+class ParcelInlineFormset(BaseInlineFormSet):
+    def clean(self):
+        super(ParcelInlineFormset, self).clean()
+        if len(self.forms) < 1:
+            raise ValidationError("Requires at least one parcel")
+
+
 class ParcelInline(admin.TabularInline):
     model = Parcel
+    formset = ParcelInlineFormset
 
     fields = [
         "get_parcel_with_html_link",
