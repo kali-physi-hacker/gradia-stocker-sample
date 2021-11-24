@@ -27,7 +27,7 @@ def test_user_can_download_to_gw_csv_success(browser, data_entry_clerk, initial_
     downloaded_csv_file = os.listdir(download_file_dir)[0]
     csv_file_path = os.path.join(download_file_dir, downloaded_csv_file)
 
-    csv_file_content = ("date_to_GW", "internal_id", "nano_etch_inscription", "basic_carat_final", "hey")
+    csv_file_content = ("date_from_gw", "internal_id", "nano_etch_inscription", "basic_carat_final", "hey")
 
     read_file = pd.read_csv(csv_file_path)
     data_frame = pd.DataFrame(read_file).to_dict().keys()
@@ -196,9 +196,9 @@ def test_user_can_download_to_gia_csv_success(browser, data_entry_clerk, initial
     csv_file_path = os.path.join(download_file_dir, downloaded_csv_file)
 
     csv_file_content = (
-        "date_to_GIA",
+        "date_from_gia",
         "nano_etch_inscription",
-        "basic_carat_final",
+        "basic_carat",
         "basic_color_final",
     )
     read_file = pd.read_csv(csv_file_path)
@@ -349,21 +349,17 @@ def test_user_can_download_adjust_gia_csv_success(browser, data_entry_clerk, ini
     csv_file_path = os.path.join(download_file_dir, downloaded_csv_file)
 
     csv_file_content = (
-        "gia_codenano_etch_inscription",
+        "gia_code",
+        "nano_etch_inscription",
         "gia_adjust_grader_1",
         "gia_adjust_grader_2",
         "gia_adjust_grader_3",
-        "gw_color_adjusted_final",
+        "gia_color_adjusted_final",
         "gia_color",
         "gia_color_adjusted_1",
         "gia_color_adjusted_2",
         "gia_color_adjusted_3",
         "gia_color_adjusted_final",
-        "basic_polish_final",
-        "gia_polish_adjusted_1",
-        "gia_polish_adjusted_2",
-        "gia_polish_adjusted_3",
-        "gia_polish_adjusted_final",
         "basic_culet_final",
         "gia_culet_adjusted_1",
         "gia_culet_adjusted_2",
@@ -408,10 +404,10 @@ def test_user_can_download_to_gw_csv_success(browser, data_entry_clerk, initial_
     csv_file_path = os.path.join(download_file_dir, downloaded_csv_file)
 
     csv_file_content = (
-        "date_to_GW",
+        "date_from_gw",
         "internal_id",
         "nano_etch_inscription",
-        "basic_carat_final",
+        "basic_carat",
     )
 
     read_file = pd.read_csv(csv_file_path)

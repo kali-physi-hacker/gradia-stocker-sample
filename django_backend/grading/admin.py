@@ -7,6 +7,8 @@ from django.contrib.auth.models import User
 from django.utils.timezone import utc
 from django.http import HttpResponse
 from django.shortcuts import redirect
+from django.forms.models import BaseInlineFormSet
+from django.forms import ValidationError
 
 from ownerships.models import ParcelTransfer, StoneTransfer
 
@@ -30,8 +32,16 @@ class StoneInline(admin.TabularInline):
     max_num = 50
 
 
+class ParcelInlineFormset(BaseInlineFormSet):
+    def clean(self):
+        super(ParcelInlineFormset, self).clean()
+        if len(self.forms) < 1:
+            raise ValidationError("Requires at least one parcel")
+
+
 class ParcelInline(admin.TabularInline):
     model = Parcel
+    formset = ParcelInlineFormset
 
     fields = [
         "get_parcel_with_html_link",
@@ -123,6 +133,7 @@ class ItemOwnerFilter(admin.SimpleListFilter):
             ("goldway", "With Goldway"),
             ("gia", "With GIA"),
             ("include", "Including splits and exited"),
+            ("customer_receipt_number", "Customer Receipt Number"),
         )
 
     def queryset(self, request, queryset):
@@ -264,6 +275,8 @@ class StoneAdmin(admin.ModelAdmin):
 
     list_filter = [StoneOwnerFilter]
 
+    search_fields = ["split_from__original_parcel__receipt__code"]
+
     def get_list_display(self, request):
         return [
             "external_id",
@@ -274,6 +287,7 @@ class StoneAdmin(admin.ModelAdmin):
             "basic_fluorescence_final",
             "basic_culet_final",
             "split_from",
+            "customer_receipt_number",
         ]
 
     actions = [

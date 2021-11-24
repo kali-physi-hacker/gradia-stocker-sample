@@ -39,14 +39,14 @@ class StoneTransferViews(TestCase):
     def test_transfer_to_goldway_success(self):
         self.do_initial_uploads()
 
-        csv_file = open("ownerships/tests/resources/gw.csv")
+        csv_file = open("ownerships/tests/resources/G048RV.csv")
         self.client.login(**self.grader_user)
         response = self.client.post(reverse("ownerships:goldway_transfer_upload_url"), data={"file": csv_file})
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, "/admin/ownerships/stonetransfer/")
 
     def test_transfer_to_goldway_fail(self):
-        csv_file = open("ownerships/tests/resources/gw.csv")
+        csv_file = open("ownerships/tests/resources/G048RV.csv")
         self.client.login(**self.grader_user)
         response = self.client.post(reverse("ownerships:goldway_transfer_upload_url"), data={"file": csv_file})
         self.assertEqual(response.status_code, 200)
