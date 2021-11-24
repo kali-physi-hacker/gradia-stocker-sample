@@ -45,7 +45,7 @@ from ownerships.models import ParcelTransfer, StoneTransfer
 from .helpers import get_stone_fields
 
 
-def generate_csv(filename, dir_name, field_names, queryset, field_map={}):
+def generate_csv(filename, dir_name, field_names, queryset, field_map):
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
     file_path = dir_name + filename
@@ -57,13 +57,17 @@ def generate_csv(filename, dir_name, field_names, queryset, field_map={}):
             values = []
             for field in field_names:
                 try:
-                    _field = field_map.get(field)
-                    if _field is None:
-                        value = getattr(stone, field)
-                    else:
-                        value = getattr(stone, _field)
+                    value = getattr(stone, field)
                 except:
-                    value = ""
+                    # using the expected attribute
+                    # field_map value contains attributes that exists
+
+                    # there are some cases in which like gia code where both attributes and values don't exist but are needed
+                    try:
+                        attribute = stone.__dict__[field_map[field]]
+                        value = attribute
+                    except:
+                        value = ""
 
                 if "inclusion" in field and value != "":
                     value = ", ".join([instance.inclusion for instance in value.all()])
@@ -135,19 +139,21 @@ class StoneManager(models.Manager):
             "basic_remarks",
         ]
 
-        return generate_csv(filename, dir_name, field_names, queryset)
+        return generate_csv(filename, dir_name, field_names, queryset, {})
 
     def generate_to_goldway_csv(self, request, queryset):
         filename = "To_Goldway_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
         dir_name = settings.MEDIA_ROOT + "/csv_downloads/to_goldway/"
         field_names = [
-            "date_to_GW",
+            "date_from_gw",
             "internal_id",
             "nano_etch_inscription",
-            "basic_carat_final",
+            "basic_carat",
         ]
 
-        return generate_csv(filename, dir_name, field_names, queryset)
+        return generate_csv(
+            filename, dir_name, field_names, queryset, field_map={"nano_etch_inscription": "external_id"}
+        )
 
     def generate_adjust_goldway_csv(self, queryset):
         filename = "Adjust_Goldway" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
@@ -179,13 +185,13 @@ class StoneManager(models.Manager):
             "gw_adjust_remarks",
         ]
 
-        return generate_csv(filename, dir_name, field_names, queryset)
+        return generate_csv(filename, dir_name, field_names, queryset, {})
 
     def generate_to_GIA_csv(self, queryset):
         filename = "To_GIA_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
         dir_name = settings.MEDIA_ROOT + "/csv_downloads/to_GIA/"
         field_names = [
-            "date_to_GIA",
+            "date_from_gia",
             "nano_etch_inscription",
             "basic_carat",
             "basic_color_final",
@@ -199,11 +205,12 @@ class StoneManager(models.Manager):
         filename = "Adjust_GIA" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
         dir_name = settings.MEDIA_ROOT + "/csv_downloads/adjust_gia/"
         field_names = [
-            "gia_code" "nano_etch_inscription",
+            "gia_code",
+            "nano_etch_inscription",
             "gia_adjust_grader_1",
             "gia_adjust_grader_2",
             "gia_adjust_grader_3",
-            "gw_color_adjusted_final",
+            "gia_color_adjusted_final",
             "gia_color",
             "gia_color_adjusted_1",
             "gia_color_adjusted_2",
@@ -227,7 +234,7 @@ class StoneManager(models.Manager):
             "gia_adjust_remarks",
         ]
 
-        return generate_csv(filename, dir_name, field_names, queryset)
+        return generate_csv(filename, dir_name, field_names, queryset, {})
 
     def generate_basic_report_csv(self, queryset):
         filename = "Basic_Report" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
@@ -300,7 +307,7 @@ class StoneManager(models.Manager):
             "lower_half_angle_grade",
         ]
 
-        return generate_csv(filename, dir_name, field_names, queryset)
+        return generate_csv(filename, dir_name, field_names, queryset, {})
 
     def generate_triple_report_csv(self, queryset):
         filename = "Triple_Report" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
@@ -343,7 +350,7 @@ class StoneManager(models.Manager):
             "post_gia_remarks",
         ]
 
-        return generate_csv(filename, dir_name, field_names, queryset)
+        return generate_csv(filename, dir_name, field_names, queryset, {})
 
 
 class Split(models.Model):
