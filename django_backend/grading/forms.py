@@ -236,7 +236,7 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
     def __to_db_name_inclusions(self, data):
         for field, value in data.items():
             if "inclusion" in field:
-                inclusions = [value.strip() for value in value.split(",")]
+                inclusions = [value.strip() for value in value.split(",")] if value is not None else []
 
                 try:
                     data[field] = [Inclusion.objects.get(inclusion=inclusion) for inclusion in inclusions]
@@ -539,7 +539,8 @@ class BasicUploadForm(BaseUploadForm):
             for field, value in data.items():
                 if "basic_grader_" in field:
                     try:
-                        data[field] = User.objects.get(username=value.lower())
+                        if value is not None:
+                            data[field] = User.objects.get(username=value.lower())
                     except User.DoesNotExist:
                         errors[row] = {}
                         errors[row][field] = f"Grader user `{value}` account does not exist"
