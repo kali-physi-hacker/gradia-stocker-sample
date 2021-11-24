@@ -92,9 +92,9 @@ class DownloadCSVAdminTest(TestCase):
         self.assertTrue(len(headers), 4)
         field_names = (
             "internal_id",
-            "date_to_GW",
+            "date_from_gw",
             "nano_etch_inscription",
-            "basic_carat_final",
+            "basic_carat",
         )
 
         for field in field_names:
@@ -118,9 +118,9 @@ class DownloadCSVAdminTest(TestCase):
 
         self.assertTrue(len(headers), 4)
         field_names = (
-            "date_to_GIA",
+            "date_from_gia",
             "nano_etch_inscription",
-            "basic_carat_final",
+            "basic_carat",
             "basic_color_final",
         )
         for field in field_names:
@@ -145,12 +145,14 @@ class DownloadCSVAdminTest(TestCase):
 
         headers, content = [row for row in response.content.decode().split("\n") if row != ""]
         headers = headers.split(",")
-        self.assertEqual(len(headers), 22)
+        self.assertEqual(len(headers), 27)
 
         for field in [
             field.name for field in GIAGradingAdjustMixin._meta.get_fields() if "polish" not in field.name
         ]:
             self.assertIn(field, headers)
+        self.assertIn("gia_code", headers)
+        self.assertIn("nano_etch_inscription", headers)
 
     def test_download_to_basic_report_csv_success(self):
         response = self.admin.download_to_basic_report_csv(request=self.request, queryset=self.queryset)
