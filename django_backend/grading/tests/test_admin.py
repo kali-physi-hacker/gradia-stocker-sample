@@ -145,7 +145,7 @@ class DownloadCSVAdminTest(TestCase):
 
         headers, content = [row for row in response.content.decode().split("\n") if row != ""]
         headers = headers.split(",")
-        self.assertEqual(len(headers), 27)
+        self.assertEqual(len(headers), 22)
 
         for field in [
             field.name for field in GIAGradingAdjustMixin._meta.get_fields() if "polish" not in field.name
