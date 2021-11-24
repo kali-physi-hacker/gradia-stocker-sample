@@ -576,14 +576,27 @@ class Stone(
         except IntegrityError:
             # email error to everyone
             raise IntegrityError("External Id already exists")
+    
+    def generate_payload(self):
+        payload = (
+            f" {self.internal_id}, {self.basic_color_final}, {self.basic_clarity_final},"
+            f" {self.sarine_cut_pre_polish_symmetry}, {self.culet_size}"
+        )
+
+        return payload
+
+
 
     def generate_triple_verified_external_id(self):
         """
         Generates full triple verified external_id and updates the stone's external_id value
         :returns:
         """
-        hashed = hashlib.blake2b(digest_size=3)  # 6 characters # G starts the ID
+        payload_part = self.generate_payload()
         later_part = self.generate_id_later_part()
+
+        hashed = hashlib.blake2b(digest_size=3)
+        hashed.update(payload_part.encode("utf-8"))  # 6 characters # G starts the ID
         self.external_id = f"G{hashed.hexdigest()[:-1]}{later_part}"
         self.save_external()
 
@@ -592,7 +605,10 @@ class Stone(
         Generates full basic external_id
         :returns:
         """
-        hashed = hashlib.blake2b(digest_size=2)  # 4 characters # GB starts the ID
+        payload_part = self.generate_payload()
         later_part = self.generate_id_later_part()
+
+        hashed = hashlib.blake2b(digest_size=2)  
+        hashed.update(payload_part.encode("utf-8"))  # 4 characters # GB starts the ID
         self.external_id = f"GB{hashed.hexdigest()}{later_part}-B"
         self.save_external()
