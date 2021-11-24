@@ -21,8 +21,8 @@ class TestIDHashGeneration(TestCase):
         new_stone = stone
         new_stone.id = 4
         new_stone.internal_id = 3
-        new_stone.basic_color_final = 'D'
-        new_stone.basic_polish_final = 'F'
+        new_stone.basic_color_final = "D"
+        new_stone.basic_polish_final = "F"
         new_stone.save()
 
         self.stones = Stone.objects.all()  # Stones created
@@ -43,8 +43,8 @@ class TestIDHashGeneration(TestCase):
         self.assertEqual(external_id[0], "G")
 
     def test_that_triple_external_part_is_not_the_same_for_next_stone(self):
-        #test that for two different stones the external part of their id would not be the same
-        #triple external_id part
+        # test that for two different stones the external part of their id would not be the same
+        # triple external_id part
         stone = self.stones[0]
         stone2 = self.stones[1]
         stone.generate_triple_verified_external_id()
@@ -52,8 +52,8 @@ class TestIDHashGeneration(TestCase):
         self.assertNotEqual(stone.external_id, stone2.external_id)
 
     def test_that_basic_external_part_is_not_the_same_for_next_stone(self):
-        #test that for two different stones the external part of their id would not be the same
-        #basic external_id part
+        # test that for two different stones the external part of their id would not be the same
+        # basic external_id part
         stone = self.stones[0]
         stone2 = self.stones[1]
         stone.generate_basic_external_id()

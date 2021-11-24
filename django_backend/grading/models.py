@@ -576,7 +576,7 @@ class Stone(
         except IntegrityError:
             # email error to everyone
             raise IntegrityError("External Id already exists")
-    
+
     def generate_payload(self):
         payload = (
             f" {self.internal_id}, {self.basic_color_final}, {self.basic_clarity_final},"
@@ -584,8 +584,6 @@ class Stone(
         )
 
         return payload
-
-
 
     def generate_triple_verified_external_id(self):
         """
@@ -608,7 +606,7 @@ class Stone(
         payload_part = self.generate_payload()
         later_part = self.generate_id_later_part()
 
-        hashed = hashlib.blake2b(digest_size=2)  
+        hashed = hashlib.blake2b(digest_size=2)
         hashed.update(payload_part.encode("utf-8"))  # 4 characters # GB starts the ID
         self.external_id = f"GB{hashed.hexdigest()}{later_part}-B"
         self.save_external()
