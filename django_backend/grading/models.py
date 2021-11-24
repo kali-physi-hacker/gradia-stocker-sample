@@ -561,10 +561,7 @@ class Stone(
         Returns  the last 3 digits of the internal id
         """
         # if internal_id is 1 === 001
-        internal_id = self.internal_id
-        if len(str(internal_id)) > 3:
-            internal_id = internal_id % 1000
-        return f"{internal_id:03d}"
+        return f"{self.internal_id% 1000:03d}"
 
     # use a modular to save instead of repeating these twice
     def save_external(self):
