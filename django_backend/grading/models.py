@@ -558,55 +558,39 @@ class Stone(
 
     def generate_id_later_part(self):
         """
-        Returns the internal_id of a particular format
-        :returns:
+        Returns  the last 3 digits of the internal id
         """
         # if internal_id is 1 === 001
         internal_id = self.internal_id
         if len(str(internal_id)) > 3:
-            internal_id = internal_id[:4]
+            internal_id = internal_id % 1000
         return f"{internal_id:03d}"
 
-    def generate_triple_verified_external_id(self):
-        """
-        Generates full triple verified external_id and updates the stone's external_id value
-        :returns:
-        """
-        # initial part
-        basic_fields = [attr for attr in dir(self) if "basic_" in attr]
-        payload = ", ".join(basic_fields)
-
-        hashed = hashlib.blake2b(digest_size=3)  # 6 characters
-        # hashed.update(payload.encode("utf-8"))
-        # import pdb; pdb.set_trace()
-
-        # G starts the ID
-        later_part = self.generate_id_later_part()
-        external_id = f"G{hashed.hexdigest()[:-1]}{later_part}"
-        self.external_id = external_id
+    #use a modular to save instead of repeating these twice
+    def save_external(self):
         try:
             self.save()
         except IntegrityError:
             # email error to everyone
             raise IntegrityError("External Id already exists")
+    
+    def generate_triple_verified_external_id(self):
+        """
+        Generates full triple verified external_id and updates the stone's external_id value
+        :returns:
+        """
+        hashed = hashlib.blake2b(digest_size=3)  # 6 characters # G starts the ID
+        later_part = self.generate_id_later_part()
+        self.external_id = f"G{hashed.hexdigest()[:-1]}{later_part}"
+        self.save_external()
 
     def generate_basic_external_id(self):
         """
         Generates full basic external_id
         :returns:
         """
-        basic_fields = [attr for attr in dir(self) if "basic_" in attr]
-        payload = ", ".join(basic_fields)
-
-        hashed = hashlib.blake2b(digest_size=2)  # 4 characters
-        # hashed.update(payload.encode("utf-8"))
-
-        # GB starts the ID
+        hashed = hashlib.blake2b(digest_size=2)  # 4 characters # GB starts the ID
         later_part = self.generate_id_later_part()
-        external_id = f"GB{hashed.hexdigest()}{later_part}"
-        self.external_id = external_id
-        try:
-            self.save()
-        except IntegrityError:
-            # email error to everyone
-            raise IntegrityError("External Id already exists")
+        self.external_id = f"GB{hashed.hexdigest()}{later_part}"
+        self.save_external()
+
