@@ -566,14 +566,14 @@ class Stone(
             internal_id = internal_id % 1000
         return f"{internal_id:03d}"
 
-    #use a modular to save instead of repeating these twice
+    # use a modular to save instead of repeating these twice
     def save_external(self):
         try:
             self.save()
         except IntegrityError:
             # email error to everyone
             raise IntegrityError("External Id already exists")
-    
+
     def generate_triple_verified_external_id(self):
         """
         Generates full triple verified external_id and updates the stone's external_id value
@@ -593,4 +593,3 @@ class Stone(
         later_part = self.generate_id_later_part()
         self.external_id = f"GB{hashed.hexdigest()}{later_part}"
         self.save_external()
-

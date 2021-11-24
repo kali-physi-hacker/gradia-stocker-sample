@@ -33,7 +33,7 @@ class TestIDHashGeneration(TestCase):
         :returns:
         """
         stone = self.stones[0]
-        #test if stone does not have any pre-existing external_id
+        # test if stone does not have any pre-existing external_id
         self.assertEqual(stone.external_id, None)
         stone.generate_triple_verified_external_id()
         external_id = stone.external_id
