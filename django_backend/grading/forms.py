@@ -289,9 +289,11 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
 
         if "culet_size_description" in data:
             if data["culet_size_description"] is not None:
-                # import pdb; pdb.set_trace()
                 data["culet_size_description"] = "/".join(
-                    [culet_choices_display_map.get(size.strip()) for size in data["culet_size_description"].split("/")]
+                    [
+                        culet_choices_display_map.get(size.strip())
+                        for size in data["culet_size_description"].split("/")
+                    ]
                 )
 
         return data
@@ -554,7 +556,6 @@ class BasicUploadForm(BaseUploadForm):
     def save(self):
         stones = []
         for data in self.cleaned_data:
-            # import pdb; pdb.set_trace()
             stone = Stone.objects.get(internal_id=data["internal_id"])  # After resolving the id stuff
 
             inclusions_fields = (
