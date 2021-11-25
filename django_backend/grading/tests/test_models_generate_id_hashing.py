@@ -49,7 +49,7 @@ class TestIDHashGeneration(TestCase):
         stone2 = self.stones[1]
         stone.generate_triple_verified_external_id()
         stone2.generate_triple_verified_external_id()
-        self.assertNotEqual(stone.external_id, stone2.external_id)
+        self.assertNotEqual(stone.external_id[:-3], stone2.external_id[:-3])
 
     def test_that_basic_external_part_is_not_the_same_for_next_stone(self):
         # test that for two different stones the external part of their id would not be the same
@@ -58,7 +58,7 @@ class TestIDHashGeneration(TestCase):
         stone2 = self.stones[1]
         stone.generate_basic_external_id()
         stone2.generate_basic_external_id()
-        self.assertNotEqual(stone.external_id, stone2.external_id)
+        self.assertNotEqual(stone.external_id[:-5], stone2.external_id[:-5])
 
     def test_triple_verified_external_id_generation_is_deterministic(self):
         """
