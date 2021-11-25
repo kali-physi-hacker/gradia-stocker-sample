@@ -269,7 +269,8 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
 
         for field in fields:
             if field in data:
-                data[field] = data[field].upper().strip()
+                if data[field] is not None:
+                    data[field] = data[field].upper().strip()
 
         return data
 
@@ -287,9 +288,11 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
         culet_choices_display_map = {key.upper(): value for (value, key) in CuletGrades.CHOICES}
 
         if "culet_size_description" in data:
-            data["culet_size_description"] = "/".join(
-                [culet_choices_display_map.get(size.strip()) for size in data["culet_size_description"].split("/")]
-            )
+            if data["culet_size_description"] is not None:
+                # import pdb; pdb.set_trace()
+                data["culet_size_description"] = "/".join(
+                    [culet_choices_display_map.get(size.strip()) for size in data["culet_size_description"].split("/")]
+                )
 
         return data
 
@@ -327,7 +330,8 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
     def __clean_heights(self, data):
         try:
             if "height" in data:
-                data["height"] = round(float(data["height"]), 2)
+                if data["height"] is not None:
+                    data["height"] = round(float(data["height"]), 2)
         except ValueError:
             pass
 
@@ -550,6 +554,7 @@ class BasicUploadForm(BaseUploadForm):
     def save(self):
         stones = []
         for data in self.cleaned_data:
+            # import pdb; pdb.set_trace()
             stone = Stone.objects.get(internal_id=data["internal_id"])  # After resolving the id stuff
 
             inclusions_fields = (
