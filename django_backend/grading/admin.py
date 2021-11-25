@@ -280,6 +280,7 @@ class StoneAdmin(admin.ModelAdmin):
     def get_list_display(self, request):
         return [
             "external_id",
+            "customer_receipt_number",
             "current_location",
             "basic_carat",
             "basic_color_final",
@@ -287,7 +288,6 @@ class StoneAdmin(admin.ModelAdmin):
             "basic_fluorescence_final",
             "basic_culet_final",
             "split_from",
-            "customer_receipt_number",
         ]
 
     actions = [
