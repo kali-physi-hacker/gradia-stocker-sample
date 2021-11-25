@@ -287,7 +287,7 @@ class StoneAdmin(admin.ModelAdmin):
             "basic_clarity_final",
             "basic_fluorescence_final",
             "basic_culet_final",
-            "split_from"
+            "split_from",
         ]
 
     actions = [
