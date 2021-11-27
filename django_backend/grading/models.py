@@ -141,6 +141,36 @@ class StoneManager(models.Manager):
 
         return generate_csv(filename, dir_name, field_names, queryset, {})
 
+    def generate_goldway_grading_template(self, request, queryset):
+        filename = "Goldway_Grading_Template_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
+        dir_name = settings.MEDIA_ROOT + "csv_downloads/goldway_grading_template/"
+        field_names = [
+            "date_from_gw",
+            "internal_id",
+            "goldway_code",
+            "nano_etch_inscription",
+            "gw_return_reweight",
+            "gw_color",
+            "gw_clarity",
+            "gw_fluorescence",
+            "gw_remarks",
+        ]
+        return generate_csv(filename, dir_name, field_names, queryset, {})
+
+    def generate_gia_grading_template(self, request, queryset):
+        filename = "GIA_Grading_Template_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
+        dir_name = settings.MEDIA_ROOT + "csv_downloads/gia_grading_template/"
+        field_names = [
+            "internal_id",
+            "date_from_gia",
+            "nano_etch_inscription",
+            "gia_code",
+            "gia_diamond_description",
+            "gia_color",
+            "gia_remarks",
+        ]
+        return generate_csv(filename, dir_name, field_names, queryset, {})
+
     def generate_to_goldway_csv(self, request, queryset):
         filename = "To_Goldway_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
         dir_name = settings.MEDIA_ROOT + "/csv_downloads/to_goldway/"
