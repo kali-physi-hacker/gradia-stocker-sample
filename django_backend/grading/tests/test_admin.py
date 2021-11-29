@@ -286,3 +286,55 @@ class DownloadCSVAdminTest(TestCase):
 
         for field in field_names:
             self.assertIn(field, headers)
+
+    def test_download_goldway_grading_template_success(self):
+        response = self.admin.download_goldway_grading_template(request=self.request, queryset=self.queryset)
+        self.assertEqual(response["Content-Type"], "text/csv")
+        disposition_type, file_name = response["Content-Disposition"].split(";")
+        file_name = file_name.split("/")[-1]
+        self.assertEqual(disposition_type, "attachment")
+        self.assertTrue(file_name.startswith("Goldway_Grading_Template_"))
+
+        # Test content of csv file
+        headers, content = [row for row in response.content.decode().split("\n") if row != ""]
+        headers = headers.split(",")
+
+        self.assertEqual(len(headers), 9)
+        field_names = (
+            "date_from_gw",
+            "internal_id",
+            "goldway_code",
+            "nano_etch_inscription",
+            "gw_return_reweight",
+            "gw_color",
+            "gw_clarity",
+            "gw_fluorescence",
+            "gw_remarks",
+        )
+        for field in field_names:
+            self.assertIn(field, headers)
+
+    def test_download_gia_grading_template_success(self):
+        response = self.admin.download_gia_grading_template(request=self.request, queryset=self.queryset)
+        self.assertEqual(response["Content-Type"], "text/csv")
+        disposition_type, file_name = response["Content-Disposition"].split(";")
+        file_name = file_name.split("/")[-1]
+        self.assertEqual(disposition_type, "attachment")
+        self.assertTrue(file_name.startswith("GIA_Grading_Template_"))
+
+        # Test content of csv file
+        headers, content = [row for row in response.content.decode().split("\n") if row != ""]
+        headers = headers.split(",")
+
+        self.assertEqual(len(headers), 7)
+        field_names = (
+            "internal_id",
+            "date_from_gia",
+            "nano_etch_inscription",
+            "gia_code",
+            "gia_diamond_description",
+            "gia_color",
+            "gia_remarks",
+        )
+        for field in field_names:
+            self.assertIn(field, headers)
