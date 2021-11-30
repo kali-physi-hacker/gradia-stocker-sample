@@ -657,7 +657,7 @@ class GWAdjustingUploadForm(BaseUploadForm):
 
         for row, data in enumerate(stone_data):
             for field, value in data.items():
-                if "_grader_" in field:
+                if "_grader_" in field and value is not None:
                     try:
                         data[field] = User.objects.get(username=value.lower())
                     except User.DoesNotExist:
