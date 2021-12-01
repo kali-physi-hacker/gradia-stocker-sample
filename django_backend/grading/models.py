@@ -155,7 +155,9 @@ class StoneManager(models.Manager):
             "gw_fluorescence",
             "gw_remarks",
         ]
-        return generate_csv(filename, dir_name, field_names, queryset, {})
+        return generate_csv(
+            filename, dir_name, field_names, queryset, field_map={"nano_etch_inscription": "external_id"}
+        )
 
     def generate_gia_grading_template(self, request, queryset):
         filename = "GIA_Grading_Template_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
@@ -169,11 +171,18 @@ class StoneManager(models.Manager):
             "gia_color",
             "gia_remarks",
         ]
-        return generate_csv(filename, dir_name, field_names, queryset, {})
+        return generate_csv(
+            filename, dir_name, field_names, queryset, field_map={"nano_etch_inscription": "external_id"}
+        )
 
     def generate_to_goldway_csv(self, request, queryset):
         filename = "To_Goldway_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
         dir_name = settings.MEDIA_ROOT + "/csv_downloads/to_goldway/"
+
+        # Generate the triple verified external ids
+        for stone in self.all():
+            stone.generate_triple_verified_external_id()
+
         field_names = [
             "date_from_gw",
             "internal_id",
@@ -620,12 +629,8 @@ class Stone(
         Generates full triple verified external_id and updates the stone's external_id value
         :returns:
         """
-        payload_part = self.generate_payload()
-        later_part = self.generate_id_later_part()
-
-        hashed = hashlib.blake2b(digest_size=3)
-        hashed.update(payload_part.encode("utf-8"))  # 6 characters # G starts the ID
-        self.external_id = f"G{hashed.hexdigest()[:-1]}{later_part}"
+        self.generate_basic_external_id()
+        self.external_id = self.external_id[:-2]  # Just strip of -B
         self.save_external()
 
     def generate_basic_external_id(self):
@@ -636,7 +641,7 @@ class Stone(
         payload_part = self.generate_payload()
         later_part = self.generate_id_later_part()
 
-        hashed = hashlib.blake2b(digest_size=2)
+        hashed = hashlib.blake2b(digest_size=3)
         hashed.update(payload_part.encode("utf-8"))  # 4 characters # GB starts the ID
-        self.external_id = f"GB{hashed.hexdigest()}{later_part}-B"
+        self.external_id = f"G{hashed.hexdigest()[:-1]}{later_part}-B"
         self.save_external()

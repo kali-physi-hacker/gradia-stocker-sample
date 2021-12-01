@@ -102,7 +102,7 @@ class TestIDHashGeneration(TestCase):
         external_id = stone.external_id
 
         self.assertEqual(len(external_id), 11)
-        self.assertEqual(external_id[:2], "GB")
+        self.assertEqual(external_id[0], "G")
         self.assertEqual(external_id[9:], "-B")
 
     def test_basic_external_id_generation_is_deterministic(self):
