@@ -155,7 +155,9 @@ class StoneManager(models.Manager):
             "gw_fluorescence",
             "gw_remarks",
         ]
-        return generate_csv(filename, dir_name, field_names, queryset, {})
+        return generate_csv(
+            filename, dir_name, field_names, queryset, field_map={"nano_etch_inscription": "external_id"}
+        )
 
     def generate_gia_grading_template(self, request, queryset):
         filename = "GIA_Grading_Template_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
@@ -169,7 +171,9 @@ class StoneManager(models.Manager):
             "gia_color",
             "gia_remarks",
         ]
-        return generate_csv(filename, dir_name, field_names, queryset, {})
+        return generate_csv(
+            filename, dir_name, field_names, queryset, field_map={"nano_etch_inscription": "external_id"}
+        )
 
     def generate_to_goldway_csv(self, request, queryset):
         filename = "To_Goldway_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
