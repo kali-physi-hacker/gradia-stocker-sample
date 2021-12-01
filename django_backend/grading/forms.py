@@ -356,6 +356,18 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
 
         return data
 
+    def __clean_weights(self, data):
+        """
+        Cleans weight fields (rounding to 6 decimal places)
+        :param data:
+        :return:
+        """
+        for field, value in data.items():
+            if "weight" in field:
+                data[field] = float("%.5f" % value)
+
+        return data
+
     def __process_csv_content(self, csv_file):
         """
         Do some processing and return data
@@ -379,6 +391,7 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
         stone_data = [self.__clean_heights(data) for data in stone_data]
         stone_data = [self.__clean_girdles(data) for data in stone_data]
         stone_data = [self.__clean_remarks(data) for data in stone_data]
+        stone_data = [self.__clean_weights(data) for data in stone_data]
 
         self.__stone_data = stone_data
 
