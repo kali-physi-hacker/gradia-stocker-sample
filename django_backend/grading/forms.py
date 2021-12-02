@@ -364,7 +364,7 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
         """
         for field, value in data.items():
             if "weight" in field:
-                data[field] = float("%.5f" % value)
+                data[field] = float("%.5f" % value) if isinstance(value, float) or isinstance(value, int) else value
 
         return data
 
