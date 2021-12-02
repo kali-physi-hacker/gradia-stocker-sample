@@ -134,6 +134,11 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
 
         self.mixin = self.Meta.mixin
 
+        self.new = False
+
+        if hasattr(self.Meta, "new"):
+            self.new = self.Meta.new
+
         extra_fields = [
             {field_name: field} for field_name, field in self.Meta.__dict__.items() if isinstance(field, forms.Field)
         ]
@@ -154,6 +159,7 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
         :param mixin:
         :return:
         """
+        is_new = self.new
 
         class StoneDataForm(forms.ModelForm):
             internal_id = forms.IntegerField()
@@ -161,6 +167,28 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
             class Meta:
                 fields = [field.name for field in mixin._meta.get_fields()]
                 model = mixin
+
+            def clean_internal_id(self):
+                """
+                If new is True internal_id should not exist, else should exist
+                :return:
+                """
+                internal_id = self.cleaned_data["internal_id"]
+                try:
+                    stone = Stone.objects.get(internal_id=internal_id)
+                except Stone.DoesNotExist:
+                    stone = None
+
+                # if self.new and stone is None:
+                #     return internal_id
+
+                if is_new and stone is not None:
+                    raise ValidationError(f"Stone with internal id: {internal_id} already exist")
+
+                if not is_new and stone is None:
+                    raise ValidationError(f"Stone with internal id: {internal_id} does not exist")
+
+                return internal_id
 
         return StoneDataForm
 
@@ -472,6 +500,7 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
 class SarineUploadForm(BaseUploadForm):
     class Meta:
         mixin = SarineGradingMixin
+        new = True
 
     def __init__(self, user, *args, **kwargs):
         self.user = user
