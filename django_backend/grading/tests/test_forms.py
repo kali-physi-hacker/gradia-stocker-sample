@@ -258,6 +258,7 @@ class BaseUploadFormClassTest(TestCase):
         class SampleUploadClass(BaseUploadForm):
             class Meta:
                 mixin = SarineGradingMixin
+                new = True
 
             def __init__(self, user, *args, **kwargs):
                 self.user = user
@@ -378,6 +379,41 @@ class BaseUploadFormClassTest(TestCase):
 
         for actual_stone, expected_stone in zip(form.cleaned_data, self.expected_stones):
             self.assertEqual(actual_stone, expected_stone)
+
+    def test_is_new_attr_true(self):
+        """
+        Tests that if is_new is True validation is applied
+        :return:
+        """
+
+        class SampleUploadForm(BaseUploadForm):
+            class Meta:
+                mixin = SarineGradingMixin
+                new = True
+
+        form = SampleUploadForm(
+            data={}, files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())}
+        )
+        self.assertTrue(form.is_valid())
+
+    def test_is_new_attr_false(self):
+        """
+        Tests that if is_new is False validation is applied
+        :return:
+        """
+
+        class AnotherUploadForm(BaseUploadForm):
+            class Meta:
+                mixin = SarineGradingMixin
+
+        form = AnotherUploadForm(
+            data={}, files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())}
+        )
+
+        self.assertFalse(form.is_valid())
+        for row, internal_id in enumerate((1, 5, 6)):
+            error = form.csv_errors[row]["internal_id"][0]
+            self.assertEqual(error, f"Stone with internal id: {internal_id} does not exist")
 
 
 class SarineUploadFormTest(TestCase):
@@ -621,7 +657,7 @@ class BasicUploadFormTest(TestCase):
         """
         Tests csv file True validation
         """
-
+        self.do_sarine_upload()
         # No column spaces
         form = BasicUploadForm(
             data={},
@@ -631,6 +667,7 @@ class BasicUploadFormTest(TestCase):
         self.assertTrue(form.is_valid())
 
     def test_csv_file_is_valid_for_csv_with_column_spaces(self):
+        self.do_sarine_upload()
         # With column spaces
         form = BasicUploadForm(
             data={},
@@ -784,9 +821,6 @@ class GiaGradingUploadForm(TestCase):
         self.csv_file_spaces = open("grading/tests/fixtures/basic-01-spaces.csv", "rb")
 
         self.do_initial_upload()
-
-        """
-        """
 
         self.user = User.objects.get(username="vault")
 
