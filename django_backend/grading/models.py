@@ -224,7 +224,9 @@ class StoneManager(models.Manager):
             "gw_adjust_remarks",
         ]
 
-        return generate_csv(filename, dir_name, field_names, queryset, field_map={"nano_etch_inscription": "external_id"})
+        return generate_csv(
+            filename, dir_name, field_names, queryset, field_map={"nano_etch_inscription": "external_id"}
+        )
 
     def generate_to_GIA_csv(self, queryset):
         filename = "To_GIA_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
@@ -268,7 +270,9 @@ class StoneManager(models.Manager):
             "gia_adjust_remarks",
         ]
 
-        return generate_csv(filename, dir_name, field_names, queryset, field_map={"nano_etch_inscription": "external_id"})
+        return generate_csv(
+            filename, dir_name, field_names, queryset, field_map={"nano_etch_inscription": "external_id"}
+        )
 
     def generate_basic_report_csv(self, queryset):
         filename = "Basic_Report" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
