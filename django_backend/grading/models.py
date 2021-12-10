@@ -180,7 +180,7 @@ class StoneManager(models.Manager):
         dir_name = settings.MEDIA_ROOT + "/csv_downloads/to_goldway/"
 
         # Generate the triple verified external ids
-        for stone in self.all():
+        for stone in queryset:
             stone.generate_triple_verified_external_id()
 
         field_names = [
