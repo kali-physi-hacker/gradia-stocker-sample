@@ -284,7 +284,7 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
                         if value.upper() in culet_characteristics_choices_map
                         else value
                     )
-                
+
         return data
 
     def __make_caps(self, data):
@@ -354,7 +354,7 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
             self.__to_db_name_inclusions,
             self.__to_db_name_girdles,
             self.__to_db_name_culet_descriptions,
-            self.__to_db_name_culet_characteristics
+            self.__to_db_name_culet_characteristics,
         )
         for cleaner in cleaners:
             data = cleaner(data)
