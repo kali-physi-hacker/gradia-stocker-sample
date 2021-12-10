@@ -275,7 +275,7 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
 
     def __to_db_name_culet_characteristics(self, data):
         culet_characteristics_choices_map = {key.upper(): value for (value, key) in CuletCharacteristics.CHOICES}
-        culet_characteristics_choices_map.update({"SL ABR": "SAB"})
+        culet_characteristics_choices_map.update({"SL ABR": "SAB", "V SL ABR": "VSAB"})
         for field, value in data.items():
             if "culet_characteristics" in field:
                 data[field] = (
@@ -367,6 +367,16 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
 
         return data
 
+    def __clean_carats(self, data):
+        try:
+            if "carat" in data:
+                if data["basic_carat"] is not None:
+                    data["basic_carat"] = round(float(data["basic_carat"]), 5)
+        except ValueError:
+            pass
+
+        return data
+
     def __clean_girdles(self, data):
         girdle_grades = [grade for grade in data if "girdle_min_grade" in grade or "girdle_max_grade" in grade]
 
@@ -420,6 +430,7 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
         stone_data = [self.__clean_girdles(data) for data in stone_data]
         stone_data = [self.__clean_remarks(data) for data in stone_data]
         stone_data = [self.__clean_weights(data) for data in stone_data]
+        stone_data = [self.__clean_carats(data) for data in stone_data]
 
         self.__stone_data = stone_data
 
