@@ -277,12 +277,15 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
         culet_characteristics_choices_map = {key.upper(): value for (value, key) in CuletCharacteristics.CHOICES}
         culet_characteristics_choices_map.update({"SL ABR": "SAB", "V SL ABR": "VSAB"})
         for field, value in data.items():
-            if "culet_characteristics" in field:
-                data[field] = (
-                    culet_characteristics_choices_map[value.upper()]
-                    if value in culet_characteristics_choices_map
-                    else value
-                )
+            if value is not None:
+                if "culet_characteristic" in field:
+                    data[field] = (
+                        culet_characteristics_choices_map[value.upper().strip()]
+                        if value.upper() in culet_characteristics_choices_map
+                        else value
+                    )
+                
+        return data
 
     def __make_caps(self, data):
         # Make uppercase
@@ -351,6 +354,7 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
             self.__to_db_name_inclusions,
             self.__to_db_name_girdles,
             self.__to_db_name_culet_descriptions,
+            self.__to_db_name_culet_characteristics
         )
         for cleaner in cleaners:
             data = cleaner(data)
@@ -369,7 +373,7 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
 
     def __clean_carats(self, data):
         try:
-            if "carat" in data:
+            if "basic_carat" in data:
                 if data["basic_carat"] is not None:
                     data["basic_carat"] = round(float(data["basic_carat"]), 5)
         except ValueError:
