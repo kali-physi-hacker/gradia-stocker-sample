@@ -6,9 +6,11 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
 from django.shortcuts import render, redirect
 from django.contrib.auth import get_user_model
+from django.http import HttpResponse
 from django.views.generic.base import TemplateResponseMixin
 
 from .forms import CSVImportForm, GWStoneTransferForm, GiaStoneTransferForm, ExternalStoneTransferForm
+from grading.models import Stone
 
 from grading.views import errors_page
 
@@ -66,7 +68,14 @@ class TransferView(LoginRequiredMixin, View):
             return errors_page(request=request, title=f"{self.title} Stone Transfer", form=form)
 
         form.save()
-        return redirect("/admin/ownerships/stonetransfer/")
+
+        stones = Stone.objects.filter(internal_id__in=form.cleaned_data[0])
+        # Download here
+        file_path = Stone.objects.generate_to_goldway_csv(request, stones)
+        with open(file_path, mode="r") as file:
+            response = HttpResponse(file, content_type="text/csv")
+            response["Content-Disposition"] = "attachment; filename=%s" % file_path
+            return response
 
 
 class GoldwayTransferView(TransferView):
