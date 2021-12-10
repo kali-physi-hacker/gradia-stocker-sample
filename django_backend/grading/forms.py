@@ -371,9 +371,11 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
         try:
             if "carat" in data:
                 if data["basic_carat"] is not None:
-                    data["basic_carat"] = round(float(data["height"]), 5)
+                    data["basic_carat"] = round(float(data["basic_carat"]), 5)
         except ValueError:
             pass
+
+        return data
 
     def __clean_girdles(self, data):
         girdle_grades = [grade for grade in data if "girdle_min_grade" in grade or "girdle_max_grade" in grade]
