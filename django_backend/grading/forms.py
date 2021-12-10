@@ -275,7 +275,7 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
 
     def __to_db_name_culet_characteristics(self, data):
         culet_characteristics_choices_map = {key.upper(): value for (value, key) in CuletCharacteristics.CHOICES}
-        culet_characteristics_choices_map.update({"SL ABR": "SAB"})
+        culet_characteristics_choices_map.update({"SL ABR": "SAB", "V SL ABR": "VSAB"})
         for field, value in data.items():
             if "culet_characteristics" in field:
                 data[field] = (
