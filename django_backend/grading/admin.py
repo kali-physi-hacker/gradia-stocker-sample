@@ -299,7 +299,6 @@ class StoneAdmin(admin.ModelAdmin):
         "download_basic_grading_template",  # generate id and girdle_min_grade
         "download_goldway_grading_template",
         "download_gia_grading_template",
-        "download_to_goldway_csv",
         "download_adjust_goldway_csv",
         "download_master_reports",
         "download_to_GIA_csv",
@@ -350,15 +349,6 @@ class StoneAdmin(admin.ModelAdmin):
             return response
 
     download_gia_grading_template.short_description = "Download GIA Grading CSV Template"
-
-    def download_to_goldway_csv(self, request, queryset):
-        file_path = Stone.objects.generate_to_goldway_csv(request, queryset)
-        with open(file_path, mode="r") as file:
-            response = HttpResponse(file, content_type="text/csv")
-            response["Content-Disposition"] = "attachment; filename=%s" % file_path
-            return response
-
-    download_to_goldway_csv.short_description = "Download Goldway CSV Transfer"
 
     def download_adjust_goldway_csv(self, request, queryset):
         file_path = Stone.objects.generate_adjust_goldway_csv(queryset)
