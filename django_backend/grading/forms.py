@@ -367,6 +367,14 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
 
         return data
 
+    def __clean_carats(self, data):
+        try:
+            if "carat" in data:
+                if data["basic_carat"] is not None:
+                    data["basic_carat"] = round(float(data["height"]), 5)
+        except ValueError:
+            pass
+
     def __clean_girdles(self, data):
         girdle_grades = [grade for grade in data if "girdle_min_grade" in grade or "girdle_max_grade" in grade]
 
@@ -420,6 +428,7 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
         stone_data = [self.__clean_girdles(data) for data in stone_data]
         stone_data = [self.__clean_remarks(data) for data in stone_data]
         stone_data = [self.__clean_weights(data) for data in stone_data]
+        stone_data = [self.__clean_carats(data) for data in stone_data]
 
         self.__stone_data = stone_data
 
