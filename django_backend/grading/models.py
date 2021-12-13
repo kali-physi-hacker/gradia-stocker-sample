@@ -83,14 +83,14 @@ class StoneManager(models.Manager):
         dir_name = settings.MEDIA_ROOT + "/csv_downloads/download_ids/"
         field_names = ["internal_id"]
 
-        return generate_csv(filename, dir_name, field_names, queryset)
+        return generate_csv(filename, dir_name, field_names, queryset, {})
 
     def generate_master_report_csv(self, queryset):
         filename = "Master_report_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
         dir_name = settings.MEDIA_ROOT + "/csv_downloads/master_reports/"
         field_names = get_stone_fields(Stone)
 
-        return generate_csv(filename, dir_name, field_names, queryset)
+        return generate_csv(filename, dir_name, field_names, queryset, {})
 
     def generate_basic_grading_template(self, request, queryset):
         filename = "Basic_Grading_Template_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
