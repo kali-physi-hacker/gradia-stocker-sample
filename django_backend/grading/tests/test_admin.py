@@ -78,28 +78,6 @@ class DownloadCSVAdminTest(TestCase):
         self.assertIn("internal_id", headers)
         self.assertIn("nano_etch_inscription", headers)
 
-    def test_download_to_goldway_csv_success(self):
-        response = self.admin.download_to_goldway_csv(request=self.request, queryset=self.queryset)
-        self.assertEqual(response["Content-Type"], "text/csv")
-        disposition_type, file_name = response["Content-Disposition"].split(";")
-        file_name = file_name.split("/")[-1]
-        self.assertEqual(disposition_type, "attachment")
-        self.assertTrue(file_name.startswith("To_Goldway"))
-
-        headers, content = [row for row in response.content.decode().split("\n") if row != ""]
-        headers = headers.split(",")
-
-        self.assertTrue(len(headers), 4)
-        field_names = (
-            "internal_id",
-            "date_from_gw",
-            "nano_etch_inscription",
-            "basic_carat",
-        )
-
-        for field in field_names:
-            self.assertIn(field, headers)
-
     def test_download_to_gia_csv_success(self):
         # give the stones a nanoetch ...
         for stone in Stone.objects.all():
