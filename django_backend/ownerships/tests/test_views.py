@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 from grading.forms import SarineUploadForm, BasicUploadForm
+from grading.models import Stone
 
 
 User = get_user_model()
@@ -42,8 +43,22 @@ class StoneTransferViews(TestCase):
         csv_file = open("ownerships/tests/resources/G048RV.csv")
         self.client.login(**self.grader_user)
         response = self.client.post(reverse("ownerships:goldway_transfer_upload_url"), data={"file": csv_file})
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, "/admin/ownerships/stonetransfer/")
+        self.assertEqual(response.status_code, 200)
+
+        expected_content_ids = []
+        with open("ownerships/tests/resources/gia.csv") as csv_file:
+            expected_content_ids.extend(csv_file.read().split("\n")[1:])
+
+        expected_content_ids.reverse()
+
+        actual_content = response.content.decode().split("\n")[1:]
+
+        for index, expected_id in enumerate(expected_content_ids):
+            stone = Stone.objects.get(internal_id=expected_id)
+            internal_id, external_id, basic_carat = actual_content[index].split(",")[1:]
+            self.assertEqual(internal_id, expected_id)
+            self.assertEqual(external_id, stone.external_id)
+            self.assertEqual(float(basic_carat), float(stone.basic_carat))
 
     def test_transfer_to_goldway_fail(self):
         csv_file = open("ownerships/tests/resources/G048RV.csv")
@@ -61,8 +76,22 @@ class StoneTransferViews(TestCase):
         csv_file = open("ownerships/tests/resources/gia.csv")
         self.client.login(**self.grader_user)
         response = self.client.post(reverse("ownerships:gia_transfer_upload_url"), data={"file": csv_file})
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, "/admin/ownerships/stonetransfer/")
+        self.assertEqual(response.status_code, 200)
+
+        expected_content_ids = []
+        with open("ownerships/tests/resources/gia.csv") as csv_file:
+            expected_content_ids.extend(csv_file.read().split("\n")[1:])
+
+        expected_content_ids.reverse()
+
+        actual_content = response.content.decode().split("\n")[1:]
+
+        for index, expected_id in enumerate(expected_content_ids):
+            stone = Stone.objects.get(internal_id=expected_id)
+            internal_id, external_id, basic_carat = actual_content[index].split(",")[1:]
+            self.assertEqual(internal_id, expected_id)
+            self.assertEqual(external_id, stone.external_id)
+            self.assertEqual(float(basic_carat), float(stone.basic_carat))
 
     def test_transfer_to_gia_fail(self):
         csv_file = open("ownerships/tests/resources/gia.csv")
@@ -82,9 +111,24 @@ class StoneTransferViews(TestCase):
         response = self.client.post(
             reverse("ownerships:external_transfer_url"), data={"file": csv_file, "customer": customer.pk}
         )
-        # import pdb; pdb.set_trace()
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, "/admin/ownerships/stonetransfer/")
+
+        self.assertEqual(response.status_code, 200)  # Does not do a redirect]
+        self.assertEqual(response["Content-Type"], "text/csv")
+
+        expected_content_ids = []
+        with open("ownerships/tests/resources/gia.csv") as csv_file:
+            expected_content_ids.extend(csv_file.read().split("\n")[1:])
+
+        expected_content_ids.reverse()
+
+        actual_content = response.content.decode().split("\n")[1:]
+
+        for index, expected_id in enumerate(expected_content_ids):
+            stone = Stone.objects.get(internal_id=expected_id)
+            internal_id, external_id, basic_carat = actual_content[index].split(",")[1:]
+            self.assertEqual(internal_id, expected_id)
+            self.assertEqual(external_id, stone.external_id)
+            self.assertEqual(float(basic_carat), float(stone.basic_carat))
 
     def transfer_to_customer_fail(self):
         customer = User.objects.create(username="Test")
