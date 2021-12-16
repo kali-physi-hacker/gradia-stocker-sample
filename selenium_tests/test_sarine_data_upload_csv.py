@@ -230,7 +230,7 @@ def test_uploading_the_same_stone_twice_should_error(browser, data_entry_clerk, 
 
     gia_link = browser.find_element_by_link_text("Sarine Stone")
     browser.slowly_click(gia_link)
-
+    # import pdb; pdb.set_trace()
     upload_file_link = browser.find_element_by_xpath("//input[@type='file']")
     os.chdir("../django_backend")
     upload_file_link.send_keys(os.getcwd() + "/grading/tests/fixtures/sarine-01.csv")
@@ -238,10 +238,4 @@ def test_uploading_the_same_stone_twice_should_error(browser, data_entry_clerk, 
     sarine_upload_link = browser.find_element_by_class_name("default")
     browser.slowly_click(sarine_upload_link)
 
-    errors = (
-        "IntegrityError at /grading/upload/sarine/",
-        "UNIQUE constraint failed: grading_split.original_parcel_id",
-    )
-
-    for ii in errors:
-        browser.assert_body_contains_text(ii)
+    browser.assert_body_contains_text("already exist")

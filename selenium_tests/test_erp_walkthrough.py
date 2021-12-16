@@ -101,24 +101,29 @@ def test_walk_through(browser, django_user_model, erp, admin_user, tanly, kary, 
     upload_file_transfer(browser=browser, file_name="G048RV.csv")
 
     # Upload Goldway results
+    browser.find_element_by_link_text("Home").click()
     browser.find_element_by_link_text("Splits").click()
     browser.find_element_by_link_text("UPLOAD STONE DATA").click()
     browser.find_element_by_link_text("Goldway Stone Data").click()
     upload_file_data(browser=browser, file_name="gold_way-01.csv")
 
     # Transfer stones to gia
+    browser.find_element_by_link_text("Home").click()
+    browser.find_element_by_link_text("Splits").click()
     browser.find_element_by_link_text("Stone transfers").click()
     browser.find_element_by_link_text("TRANSFER STONES").click()
     browser.find_element_by_link_text("GIA Transfer").click()
     upload_file_transfer(browser=browser, file_name="gia.csv")
 
     # Upload GIA results
+    browser.find_element_by_link_text("Home").click()
     browser.find_element_by_link_text("Splits").click()
     browser.find_element_by_link_text("UPLOAD STONE DATA").click()
     browser.find_element_by_link_text("Gia Grading Data").click()
     upload_file_data(browser=browser, file_name="gia.csv")
 
     # Transfer to external customer
+    browser.find_element_by_link_text("Home").click()
     browser.find_element_by_link_text("Stone transfers").click()
     browser.find_element_by_link_text("TRANSFER STONES").click()
     browser.find_element_by_link_text("External Transfer").click()
