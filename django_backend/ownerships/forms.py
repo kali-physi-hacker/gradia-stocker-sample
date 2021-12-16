@@ -2,11 +2,15 @@ import os
 from datetime import datetime
 
 from django import forms
+from django.core.exceptions import PermissionDenied
+from django.db.utils import IntegrityError
 from django.utils.timezone import utc
 from django.contrib.auth import get_user_model
+from django.http import HttpResponse
 
 from grading.models import GoldwayVerification, Stone
 from grading.forms import get_error_headers
+from grading.views import errors_page
 
 from .models import StoneTransfer
 
@@ -67,7 +71,7 @@ class BaseTransferUploadForm(forms.Form):
             except Stone.DoesNotExist:
                 error_dict[row] = {}
                 error_dict[row]["internal_id"] = [f"Stone With ID `{stone_id}` does not exist"]
-
+    
         if error_dict:
             self.__csv_errors = error_dict
             raise forms.ValidationError({"file": "The CSV file content is invalid"})
@@ -130,8 +134,12 @@ class BaseTransferUploadForm(forms.Form):
 class GWStoneTransferForm(BaseTransferUploadForm):
     def save(self):
         stone_ids, invoice_number = self.cleaned_data
-
-        goldway_verification = GoldwayVerification.objects.create(invoice_number=invoice_number)
+        try:
+            goldway_verification = GoldwayVerification.objects.create(invoice_number=invoice_number)
+        except IntegrityError:
+            return forms.ValidationError(f"Invoice number {invoice_number} already exists")
+        # goldway_verification = GoldwayVerification.objects.create(invoice_number=invoice_number)
+                
         transfers = []
 
         for stone_id in stone_ids:

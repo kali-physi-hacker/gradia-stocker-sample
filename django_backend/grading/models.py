@@ -550,7 +550,7 @@ class Parcel(AbstractParcel):
 
 class GoldwayVerification(models.Model):
     purchase_order = models.CharField(max_length=15, blank=True)
-    invoice_number = models.CharField(max_length=15, blank=True)
+    invoice_number = models.CharField(max_length=15, unique=True, blank=True)
     started = models.DateTimeField(auto_now_add=True)
 
     @property
@@ -563,7 +563,7 @@ class GoldwayVerification(models.Model):
 
 class GiaVerification(models.Model):
     receipt_number = models.CharField(max_length=10, blank=True)
-    invoice_number = models.CharField(max_length=10, blank=True)
+    invoice_number = models.CharField(max_length=10, unique=True, blank=True)
     started = models.DateTimeField(auto_now_add=True)
 
     @property
