@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 
 from django import forms
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.utils import IntegrityError
 from django.utils.timezone import utc
 from django.contrib.auth import get_user_model
@@ -71,7 +71,7 @@ class BaseTransferUploadForm(forms.Form):
             except Stone.DoesNotExist:
                 error_dict[row] = {}
                 error_dict[row]["internal_id"] = [f"Stone With ID `{stone_id}` does not exist"]
-    
+
         if error_dict:
             self.__csv_errors = error_dict
             raise forms.ValidationError({"file": "The CSV file content is invalid"})
@@ -91,6 +91,9 @@ class BaseTransferUploadForm(forms.Form):
         Return html table of the errors
         :return:
         """
+        if not self.is_valid():
+            return "<p style='color: red'>Invoice number {invoice_number} already exists</p>"
+
         error_columns = get_error_headers(self.csv_errors)
         table_head = (
             "<thead><tr><th>Row No.</th>"
@@ -132,6 +135,23 @@ class BaseTransferUploadForm(forms.Form):
 
 
 class GWStoneTransferForm(BaseTransferUploadForm):
+    def clean(self):
+        """
+        Raises validation error if invoice number already been used
+        :returns:
+        """
+        stone_id, invoice_number = super().clean()
+
+        try:
+            GoldwayVerification.objects.get(invoice_number=invoice_number)
+            raise forms.ValidationError(
+                f"Stones with this {invoice_number} invoice number has already been transferred to goldway"
+            )
+        except GoldwayVerification.DoesNotExist:
+            pass
+
+        return stone_id, invoice_number
+
     def save(self):
         stone_ids, invoice_number = self.cleaned_data
         try:
@@ -139,7 +159,7 @@ class GWStoneTransferForm(BaseTransferUploadForm):
         except IntegrityError:
             return forms.ValidationError(f"Invoice number {invoice_number} already exists")
         # goldway_verification = GoldwayVerification.objects.create(invoice_number=invoice_number)
-                
+
         transfers = []
 
         for stone_id in stone_ids:

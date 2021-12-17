@@ -100,7 +100,7 @@ class p(TestCase):
 
             self.assertTrue(invoice_number_gw, str())
             self.assertEqual(invoice_number_gw, expected_goldway_verification.invoice_number)
-            
+
     def test_invoice_number_upload_twice_errors(self):
         """
         Tests that when a csv with a particular invoice number is uploaded twice
@@ -108,18 +108,26 @@ class p(TestCase):
         """
         self.do_initial_uploads()
         # You can continue
-        form = GWStoneTransferForm(data={}, user=self.user, files={"file": SimpleUploadedFile(self.gw_file.name, self.gw_file.read())})
-        import pdb; pdb.set_trace()
-        self.assertTrue(form.is_valid)
+        form = GWStoneTransferForm(
+            data={}, user=self.user, files={"file": SimpleUploadedFile(self.gw_file.name, self.gw_file.read())}
+        )
+        self.assertTrue(form.is_valid())
         form.save()
 
         # you can now run the test. There are going to be slight mistakes, tweak and fix them. I'll be with you shortly
-        
-        form = GWStoneTransferForm(data={}, user=self.user, files={"file": SimpleUploadedFile(self.gw_file.name, self.gw_file.read())})
-        import pdb; pdb.set_trace()
+        gw_file = open("ownerships/tests/resources/G048RV.csv", "rb")
+        form = GWStoneTransferForm(
+            data={}, user=self.user, files={"file": SimpleUploadedFile(gw_file.name, gw_file.read())}
+        )
         self.assertFalse(form.is_valid())
         invoice_number = Path("ownerships/tests/resources/G048RV.csv").stem
-        self.assertEqual(form.csv_errors[0]["invoice_number"], f"Stones with this {invoice_number} invoice number has already been transferred to goldway")
+        self.assertEqual(
+            form.errors["__all__"][0],
+            f"Stones with this {invoice_number} invoice number has already been transferred to goldway",
+        )
+
+        # You can test for the errors_as_table method here
+
 
 class GiaTransferFormTest(TestCase):
 
