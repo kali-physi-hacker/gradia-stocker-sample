@@ -656,6 +656,21 @@ class GWGradingUploadForm(BaseUploadForm):
         external_id = forms.CharField(max_length=11)
         goldway_code = forms.CharField()
 
+    def __process_internal_id(self, stone_data, file_name):
+        """
+        custom error that errors if internal id is empty
+        """
+        errors = {}
+        for row, data in enumerate(stone_data):
+            for field, value in data.items():
+                if "internal_id" in field:
+                    if value == None:
+                        errors[row] = {}
+                        errors[row][field] = f"row no {row+1} internal id is empty"
+                    else:
+                        continue
+        return stone_data, errors
+
     def save(self):
         """
         Update the stone instance using data from the gw

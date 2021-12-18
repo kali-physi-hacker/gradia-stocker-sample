@@ -6,36 +6,6 @@ from selenium.webdriver.support.ui import Select
 from grading.models import Stone
 
 
-def test_user_can_download_to_gw_csv_success(browser, data_entry_clerk, initial_stones, download_file_dir):
-    browser.login(data_entry_clerk.username, data_entry_clerk.raw_password)
-
-    stone_tab = browser.find_element_by_link_text("Stones")
-    browser.slowly_click(stone_tab)
-
-    show_stones = browser.find_element_by_link_text("Including splits and exited")
-    browser.slowly_click(show_stones)
-
-    checkbox_1 = browser.find_element_by_class_name("action-checkbox")
-    browser.slowly_click(checkbox_1, elem_should_disappear=False)
-
-    select_from_dropdown = Select(browser.find_element_by_name("action"))
-    select_from_dropdown.select_by_visible_text("Download Goldway CSV Transfer")
-    browser.click_go(elem_should_disappear=False)
-    # wait for 2 seconds for the file to be downloaded and store in path
-    time.sleep(2)
-
-    downloaded_csv_file = os.listdir(download_file_dir)[0]
-    csv_file_path = os.path.join(download_file_dir, downloaded_csv_file)
-
-    csv_file_content = ("date_from_gw", "internal_id", "nano_etch_inscription", "basic_carat_final", "hey")
-
-    read_file = pd.read_csv(csv_file_path)
-    data_frame = pd.DataFrame(read_file).to_dict().keys()
-    for text in csv_file_content:
-        if text not in data_frame:
-            raise AssertionError(f"unable to find the text, {text} in csv file")
-
-
 def test_user_can_download_basic_grading_csv_template_success(
     browser, data_entry_clerk, initial_stones, download_file_dir
 ):
@@ -371,43 +341,6 @@ def test_user_can_download_adjust_gia_csv_success(browser, data_entry_clerk, ini
         "gia_culet_characteristic_3",
         "gia_culet_characteristic_final",
         "gia_adjust_remarks",
-    )
-
-    read_file = pd.read_csv(csv_file_path)
-    data_frame = pd.DataFrame(read_file).to_dict().keys()
-    for text in csv_file_content:
-        if text not in data_frame:
-            raise AssertionError(f"unable to find the text, {text} in the csv file")
-
-
-def test_user_can_download_to_gw_csv_success(browser, data_entry_clerk, initial_stones, download_file_dir):
-    browser.login(data_entry_clerk.username, data_entry_clerk.raw_password)
-
-    stone_tab = browser.find_element_by_link_text("Stones")
-    browser.slowly_click(stone_tab)
-
-    show_stones = browser.find_element_by_link_text("Including splits and exited")
-    browser.slowly_click(show_stones)
-
-    checkbox_1 = browser.find_element_by_class_name("action-checkbox")
-    browser.slowly_click(checkbox_1, elem_should_disappear=False)
-
-    select_from_dropdown = Select(browser.find_element_by_name("action"))
-    select_from_dropdown.select_by_visible_text("Download Goldway CSV Transfer")
-
-    browser.click_go(elem_should_disappear=False)
-
-    # wait for 2 seconds for the file to be downloaded and store in path
-    time.sleep(2)
-
-    downloaded_csv_file = os.listdir(download_file_dir)[0]
-    csv_file_path = os.path.join(download_file_dir, downloaded_csv_file)
-
-    csv_file_content = (
-        "date_from_gw",
-        "internal_id",
-        "nano_etch_inscription",
-        "basic_carat",
     )
 
     read_file = pd.read_csv(csv_file_path)
