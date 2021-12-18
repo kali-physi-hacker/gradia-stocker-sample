@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+import pdb
 
 from django import forms
 from django.core.exceptions import PermissionDenied, ValidationError
@@ -91,8 +92,9 @@ class BaseTransferUploadForm(forms.Form):
         Return html table of the errors
         :return:
         """
-        if not self.is_valid():
-            return "<p style='color: red'>Invoice number {invoice_number} already exists</p>"
+        # if not self.is_valid():
+
+        #     return f"<a style='color: red'>{self.errors.get('__all__')}</a>"
 
         error_columns = get_error_headers(self.csv_errors)
         table_head = (
@@ -145,7 +147,7 @@ class GWStoneTransferForm(BaseTransferUploadForm):
         try:
             GoldwayVerification.objects.get(invoice_number=invoice_number)
             raise forms.ValidationError(
-                f"Stones with this {invoice_number} invoice number has already been transferred to goldway"
+                {"file": f"Stones with this {invoice_number} invoice number has already been transferred to goldway"}
             )
         except GoldwayVerification.DoesNotExist:
             pass
@@ -154,11 +156,8 @@ class GWStoneTransferForm(BaseTransferUploadForm):
 
     def save(self):
         stone_ids, invoice_number = self.cleaned_data
-        try:
-            goldway_verification = GoldwayVerification.objects.create(invoice_number=invoice_number)
-        except IntegrityError:
-            return forms.ValidationError(f"Invoice number {invoice_number} already exists")
-        # goldway_verification = GoldwayVerification.objects.create(invoice_number=invoice_number)
+
+        goldway_verification = GoldwayVerification.objects.create(invoice_number=invoice_number)
 
         transfers = []
 
@@ -169,6 +168,7 @@ class GWStoneTransferForm(BaseTransferUploadForm):
 
             # Create the GoldwayVerification instance and assign to stone
             stone = Stone.objects.get(internal_id=stone_id)
+            # import pdb; pdb.set_trace()
             stone.gw_verification = goldway_verification
             stone.save()
 
