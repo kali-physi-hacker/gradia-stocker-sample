@@ -52,7 +52,7 @@ class p(TestCase):
         form = GWStoneTransferForm(
             data={}, user=self.user, files={"file": SimpleUploadedFile(self.gw_file.name, self.gw_file.read())}
         )
-
+        # import pdb; pdb.set_trace()
         self.assertTrue(form.is_valid())
 
         stone_transfers = form.save()
@@ -92,7 +92,7 @@ class p(TestCase):
 
         invoice_number = Path("ownerships/tests/resources/G048RV.csv").stem
 
-        expected_goldway_verification = GoldwayVerification.objects.create(invoice_number=invoice_number)
+        expected_goldway_verification = GoldwayVerification.objects.get(invoice_number=invoice_number)
 
         for stone_id in stone_ids:
             stone = Stone.objects.get(internal_id=stone_id)
@@ -100,6 +100,30 @@ class p(TestCase):
 
             self.assertTrue(invoice_number_gw, str())
             self.assertEqual(invoice_number_gw, expected_goldway_verification.invoice_number)
+
+    def test_invoice_number_upload_twice_errors(self):
+        """
+        Tests that when a csv with a particular invoice number is uploaded twice
+        :returns:
+        """
+        self.do_initial_uploads()
+        form = GWStoneTransferForm(
+            data={}, user=self.user, files={"file": SimpleUploadedFile(self.gw_file.name, self.gw_file.read())}
+        )
+
+        self.assertTrue(form.is_valid())
+        form.save()
+
+        gw_file = open("ownerships/tests/resources/G048RV.csv", "rb")
+        form = GWStoneTransferForm(
+            data={}, user=self.user, files={"file": SimpleUploadedFile(gw_file.name, gw_file.read())}
+        )
+        self.assertFalse(form.is_valid())
+        invoice_number = Path("ownerships/tests/resources/G048RV.csv").stem
+        self.assertEqual(
+            form.errors["file"][0],
+            f"Stones with this {invoice_number} invoice number has already been transferred to goldway",
+        )
 
 
 class GiaTransferFormTest(TestCase):
