@@ -1,7 +1,4 @@
 import os
-import pytest
-import time
-import re
 
 
 def test_user_can_upload_sarine_stone_data(browser, data_entry_clerk, parcels):
