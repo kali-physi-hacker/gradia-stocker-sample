@@ -251,7 +251,7 @@ class StoneManager(models.Manager):
             "gia_adjust_grader_1",
             "gia_adjust_grader_2",
             "gia_adjust_grader_3",
-            "gia_color_adjusted_final",
+            "gw_color_adjusted_final",
             "gia_color",
             "gia_color_adjusted_1",
             "gia_color_adjusted_2",
