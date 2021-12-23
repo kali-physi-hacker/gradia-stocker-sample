@@ -71,7 +71,6 @@ class TransferView(LoginRequiredMixin, View):
         form.save()
 
         stones = Stone.objects.filter(internal_id__in=form.cleaned_data[0])
-        # import pdb; pdb.set_trace()
         # Download here
 
         file_path = Stone.objects.generate_to_goldway_csv(request, stones)
