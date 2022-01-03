@@ -653,7 +653,6 @@ class GWGradingUploadForm(BaseUploadForm):
         mixin = GWGradingMixin
 
         # extra_fields
-        external_id = forms.CharField(max_length=11)
         goldway_code = forms.CharField()
 
     def __process_internal_id(self, stone_data, file_name):
