@@ -810,6 +810,28 @@ class GoldWayGradingDataTest(TestCase):
                 vault = User.objects.get(username="vault")
                 self.assertEqual(holder, vault)
 
+    def test_external_id_is_not_none(self):
+        form = GWGradingUploadForm(
+            data={}, user=self.grader, files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())}
+        )
+
+        for stone_id in (1, 5, 6):
+            stone = Stone.objects.get(internal_id=stone_id)
+            split = User.objects.get(username="split")
+            goldway = User.objects.get(username="goldway")
+
+            # Transfer stones
+            StoneTransfer.initiate_transfer(item=stone, from_user=split, to_user=goldway, created_by=self.grader)
+            StoneTransfer.confirm_received(item=stone)
+
+        self.assertTrue(form.is_valid())
+        form.save()
+
+        for stone in Stone.objects.all():
+            self.assertTrue(isinstance(stone.external_id, str))
+            self.assertFalse(stone.external_id is None)
+            self.assertEqual(len(stone.external_id), 11)
+
 
 class GiaGradingUploadForm(TestCase):
     fixtures = ("grading/fixtures/test_data.json",)
