@@ -407,7 +407,7 @@ def test_user_can_download_tripple_report_success(browser, data_entry_clerk, ini
         "gia_remarks",
         "post_gia_remarks",
     )
-
+    
     read_file = pd.read_csv(csv_file_path)
     data_frame = pd.DataFrame(read_file).to_dict().keys()
     for text in csv_file_content:
