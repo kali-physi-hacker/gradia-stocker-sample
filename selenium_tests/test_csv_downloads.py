@@ -2,7 +2,7 @@ import os
 import time
 import pandas as pd
 from selenium.webdriver.support.ui import Select
-
+from grading.models import Stone
 
 def test_user_can_download_basic_grading_csv_template_success(
     browser, data_entry_clerk, initial_stones, download_file_dir
