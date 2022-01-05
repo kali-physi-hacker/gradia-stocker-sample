@@ -810,7 +810,13 @@ class GoldWayGradingDataTest(TestCase):
                 vault = User.objects.get(username="vault")
                 self.assertEqual(holder, vault)
 
-    def test_external_id_is_not_none(self):
+    def test_does_not_override_external_id(self):
+
+        # generate dictionary of internal_id: external_id using dictionary comprehension
+        external_ids = {
+            internal_id: Stone.objects.get(internal_id=internal_id).external_id for internal_id in (1, 5, 6)
+        }
+
         form = GWGradingUploadForm(
             data={}, user=self.grader, files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())}
         )
@@ -827,10 +833,9 @@ class GoldWayGradingDataTest(TestCase):
         self.assertTrue(form.is_valid())
         form.save()
 
-        for stone in Stone.objects.all():
-            self.assertTrue(isinstance(stone.external_id, str))
-            self.assertFalse(stone.external_id is None)
-            self.assertEqual(len(stone.external_id), 11)
+        for internal_id, external_id in external_ids.items():
+            stone = Stone.objects.get(internal_id=internal_id)
+            self.assertEqual(stone.external_id, external_id)
 
 
 class GiaGradingUploadForm(TestCase):
