@@ -3,8 +3,6 @@ import time
 import pandas as pd
 from selenium.webdriver.support.ui import Select
 
-from grading.models import Stone
-
 
 def test_user_can_download_basic_grading_csv_template_success(
     browser, data_entry_clerk, initial_stones, download_file_dir
@@ -444,7 +442,10 @@ def test_can_download_master_report_csv(browser, data_entry_clerk, initial_stone
     )
 
     read_file = pd.read_csv(csv_file_path)
-    data_frame = pd.DataFrame(read_file).to_dict().keys()
+    data_frame = pd.DataFrame(read_file).to_dict().keys()   
     for text in csv_file_content:
         if text not in data_frame:
             raise AssertionError(f"unable to find the text, {text} in the csv file")
+    splitFrom = str(read_file['split_from'].values[0])
+    if "Split of" in splitFrom:
+        raise AssertionError("contains Split of , in split_from value")
