@@ -86,6 +86,9 @@ def generate_csv(filename, dir_name, field_names, queryset, field_map):
                     except:
                         value = ""
 
+                if value is None:
+                    value = ""
+
                 if is_lab_export and field in omit_plus_or_minus_fields:
                     value = value.strip("+").strip("-")
 
