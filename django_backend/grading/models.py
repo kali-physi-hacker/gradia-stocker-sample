@@ -37,6 +37,7 @@ from stonegrading.grades import (
     GirdleGrades,
     FluorescenceGrades,
     Inclusions,
+    CuletCharacteristics,
 )
 
 from customers.models import Entity
@@ -46,15 +47,31 @@ from .helpers import get_stone_fields
 
 
 def generate_csv(filename, dir_name, field_names, queryset, field_map):
+    is_lab_export = False
+
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
     file_path = dir_name + filename
 
+    if "gradia_ID" in field_map:  # if gradia_ID found it means we're doing an export to lab
+        omit_plus_or_minus_fields = (
+            "gia_color_adjusted_final",
+            "gw_clarity_adjusted_final",
+            "gw_fluorescence_adjusted_final",
+            "basic_polish_final",
+        )
+        is_lab_export = True
+
     with open(file_path, "w") as file:
         writer = csv.writer(file, delimiter=",")
         writer.writerow(field_names)
+        if len(field_map) > 1:
+            for field in field_map:
+                index = field_names.index(field)
+                field_names[index] = field_map[field]
         for stone in reversed(queryset.all()):
             values = []
+
             for field in field_names:
                 try:
                     value = getattr(stone, field)
@@ -69,8 +86,21 @@ def generate_csv(filename, dir_name, field_names, queryset, field_map):
                     except:
                         value = ""
 
+                if is_lab_export and field in omit_plus_or_minus_fields:
+                    value = value.strip("+").strip("-")
+
+                if is_lab_export and field == "gia_culet_characteristic_final":
+                    export_value = CuletCharacteristics.LAB_EXPORT_MAP.get(value)
+                    value = export_value if export_value is not None else value
+
+                if is_lab_export and field == "height":
+                    value = "%.2f" % round(float(value), 2) if value != "" else value
+
                 if "inclusion" in field and value != "":
                     value = ", ".join([instance.inclusion for instance in value.all()])
+                if "verification" in field and value != "" and value is not None:
+                    value = value.code
+
                 values.append(value)
             writer.writerow(values)
 
@@ -348,47 +378,61 @@ class StoneManager(models.Manager):
         return generate_csv(filename, dir_name, field_names, queryset, {})
 
     def generate_triple_report_csv(self, queryset):
-        filename = "Triple_Report" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
+        filename = "Triple_Report_Lab_Export" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
         dir_name = settings.MEDIA_ROOT + "/csv_downloads/Triple_Report/"
 
         field_names = [
-            "internal_id",
-            "goldway_code",
-            "gia_code",
-            "basic_carat_final",
-            "gw_color_adjusted_final",
-            "gw_clarity_adjusted_final",
-            "gw_fluorescence_adjusted_final",
-            "gia_culet_characteristic_final",
-            "gia_culet_adjusted_final",
-            "basic_inclusions_final",
-            "basic_inclusions_final",
-            "gia_polish_adjusted_final",
-            "diameter_min",
-            "diameter_max",
-            "height",
+            "date",
+            "gradia_ID",
+            "carat",
+            "color",
+            "clarity",
+            "fluorescence",
+            "culet",
+            "culet_description",
+            "cut",
+            "polish",
+            "symmetry",
             "table_size",
             "crown_angle",
             "pavilion_angle",
             "star_length",
             "lower_half",
-            "girdle_thickness_number",
-            "girdle_min_number",
-            "girdle_max_number",
+            "girdle_thickness",
+            "girdle_maximum",
+            "girdle_minimum",
             "crown_height",
             "pavilion_depth",
             "total_depth",
-            "sarine_cut_pre_polish_symmetry",
-            "sarine_symmetry",
-            "blockchain_address",
-            "basic_remarks",
-            "gw_remarks",
-            "gw_adjust_remarks",
-            "gia_remarks",
-            "post_gia_remarks",
+            "comments",
+            "diameter_min",
+            "diameter_max",
+            "height",
+            "goldway_AI_code",
+            "GIA_batch_code",
+            "inclusion",
         ]
+        field_map = {
+            "date": "adjust_gia_date",
+            "gradia_ID": "external_id",
+            "carat": "basic_carat",
+            "color": "gia_color_adjusted_final",
+            "clarity": "gw_clarity_adjusted_final",
+            "fluorescence": "gw_fluorescence_adjusted_final",
+            "culet": "gia_culet_adjusted_final",
+            "culet_description": "gia_culet_characteristic_final",
+            "cut": "auto_final_gradia_cut_grade",
+            "polish": "basic_polish_final",
+            "symmetry": "sarine_symmetry",
+            "girdle_thickness": "girdle_thickness_rounded",
+            "girdle_maximum": "girdle_max_grade",
+            "girdle_minimum": "basic_girdle_min_grade_final",
+            "goldway_AI_code": "gw_verification",
+            "GIA_batch_code": "gia_verification",
+            "inclusion": "basic_inclusions_final",
+        }
 
-        return generate_csv(filename, dir_name, field_names, queryset, {})
+        return generate_csv(filename, dir_name, field_names, queryset, field_map=field_map)
 
 
 class Split(models.Model):
@@ -555,7 +599,7 @@ class GoldwayVerification(models.Model):
 
     @property
     def code(self):
-        pass
+        return self.invoice_number
 
     def summary(self):
         return f"{self.stone_set.count()} stones"
@@ -568,7 +612,7 @@ class GiaVerification(models.Model):
 
     @property
     def code(self):
-        pass
+        return self.receipt_number
 
     def summary(self):
         return f"{self.stone_set.count()} stones"
@@ -649,3 +693,105 @@ class Stone(
         hashed.update(payload_part.encode("utf-8"))  # 4 characters # GB starts the ID
         self.external_id = f"G{hashed.hexdigest()[:-1]}{later_part}-B"
         self.save_external()
+
+    @property
+    def is_sarine_grading_complete(self):
+        """
+        Returns true / false on whether it is done with sarine grading
+        :return:
+        """
+        # Technically, this property is not very significant since, sarine grading results
+        # is what even makes the stone instance exists in the 1st place
+        fields = [field.name for field in SarineGradingMixin._meta.get_fields()]
+        is_empty = False
+        for field in fields:
+            if getattr(self, field) is None:
+                is_empty = True
+                break
+        return not is_empty
+
+    @property
+    def is_basic_grading_complete(self):
+        """
+        Returns true / false on whether it is done with basic grading
+        :return:
+        """
+        fields = [field.name for field in BasicGradingMixin._meta.get_fields()]
+        is_empty = False
+        for field in fields:
+            if getattr(self, field) is None:
+                is_empty = True
+                break
+        return not is_empty
+
+    @property
+    def is_goldway_grading_complete(self):
+        """
+        Returns true / false on whether it is done with goldway grading
+        :return:
+        """
+        fields = [field.name for field in GWGradingMixin._meta.get_fields()]
+        is_empty = False
+        for field in fields:
+            if getattr(self, field) is None:
+                is_empty = True
+                break
+        return not is_empty
+
+    @property
+    def is_gia_grading_complete(self):
+        """
+        Returns true /false on whether it is done with gia grading
+        :return:
+        """
+        fields = [field.name for field in GIAGradingMixin._meta.get_fields()]
+        is_empty = False
+        for field in fields:
+            if getattr(self, field) is None:
+                is_empty = True
+                break
+        return not is_empty
+
+    @property
+    def is_goldway_adjusting_grading_complete(self):
+        """
+        Returns true / false on whether it is done with goldway adjusting grading
+        :return:
+        """
+        fields = [field.name for field in GWGradingAdjustMixin._meta.get_fields()]
+        is_empty = False
+        for field in fields:
+            if getattr(self, field) is None:
+                is_empty = True
+                break
+        return not is_empty
+
+    @property
+    def is_gia_adjusting_grading_complete(self):
+        """
+        Returns true / false on whether it is done with gia adjusting grading
+        :return:
+        """
+        fields = [field.name for field in GIAGradingAdjustMixin._meta.get_fields()]
+        is_empty = False
+        for field in fields:
+            if getattr(self, field) is None:
+                is_empty = True
+                break
+        return not is_empty
+
+    @property
+    def is_triple_grading_complete(self):
+        """
+        Returns true / false on whether it is completely done with all the grading
+        stages
+        :return:
+        """
+        return (
+            self.is_sarine_grading_complete
+            and self.is_basic_grading_complete
+            and self.is_goldway_grading_complete
+            and self.is_goldway_adjusting_grading_complete
+            and self.is_gia_grading_complete
+            and self.is_gia_adjusting_grading_complete
+        )
