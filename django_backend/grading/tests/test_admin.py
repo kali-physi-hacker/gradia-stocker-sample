@@ -1,15 +1,30 @@
-import pandas as pd
+from decimal import Decimal
 
 from unittest.mock import patch
 
 from django.test import TestCase, RequestFactory
 from django.contrib.admin.sites import AdminSite
-from django.http import HttpRequest
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.contrib.auth import get_user_model
 
 from grading.admin import StoneAdmin
 from grading.models import Stone
+from grading.forms import (
+    SarineUploadForm,
+    BasicUploadForm,
+    GWGradingUploadForm,
+    GWAdjustingUploadForm,
+    GIAUploadForm,
+    GIAAdjustingUploadForm,
+)
 
-from stonegrading.mixins import BasicGradingMixin, GWGradingAdjustMixin, GIAGradingAdjustMixin, BasicGradingMixin
+from ownerships.models import StoneTransfer
+
+from stonegrading.mixins import GWGradingAdjustMixin, GIAGradingAdjustMixin, BasicGradingMixin
+from stonegrading.grades import CuletCharacteristics
+
+
+User = get_user_model()
 
 """
 What did you implement? / What implementations do you need tests for?
@@ -40,6 +55,88 @@ class DownloadCSVAdminTest(TestCase):
         self.admin = StoneAdmin(model=Stone, admin_site=admin_site)
 
         self.request = RequestFactory()
+
+    def upload_initial_grading_results(self):
+        """
+        Upload both basic and sarine
+        :return:
+        """
+        grading_form = (SarineUploadForm, BasicUploadForm)
+        csv_upload_files = ("sarine-01.csv", "basic-01.csv")
+
+        for form_class, csv_filename in zip(grading_form, csv_upload_files):
+            file = open(f"grading/tests/fixtures/{csv_filename}", "rb")
+            kwargs = {
+                "data": {},
+                "files": {"file": SimpleUploadedFile(file.name, file.read())},
+                "user": User.objects.get(username="gary"),
+            }
+            form = form_class(**kwargs)
+            self.assertTrue(form.is_valid())
+            form.save()
+
+    def upload_adjusting_results(self):
+        """
+        Upload both GWAdjusting and GIAAdjusting results
+        :return:
+        """
+        grading_form = (GWAdjustingUploadForm, GIAAdjustingUploadForm)
+        csv_upload_files = ("gw_adjust.csv", "gia_adjusting.csv")
+
+        for form_class, csv_filename in zip(grading_form, csv_upload_files):
+            file = open(f"grading/tests/fixtures/{csv_filename}", "rb")
+            kwargs = {"data": {}, "files": {"file": SimpleUploadedFile(file.name, file.read())}}
+            form = form_class(**kwargs)
+            self.assertTrue(form.is_valid())
+            form.save()
+
+    def upload_third_party_grading_results(self):
+        """
+        Upload both gia and gw grading results
+        :return:
+        """
+        grading_form = (GWGradingUploadForm, GIAUploadForm)
+        csv_upload_files = ("gold_way-01.csv", "gia.csv")
+
+        split = User.objects.get(username="split")
+        vault = User.objects.get(username="vault")
+        goldway = User.objects.get(username="goldway")
+        gia = User.objects.get(username="gia")
+        grader = User.objects.get(username="tanly")
+
+        for index, (form_class, csv_filename) in enumerate(zip(grading_form, csv_upload_files)):
+            file = open(f"grading/tests/fixtures/{csv_filename}", "rb")
+            kwargs = {
+                "data": {},
+                "files": {"file": SimpleUploadedFile(file.name, file.read())},
+                "user": User.objects.get(username="gary"),
+            }
+            form = form_class(**kwargs)
+            self.assertTrue(form.is_valid())
+
+            # Do stone transfer here index == 0 == GW results, index == 1 == GIA results
+            for stone_id in (1, 5, 6):
+                stone = Stone.objects.get(internal_id=stone_id)
+                if index == 0:
+                    from_user = split
+                    to_user = goldway
+                else:
+                    from_user = vault
+                    to_user = gia
+
+                StoneTransfer.initiate_transfer(item=stone, from_user=from_user, to_user=to_user, created_by=grader)
+                StoneTransfer.confirm_received(item=stone)
+
+            form.save()
+
+    def upload_all_grading_results(self):
+        """
+        Upload all grading results fixture
+        :return:
+        """
+        self.upload_initial_grading_results()
+        self.upload_third_party_grading_results()
+        self.upload_adjusting_results()
 
     def test_download_basic_grading_template_success(self):
         response = self.admin.download_basic_grading_template(request=self.request, queryset=self.queryset)
@@ -213,57 +310,149 @@ class DownloadCSVAdminTest(TestCase):
         for field in field_names:
             self.assertIn(field, headers)
 
-    def test_download_to_triple_report_csv_success(self):
-        response = self.admin.download_to_triple_report_csv(request=self.request, queryset=self.queryset)
+    def test_download_export_triple_report_to_lab_success(self):
+        """
+        Tests export to triple graded stone report to lab
+        :return:
+        """
+        self.upload_all_grading_results()
+        queryset = self.queryset.filter(internal_id__in=(1, 5, 6))
+        response = self.admin.download_export_triple_report_to_lab(request=self.request, queryset=queryset)
         self.assertEqual(response["Content-Type"], "text/csv")
         disposition_type, file_name = response["Content-Disposition"].split(";")
         file_name = file_name.split("/")[-1]
         self.assertEqual(disposition_type, "attachment")
-        self.assertTrue(file_name.startswith("Triple_Report"))
+        self.assertTrue(file_name.startswith("Triple_Report_Lab_Export"))
 
-        headers, content = [row for row in response.content.decode().split("\n") if row != ""]
+        content = [row for row in response.content.decode().split("\n") if row != ""]
+        content, headers = content[1:], content[0]
         headers = headers.split(",")
-        self.assertEqual(len(headers), 34)
+        self.assertEqual(len(headers), 29)
 
         field_names = (
-            "internal_id",
-            "goldway_code",
-            "gia_code",
-            "basic_carat_final",
-            "gw_color_adjusted_final",
-            "gw_clarity_adjusted_final",
-            "gw_fluorescence_adjusted_final",
-            "gia_culet_characteristic_final",
-            "gia_culet_adjusted_final",
-            "basic_inclusions_final",
-            "basic_inclusions_final",
-            "gia_polish_adjusted_final",
-            "diameter_min",
-            "diameter_max",
-            "height",
+            "date",
+            "gradia_ID",
+            "carat",
+            "color",
+            "clarity",
+            "fluorescence",
+            "culet",
+            "culet_description",
+            "cut",
+            "polish",
+            "symmetry",
             "table_size",
             "crown_angle",
             "pavilion_angle",
             "star_length",
             "lower_half",
-            "girdle_thickness_number",
-            "girdle_min_number",
-            "girdle_max_number",
+            "girdle_thickness",
+            "girdle_maximum",
+            "girdle_minimum",
             "crown_height",
             "pavilion_depth",
             "total_depth",
-            "sarine_cut_pre_polish_symmetry",
-            "sarine_symmetry",
-            "blockchain_address",
-            "basic_remarks",
-            "gw_remarks",
-            "gw_adjust_remarks",
-            "gia_remarks",
-            "post_gia_remarks",
+            "comments",
+            "diameter_min",
+            "diameter_max",
+            "height",
+            "goldway_AI_code",
+            "GIA_batch_code",
+            "inclusion",
         )
 
-        for field in field_names:
-            self.assertIn(field, headers)
+        for field_name in field_names:
+            self.assertIn(field_name, headers)
+
+        db_fields = (
+            "external_id",
+            "basic_carat",
+            "gia_color_adjusted_final",
+            "gw_clarity_adjusted_final",
+            "gw_fluorescence_adjusted_final",
+            "gia_culet_adjusted_final",
+            "gia_culet_characteristic_final",
+            "auto_final_gradia_cut_grade",
+            "basic_polish_final",
+            "sarine_symmetry",
+            "table_size",
+            "crown_angle",
+            "pavilion_angle",
+            "star_length",
+            "lower_half",
+            "girdle_thickness_rounded",
+            "girdle_max_grade",
+            "basic_girdle_min_grade_final",
+            "crown_height",
+            "pavilion_depth",
+            "total_depth",
+            "comments",
+            "diameter_min",
+            "diameter_max",
+            "height",
+            "goldway_AI_code",
+            "GIA_batch_code",
+            "basic_inclusions_final",
+        )
+        special_fields = ("comments", "goldway_AI_code", "GIA_batch_code", "basic_inclusions_final")
+        omit_plus_or_minus_fields = (
+            "gia_color_adjusted_final",
+            "gw_clarity_adjusted_final",
+            "gw_fluorescence_adjusted_final",
+            "basic_polish_final",
+        )
+
+        for index, row in enumerate(content):
+            data = row.split(",")[1:]  # Leave out date field
+
+            if data[-1][-1] == '"':
+                # Fix inclusion split problem
+                inclusions = ", ".join([inclusion.strip('" ') for inclusion in data[-2:]])
+                data.pop()
+                data.pop()
+                data.append(inclusions)
+
+            stone = queryset.get(external_id=data[0])
+            expected_data = [getattr(stone, field) if field not in special_fields else field for field in db_fields]
+
+            special_fields_map = {
+                "goldway_AI_code": stone.gw_verification.code,
+                "GIA_batch_code": stone.gia_verification.code,
+            }
+            for _, (actual_value, expected_value) in enumerate(zip(data, expected_data)):
+                if db_fields[_] in omit_plus_or_minus_fields:
+                    expected_value = getattr(stone, db_fields[_]).strip("-").strip("+")
+                    self.assertEqual(actual_value, expected_value)
+                    continue
+
+                if db_fields[_] == "gia_culet_characteristic_final":
+                    expected_value = CuletCharacteristics.LAB_EXPORT_MAP[stone.gia_culet_characteristic_final]
+                    self.assertEqual(actual_value, expected_value)
+                    continue
+
+                if db_fields[_] == "height":
+                    expected_value = "%.2f" % round(stone.height, 2)
+                    self.assertEqual(actual_value, expected_value)
+                    continue
+
+                if expected_value not in special_fields:
+                    if type(expected_value) == Decimal:
+                        self.assertEqual(str(actual_value), str(expected_value))
+                    else:
+                        if expected_value is None:
+                            self.assertEqual(actual_value, "")
+                        else:
+                            self.assertEqual(actual_value, expected_value)
+                else:
+                    field = db_fields[_]
+                    if field == "basic_inclusions_final":
+                        inclusions = ", ".join(
+                            [inclusion.inclusion for inclusion in stone.basic_inclusions_final.all()]
+                        )
+                        self.assertEqual(actual_value, inclusions)
+                        continue
+                    if field != "comments":
+                        self.assertEqual(actual_value, special_fields_map[db_fields[_]])
 
     def test_download_goldway_grading_template_success(self):
         response = self.admin.download_goldway_grading_template(request=self.request, queryset=self.queryset)
