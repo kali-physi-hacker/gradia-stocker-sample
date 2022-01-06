@@ -327,7 +327,6 @@ class DownloadCSVAdminTest(TestCase):
         self.assertTrue(file_name.startswith("Gradia_id_"))
 
         headers, content = [row for row in response.content.decode().split('\n"')]
-        header = headers.split(',')
+        header = headers.split(",")
         self.assertEqual(len(header), 1)
-        self.assertEqual(headers, 'external_id')        
-        
+        self.assertEqual(headers, "external_id")

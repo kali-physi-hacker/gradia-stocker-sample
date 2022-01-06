@@ -598,7 +598,6 @@ class Stone(
 
     objects = StoneManager()
 
-
     def __str__(self):
         text = self.external_id if self.external_id is not None else self.internal_id
         return text
