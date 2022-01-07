@@ -217,7 +217,7 @@ class StoneManager(models.Manager):
             stone.generate_triple_verified_external_id()
 
         field_names = [
-            "date_from_gw",
+            "date_to_gw",
             "internal_id",
             "nano_etch_inscription",
             "basic_carat",
