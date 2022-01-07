@@ -193,10 +193,10 @@ class DownloadCSVAdminTest(TestCase):
 
         self.assertTrue(len(headers), 4)
         field_names = (
-            "date_from_gia",
+            "date_to_gia",
             "nano_etch_inscription",
-            "basic_carat",
-            "basic_color_final",
+            "gw_return_reweight",
+            "gw_color_adjusted_final",
         )
         for field in field_names:
             self.assertIn(field, headers)

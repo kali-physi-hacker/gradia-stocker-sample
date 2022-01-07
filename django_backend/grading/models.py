@@ -265,10 +265,10 @@ class StoneManager(models.Manager):
         filename = "To_GIA_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
         dir_name = settings.MEDIA_ROOT + "/csv_downloads/to_GIA/"
         field_names = [
-            "date_from_gia",
+            "date_to_gia",
             "nano_etch_inscription",
-            "basic_carat",
-            "basic_color_final",
+            "gw_return_reweight",
+            "gw_color_adjusted_final",
         ]
 
         return generate_csv(
