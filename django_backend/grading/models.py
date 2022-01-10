@@ -220,7 +220,7 @@ class StoneManager(models.Manager):
             stone.generate_triple_verified_external_id()
 
         field_names = [
-            "date_from_gw",
+            "date_to_gw",
             "internal_id",
             "nano_etch_inscription",
             "basic_carat",
@@ -268,10 +268,10 @@ class StoneManager(models.Manager):
         filename = "To_GIA_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
         dir_name = settings.MEDIA_ROOT + "/csv_downloads/to_GIA/"
         field_names = [
-            "date_from_gia",
+            "date_to_gia",
             "nano_etch_inscription",
-            "basic_carat",
-            "basic_color_final",
+            "gw_return_reweight",
+            "gw_color_adjusted_final",
         ]
 
         return generate_csv(
@@ -287,12 +287,11 @@ class StoneManager(models.Manager):
             "gia_adjust_grader_1",
             "gia_adjust_grader_2",
             "gia_adjust_grader_3",
-            "gw_color_adjusted_final",
             "gia_color",
             "gia_color_adjusted_1",
             "gia_color_adjusted_2",
             "gia_color_adjusted_3",
-            "gia_color_adjusted_final",
+            "gw_color_adjusted_final",
             "basic_culet_final",
             "gia_culet_adjusted_1",
             "gia_culet_adjusted_2",
