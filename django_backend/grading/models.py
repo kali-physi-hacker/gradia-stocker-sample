@@ -101,8 +101,12 @@ def generate_csv(filename, dir_name, field_names, queryset, field_map):
 
                 if "inclusion" in field and value != "":
                     value = ", ".join([instance.inclusion for instance in value.all()])
+                    
                 if "verification" in field and value != "" and value is not None:
                     value = value.code
+                    
+                if "split_from" in field and value != "":
+                    value = value.original_parcel.gradia_parcel_code
 
                 values.append(value)
             writer.writerow(values)
@@ -122,7 +126,6 @@ class StoneManager(models.Manager):
         filename = "Master_report_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
         dir_name = settings.MEDIA_ROOT + "/csv_downloads/master_reports/"
         field_names = get_stone_fields(Stone)
-
         return generate_csv(filename, dir_name, field_names, queryset, {})
 
     def generate_basic_grading_template(self, request, queryset):
@@ -217,7 +220,7 @@ class StoneManager(models.Manager):
             stone.generate_triple_verified_external_id()
 
         field_names = [
-            "date_from_gw",
+            "date_to_gw",
             "internal_id",
             "nano_etch_inscription",
             "basic_carat",
@@ -265,10 +268,10 @@ class StoneManager(models.Manager):
         filename = "To_GIA_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
         dir_name = settings.MEDIA_ROOT + "/csv_downloads/to_GIA/"
         field_names = [
-            "date_from_gia",
+            "date_to_gia",
             "nano_etch_inscription",
-            "basic_carat",
-            "basic_color_final",
+            "gw_return_reweight",
+            "gw_color_adjusted_final",
         ]
 
         return generate_csv(
@@ -284,12 +287,11 @@ class StoneManager(models.Manager):
             "gia_adjust_grader_1",
             "gia_adjust_grader_2",
             "gia_adjust_grader_3",
-            "gw_color_adjusted_final",
             "gia_color",
             "gia_color_adjusted_1",
             "gia_color_adjusted_2",
             "gia_color_adjusted_3",
-            "gia_color_adjusted_final",
+            "gw_color_adjusted_final",
             "basic_culet_final",
             "gia_culet_adjusted_1",
             "gia_culet_adjusted_2",
