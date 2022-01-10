@@ -101,8 +101,12 @@ def generate_csv(filename, dir_name, field_names, queryset, field_map):
 
                 if "inclusion" in field and value != "":
                     value = ", ".join([instance.inclusion for instance in value.all()])
+                    
                 if "verification" in field and value != "" and value is not None:
                     value = value.code
+                    
+                if "split_from" in field and value != "":
+                    value = value.original_parcel.gradia_parcel_code
 
                 values.append(value)
             writer.writerow(values)
@@ -122,7 +126,6 @@ class StoneManager(models.Manager):
         filename = "Master_report_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
         dir_name = settings.MEDIA_ROOT + "/csv_downloads/master_reports/"
         field_names = get_stone_fields(Stone)
-
         return generate_csv(filename, dir_name, field_names, queryset, {})
 
     def generate_basic_grading_template(self, request, queryset):
