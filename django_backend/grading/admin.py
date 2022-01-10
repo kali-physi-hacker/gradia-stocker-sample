@@ -304,7 +304,7 @@ class StoneAdmin(admin.ModelAdmin):
         "download_to_GIA_csv",
         "download_adjust_GIA_csv",
         "download_to_basic_report_csv",
-        "download_to_triple_report_csv",
+        "download_export_triple_report_to_lab",
     ]
 
     def get_actions(self, request):
@@ -393,14 +393,20 @@ class StoneAdmin(admin.ModelAdmin):
 
     download_to_basic_report_csv.short_description = "Download Basic Report"
 
-    def download_to_triple_report_csv(self, request, queryset):
+    def download_export_triple_report_to_lab(self, request, queryset):
+        """
+        Generates csv file representing stone data used as triple report in lab
+        :param request:
+        :param queryset:
+        :return:
+        """
         file_path = Stone.objects.generate_triple_report_csv(queryset)
         with open(file_path, mode="r") as file:
             response = HttpResponse(file, content_type="text/csv")
             response["Content-Disposition"] = "attachment; filename=%s" % file_path
             return response
 
-    download_to_triple_report_csv.short_description = "Download Triple Report"
+    download_export_triple_report_to_lab.short_description = "Download Triple Report"
 
     def download_master_reports(self, request, queryset):
         file_path = Stone.objects.generate_master_report_csv(queryset)
