@@ -490,7 +490,8 @@ class GoldwayVerificationAdmin(admin.ModelAdmin):
 
     def gw_code(self, instance):
         return instance.code
-        
+
+
 @admin.register(GiaVerification)
 class GiaVerificationAdmin(admin.ModelAdmin):
     model = GiaVerification
