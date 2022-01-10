@@ -600,7 +600,7 @@ class Stone(
 
     def __str__(self):
         text = self.external_id if self.external_id is not None else self.internal_id
-        return text
+        return str(text)
 
     @property
     def customer_receipt_number(self):
