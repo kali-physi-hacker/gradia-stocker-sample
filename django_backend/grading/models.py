@@ -101,10 +101,10 @@ def generate_csv(filename, dir_name, field_names, queryset, field_map):
 
                 if "inclusion" in field and value != "":
                     value = ", ".join([instance.inclusion for instance in value.all()])
-                    
+
                 if "verification" in field and value != "" and value is not None:
                     value = value.code
-                    
+
                 if "split_from" in field and value != "":
                     value = value.original_parcel.gradia_parcel_code
 
