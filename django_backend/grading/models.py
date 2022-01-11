@@ -611,8 +611,8 @@ class GoldwayVerification(models.Model):
 
 
 class GiaVerification(models.Model):
-    receipt_number = models.CharField(max_length=10, blank=True)
-    invoice_number = models.CharField(max_length=10, blank=True)
+    receipt_number = models.CharField(max_length=15, blank=True)
+    invoice_number = models.CharField(max_length=15, blank=True)
     started = models.DateTimeField(auto_now_add=True)
 
     @property
