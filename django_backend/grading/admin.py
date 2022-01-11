@@ -295,7 +295,7 @@ class StoneAdmin(admin.ModelAdmin):
         "transfer_to_GIA",
         "transfer_to_vault",
         "confirm_received_stones",
-        "download_ids",
+        "download_external_ids",
         "download_basic_grading_template",  # generate id and girdle_min_grade
         "download_goldway_grading_template",
         "download_gia_grading_template",
@@ -314,14 +314,14 @@ class StoneAdmin(admin.ModelAdmin):
             del actions["transfer_to_GIA"]
         return actions
 
-    def download_ids(self, request, queryset):
-        file_path = Stone.objects.generate_id_csv(queryset)
+    def download_external_ids(self, request, queryset):
+        file_path = Stone.objects.generate_external_id_csv(queryset)
         with open(file_path, mode="r") as file:
             response = HttpResponse(file, content_type="text/csv")
             response["Content-Disposition"] = "attachment; filename=%s" % file_path
             return response
 
-    download_ids.short_description = "Download Diamond(s) External Nanotech IDs"
+    download_external_ids.short_description = "Download External IDs"
 
     def download_basic_grading_template(self, request, queryset):
         file_path = Stone.objects.generate_basic_grading_template(request, queryset)
