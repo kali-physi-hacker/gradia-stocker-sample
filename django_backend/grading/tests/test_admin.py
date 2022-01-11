@@ -506,3 +506,17 @@ class DownloadCSVAdminTest(TestCase):
         )
         for field in field_names:
             self.assertIn(field, headers)
+
+    def test_download_external_ids_csv_success(self):
+        response = self.admin.download_external_ids(request=self.request, queryset=self.queryset)
+        self.assertEqual(response["Content-Type"], "text/csv")
+
+        disposition_type, file_name = response["Content-Disposition"].split(";")
+        file_name = file_name.split("/")[-1]
+        self.assertEqual(disposition_type, "attachment")
+        self.assertTrue(file_name.startswith("Gradia_id_"))
+
+        headers, content = [row for row in response.content.decode().split('\n"')]
+        header = headers.split(",")
+        self.assertEqual(len(header), 1)
+        self.assertEqual(headers, "external_id")
