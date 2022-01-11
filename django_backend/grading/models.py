@@ -101,10 +101,10 @@ def generate_csv(filename, dir_name, field_names, queryset, field_map):
 
                 if "inclusion" in field and value != "":
                     value = ", ".join([instance.inclusion for instance in value.all()])
-                    
+
                 if "verification" in field and value != "" and value is not None:
                     value = value.code
-                    
+
                 if "split_from" in field and value != "":
                     value = value.original_parcel.gradia_parcel_code
 
@@ -115,10 +115,10 @@ def generate_csv(filename, dir_name, field_names, queryset, field_map):
 
 
 class StoneManager(models.Manager):
-    def generate_id_csv(self, queryset):
+    def generate_external_id_csv(self, queryset):
         filename = "Gradia_id_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
         dir_name = settings.MEDIA_ROOT + "/csv_downloads/download_ids/"
-        field_names = ["internal_id"]
+        field_names = ["external_id"]
 
         return generate_csv(filename, dir_name, field_names, queryset, {})
 
@@ -611,8 +611,8 @@ class GoldwayVerification(models.Model):
 
 
 class GiaVerification(models.Model):
-    receipt_number = models.CharField(max_length=10, blank=True)
-    invoice_number = models.CharField(max_length=10, blank=True)
+    receipt_number = models.CharField(max_length=15, blank=True)
+    invoice_number = models.CharField(max_length=15, blank=True)
     started = models.DateTimeField(auto_now_add=True)
 
     @property
@@ -646,6 +646,10 @@ class Stone(
     external_id = models.CharField(max_length=11, unique=True, blank=True, null=True)
 
     objects = StoneManager()
+
+    def __str__(self):
+        text = self.external_id if self.external_id is not None else self.internal_id
+        return str(text)
 
     @property
     def customer_receipt_number(self):
