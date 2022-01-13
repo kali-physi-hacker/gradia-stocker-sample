@@ -485,7 +485,11 @@ class StoneAdmin(admin.ModelAdmin):
 @admin.register(GoldwayVerification)
 class GoldwayVerificationAdmin(admin.ModelAdmin):
     model = GoldwayVerification
-    list_display = ["purchase_order", "invoice_number", "started", "summary"]
+
+    list_display = ["gw_code", "purchase_order", "invoice_number", "started", "summary"]
+
+    def gw_code(self, instance):
+        return instance.code
 
 
 @admin.register(GiaVerification)
