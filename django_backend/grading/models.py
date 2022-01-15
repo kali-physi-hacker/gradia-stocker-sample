@@ -268,6 +268,7 @@ class StoneManager(models.Manager):
         filename = "To_GIA_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
         dir_name = settings.MEDIA_ROOT + "/csv_downloads/to_GIA/"
         field_names = [
+            "internal_id",
             "date_to_gia",
             "nano_etch_inscription",
             "gw_return_reweight",
