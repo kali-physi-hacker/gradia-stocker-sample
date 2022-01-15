@@ -191,15 +191,16 @@ class DownloadCSVAdminTest(TestCase):
         headers, content = [row for row in response.content.decode().split("\n") if row != ""]
         headers = headers.split(",")
 
-        self.assertTrue(len(headers), 4)
+        self.assertEqual(len(headers), 5)
         field_names = (
+            "internal_id",
             "date_to_gia",
             "nano_etch_inscription",
             "gw_return_reweight",
             "gw_color_adjusted_final",
         )
-        for field in field_names:
-            self.assertIn(field, headers)
+        for field in headers:
+            self.assertIn(field, field_names)
 
     @patch("django.contrib.messages.warning")
     def test_download_to_gia_csv_failure(self, mocked_messages):
@@ -222,11 +223,19 @@ class DownloadCSVAdminTest(TestCase):
         headers = headers.split(",")
         self.assertEqual(len(headers), 21)
 
-        fields = [field.name for field in GIAGradingAdjustMixin._meta.get_fields() if "polish" not in field.name]
+        fields = [field.name for field in GIAGradingAdjustMixin._meta.get_fields() if "polish" not in field.name] + [
+            "gia_code",
+            "nano_etch_inscription",
+            "gia_color",
+            "gw_color_adjusted_final",
+            "basic_culet_final",
+            "basic_culet_characteristic_final",
+        ]
         fields.remove("gia_color_adjusted_final")
+        self.assertEqual(len(fields), len(headers))
 
-        for field in fields:
-            self.assertIn(field, headers)
+        for field in headers:
+            self.assertIn(field, fields)
         self.assertIn("gia_code", headers)
         self.assertIn("nano_etch_inscription", headers)
 
@@ -308,8 +317,8 @@ class DownloadCSVAdminTest(TestCase):
             "lower_half_angle",
             "lower_half_angle_grade",
         )
-        for field in field_names:
-            self.assertIn(field, headers)
+        for field in headers:
+            self.assertIn(field, field_names)
 
     def test_download_export_triple_report_to_lab_success(self):
         """
@@ -362,8 +371,8 @@ class DownloadCSVAdminTest(TestCase):
             "inclusion",
         )
 
-        for field_name in field_names:
-            self.assertIn(field_name, headers)
+        for field_name in headers:
+            self.assertIn(field_name, field_names)
 
         db_fields = (
             "external_id",
@@ -479,8 +488,8 @@ class DownloadCSVAdminTest(TestCase):
             "gw_fluorescence",
             "gw_remarks",
         )
-        for field in field_names:
-            self.assertIn(field, headers)
+        for field in headers:
+            self.assertIn(field, field_names)
 
     def test_download_gia_grading_template_success(self):
         response = self.admin.download_gia_grading_template(request=self.request, queryset=self.queryset)
@@ -504,8 +513,8 @@ class DownloadCSVAdminTest(TestCase):
             "gia_color",
             "gia_remarks",
         )
-        for field in field_names:
-            self.assertIn(field, headers)
+        for field in headers:
+            self.assertIn(field, field_names)
 
     def test_download_external_ids_csv_success(self):
         response = self.admin.download_external_ids(request=self.request, queryset=self.queryset)
