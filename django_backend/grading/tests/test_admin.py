@@ -384,17 +384,17 @@ class DownloadCSVAdminTest(TestCase):
             "auto_final_gradia_cut_grade",
             "basic_polish_final",
             "sarine_symmetry",
-            "table_size",
-            "crown_angle",
-            "pavilion_angle",
-            "star_length",
-            "lower_half",
+            "table_size_rounded",
+            "crown_angle_rounded",
+            "pavilion_angle_rounded",
+            "star_length_rounded",
+            "lower_half_rounded",
             "girdle_thickness_rounded",
             "girdle_max_grade",
             "basic_girdle_min_grade_final",
-            "crown_height",
-            "pavilion_depth",
-            "total_depth",
+            "crown_height_rounded",
+            "pavilion_depth_rounded",
+            "total_depth_rounded",
             "comments",
             "diameter_min",
             "diameter_max",
@@ -445,13 +445,10 @@ class DownloadCSVAdminTest(TestCase):
                     continue
 
                 if expected_value not in special_fields:
-                    if type(expected_value) == Decimal:
-                        self.assertEqual(str(actual_value), str(expected_value))
+                    if expected_value is None:
+                        self.assertEqual(actual_value, "")
                     else:
-                        if expected_value is None:
-                            self.assertEqual(actual_value, "")
-                        else:
-                            self.assertEqual(actual_value, expected_value)
+                        self.assertEqual(actual_value, str(expected_value))
                 else:
                     field = db_fields[_]
                     if field == "basic_inclusions_final":
