@@ -179,9 +179,6 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
                 except Stone.DoesNotExist:
                     stone = None
 
-                # if self.new and stone is None:
-                #     return internal_id
-
                 if is_new and stone is not None:
                     raise ValidationError(f"Stone with internal id: {internal_id} already exist")
 
@@ -730,7 +727,8 @@ class GWAdjustingUploadForm(BaseUploadForm):
             for field, value in data.items():
                 if "_grader_" in field and value is not None:
                     try:
-                        data[field] = User.objects.get(username=value.lower())
+                        if value is not None:
+                            data[field] = User.objects.get(username=value.lower())
                     except User.DoesNotExist:
                         errors[row] = {}
                         errors[row][field] = f"Grader user `{value}` account does not exist"
@@ -792,7 +790,8 @@ class GIAAdjustingUploadForm(BaseUploadForm):
             for field, value in data.items():
                 if "_grader_" in field:
                     try:
-                        data[field] = User.objects.get(username=value.lower())
+                        if value is not None:
+                            data[field] = User.objects.get(username=value.lower())
                     except User.DoesNotExist:
                         errors[row] = {}
                         errors[row][field] = f"Grader user `{value}` account does not exist"
