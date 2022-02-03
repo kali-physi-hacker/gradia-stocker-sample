@@ -276,6 +276,9 @@ class StoneAdmin(admin.ModelAdmin):
     list_filter = [StoneOwnerFilter]
 
     search_fields = ["split_from__original_parcel__receipt__code"]
+    
+    change_list_template = "grading/stone_data_upload.html"
+
 
     def get_list_display(self, request):
         return [
