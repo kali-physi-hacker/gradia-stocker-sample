@@ -320,7 +320,8 @@ class StoneAdmin(admin.ModelAdmin):
         file_path = Stone.objects.generate_external_id_csv(queryset)
         with open(file_path, mode="r") as file:
             response = HttpResponse(file, content_type="text/csv")
-            response["Content-Disposition"] = "attachment; filename=%s" % file_path
+            filename = "Gradia_id_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
+            response["Content-Disposition"] = "attachment; filename=%s" % filename
             return response
 
     download_external_ids.short_description = "Download External IDs"
@@ -329,7 +330,8 @@ class StoneAdmin(admin.ModelAdmin):
         file_path = Stone.objects.generate_basic_grading_template(request, queryset)
         with open(file_path, mode="r") as file:
             response = HttpResponse(file, content_type="text/csv")
-            response["Content-Disposition"] = "attachment; filename=%s" % file_path
+            filename = "Basic_Grading_Template_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
+            response["Content-Disposition"] = "attachment; filename=%s" % filename
             return response
 
     download_basic_grading_template.short_description = "Download Basic Grading CSV Template"
@@ -338,7 +340,8 @@ class StoneAdmin(admin.ModelAdmin):
         file_path = Stone.objects.generate_goldway_grading_template(request, queryset)
         with open(file_path, mode="r") as file:
             response = HttpResponse(file, content_type="text/csv")
-            response["Content-Disposition"] = "attachment; filename=%s" % file_path
+            filename = "Goldway_Grading_Template_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
+            response["Content-Disposition"] = "attachment; filename=%s" % filename
             return response
 
     download_goldway_grading_template.short_description = "Download Goldway Grading CSV Template"
@@ -347,7 +350,8 @@ class StoneAdmin(admin.ModelAdmin):
         file_path = Stone.objects.generate_gia_grading_template(request, queryset)
         with open(file_path, mode="r") as file:
             response = HttpResponse(file, content_type="text/csv")
-            response["Content-Disposition"] = "attachment; filename=%s" % file_path
+            filename = "GIA_Grading_Template_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
+            response["Content-Disposition"] = "attachment; filename=%s" % filename
             return response
 
     download_gia_grading_template.short_description = "Download GIA Grading CSV Template"
@@ -356,7 +360,8 @@ class StoneAdmin(admin.ModelAdmin):
         file_path = Stone.objects.generate_adjust_goldway_csv(queryset)
         with open(file_path, mode="r") as file:
             response = HttpResponse(file, content_type="text/csv")
-            response["Content-Disposition"] = "attachment; filename=%s" % file_path
+            filename = "Adjust_Goldway" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
+            response["Content-Disposition"] = "attachment; filename=%s" % filename
             return response
 
     download_adjust_goldway_csv.short_description = "Download Adjust Goldway CSV"
@@ -372,7 +377,8 @@ class StoneAdmin(admin.ModelAdmin):
 
         with open(file_path, mode="r") as file:
             response = HttpResponse(file, content_type="text/csv")
-            response["Content-Disposition"] = "attachment; filename=%s" % file_path
+            filename = "To_GIA_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
+            response["Content-Disposition"] = "attachment; filename=%s" % filename
             return response
 
     download_to_GIA_csv.short_description = "Download GIA CSV Transfer"
@@ -381,7 +387,8 @@ class StoneAdmin(admin.ModelAdmin):
         file_path = Stone.objects.generate_adjust_GIA_csv(queryset)
         with open(file_path, mode="r") as file:
             response = HttpResponse(file, content_type="text/csv")
-            response["Content-Disposition"] = "attachment; filename=%s" % file_path
+            filename = "Adjust_GIA" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
+            response["Content-Disposition"] = "attachment; filename=%s" % filename
             return response
 
     download_adjust_GIA_csv.short_description = "Download Adjust GIA CSV"
@@ -390,7 +397,8 @@ class StoneAdmin(admin.ModelAdmin):
         file_path = Stone.objects.generate_basic_report_csv(queryset)
         with open(file_path, mode="r") as file:
             response = HttpResponse(file, content_type="text/csv")
-            response["Content-Disposition"] = "attachment; filename=%s" % file_path
+            filename = "Basic_Report" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
+            response["Content-Disposition"] = "attachment; filename=%s" % filename
             return response
 
     download_to_basic_report_csv.short_description = "Download Basic Report"
@@ -405,7 +413,8 @@ class StoneAdmin(admin.ModelAdmin):
         file_path = Stone.objects.generate_triple_report_csv(queryset)
         with open(file_path, mode="r") as file:
             response = HttpResponse(file, content_type="text/csv")
-            response["Content-Disposition"] = "attachment; filename=%s" % file_path
+            filename = "Triple_Report_Lab_Export" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
+            response["Content-Disposition"] = "attachment; filename=%s" % filename
             return response
 
     download_export_triple_report_to_lab.short_description = "Download Triple Report"
@@ -414,7 +423,8 @@ class StoneAdmin(admin.ModelAdmin):
         file_path = Stone.objects.generate_master_report_csv(queryset)
         with open(file_path, mode="r") as file:
             response = HttpResponse(file, content_type="text/csv")
-            response["Content-Disposition"] = "attachment; filename=%s" % file_path
+            filename = "Master_report_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
+            response["Content-Disposition"] = "attachment; filename=%s" % filename
             return response
 
     download_master_reports.short_description = "Download Master Report"
