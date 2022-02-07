@@ -320,7 +320,7 @@ class StoneAdmin(admin.ModelAdmin):
         file_path = Stone.objects.generate_external_id_csv(queryset)
         with open(file_path, mode="r") as file:
             response = HttpResponse(file, content_type="text/csv")
-            filename = "Gradia_id_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
+            filename = "Gradia_ids_" + str(datetime.utcnow().strftime("%d-%m-%Y_%H-%M-%S")) + ".csv"
             response["Content-Disposition"] = "attachment; filename=%s" % filename
             return response
 
