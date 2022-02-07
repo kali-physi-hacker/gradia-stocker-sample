@@ -6,6 +6,7 @@ from django.test import TestCase, RequestFactory
 from django.contrib.admin.sites import AdminSite
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.contrib.auth import get_user_model
+import pandas as pd
 
 from grading.admin import StoneAdmin
 from grading.models import Stone
@@ -141,8 +142,8 @@ class DownloadCSVAdminTest(TestCase):
     def test_download_basic_grading_template_success(self):
         response = self.admin.download_basic_grading_template(request=self.request, queryset=self.queryset)
         self.assertEqual(response["Content-Type"], "text/csv")
-        disposition_type, file_name = response["Content-Disposition"].split(";")
-        file_name = file_name.split("/")[-1]
+        disposition_type, file_name = response["Content-Disposition"].split("=")
+        disposition_type = disposition_type.split(";")[0]
         self.assertEqual(disposition_type, "attachment")
         self.assertTrue(file_name.startswith("Basic_Grading_Template_"))
 
@@ -160,8 +161,8 @@ class DownloadCSVAdminTest(TestCase):
     def test_download_adjust_goldway_csv_success(self):
         response = self.admin.download_adjust_goldway_csv(request=self.request, queryset=self.queryset)
         self.assertEqual(response["Content-Type"], "text/csv")
-        disposition_type, file_name = response["Content-Disposition"].split(";")
-        file_name = file_name.split("/")[-1]
+        disposition_type, file_name = response["Content-Disposition"].split("=")
+        disposition_type = disposition_type.split(";")[0]
         self.assertEqual(disposition_type, "attachment")
         self.assertTrue(file_name.startswith("Adjust_Goldway"))
 
@@ -183,8 +184,8 @@ class DownloadCSVAdminTest(TestCase):
 
         response = self.admin.download_to_GIA_csv(request=self.request, queryset=self.queryset)
         self.assertEqual(response["Content-Type"], "text/csv")
-        disposition_type, file_name = response["Content-Disposition"].split(";")
-        file_name = file_name.split("/")[-1]
+        disposition_type, file_name = response["Content-Disposition"].split("=")
+        disposition_type = disposition_type.split(";")[0]
         self.assertEqual(disposition_type, "attachment")
         self.assertTrue(file_name.startswith("To_GIA"))
 
@@ -214,8 +215,8 @@ class DownloadCSVAdminTest(TestCase):
     def test_download_adjust_gia_csv_success(self):
         response = self.admin.download_adjust_GIA_csv(request=self.request, queryset=self.queryset)
         self.assertEqual(response["Content-Type"], "text/csv")
-        disposition_type, file_name = response["Content-Disposition"].split(";")
-        file_name = file_name.split("/")[-1]
+        disposition_type, file_name = response["Content-Disposition"].split("=")
+        disposition_type = disposition_type.split(";")[0]
         self.assertEqual(disposition_type, "attachment")
         self.assertTrue(file_name.startswith("Adjust_GIA"))
 
@@ -241,8 +242,8 @@ class DownloadCSVAdminTest(TestCase):
     def test_download_to_basic_report_csv_success(self):
         response = self.admin.download_to_basic_report_csv(request=self.request, queryset=self.queryset)
         self.assertEqual(response["Content-Type"], "text/csv")
-        disposition_type, file_name = response["Content-Disposition"].split(";")
-        file_name = file_name.split("/")[-1]
+        disposition_type, file_name = response["Content-Disposition"].split("=")
+        disposition_type = disposition_type.split(";")[0]
         self.assertEqual(disposition_type, "attachment")
         self.assertTrue(file_name.startswith("Basic_Report"))
 
@@ -328,8 +329,8 @@ class DownloadCSVAdminTest(TestCase):
         queryset = self.queryset.filter(internal_id__in=(1, 5, 6))
         response = self.admin.download_export_triple_report_to_lab(request=self.request, queryset=queryset)
         self.assertEqual(response["Content-Type"], "text/csv")
-        disposition_type, file_name = response["Content-Disposition"].split(";")
-        file_name = file_name.split("/")[-1]
+        disposition_type, file_name = response["Content-Disposition"].split("=")
+        disposition_type = disposition_type.split(";")[0]
         self.assertEqual(disposition_type, "attachment")
         self.assertTrue(file_name.startswith("Triple_Report_Lab_Export"))
 
@@ -463,8 +464,8 @@ class DownloadCSVAdminTest(TestCase):
     def test_download_goldway_grading_template_success(self):
         response = self.admin.download_goldway_grading_template(request=self.request, queryset=self.queryset)
         self.assertEqual(response["Content-Type"], "text/csv")
-        disposition_type, file_name = response["Content-Disposition"].split(";")
-        file_name = file_name.split("/")[-1]
+        disposition_type, file_name = response["Content-Disposition"].split("=")
+        disposition_type = disposition_type.split(";")[0]
         self.assertEqual(disposition_type, "attachment")
         self.assertTrue(file_name.startswith("Goldway_Grading_Template_"))
 
@@ -490,8 +491,8 @@ class DownloadCSVAdminTest(TestCase):
     def test_download_gia_grading_template_success(self):
         response = self.admin.download_gia_grading_template(request=self.request, queryset=self.queryset)
         self.assertEqual(response["Content-Type"], "text/csv")
-        disposition_type, file_name = response["Content-Disposition"].split(";")
-        file_name = file_name.split("/")[-1]
+        disposition_type, file_name = response["Content-Disposition"].split("=")
+        disposition_type = disposition_type.split(";")[0]
         self.assertEqual(disposition_type, "attachment")
         self.assertTrue(file_name.startswith("GIA_Grading_Template_"))
 
@@ -516,8 +517,8 @@ class DownloadCSVAdminTest(TestCase):
         response = self.admin.download_external_ids(request=self.request, queryset=self.queryset)
         self.assertEqual(response["Content-Type"], "text/csv")
 
-        disposition_type, file_name = response["Content-Disposition"].split(";")
-        file_name = file_name.split("/")[-1]
+        disposition_type, file_name = response["Content-Disposition"].split("=")
+        disposition_type = disposition_type.split(";")[0]
         self.assertEqual(disposition_type, "attachment")
         self.assertTrue(file_name.startswith("Gradia_id_"))
 
