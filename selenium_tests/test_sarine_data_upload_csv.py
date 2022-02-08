@@ -8,7 +8,7 @@ def test_user_can_upload_sarine_stone_data(browser, data_entry_clerk, parcels):
     browser.login(data_entry_clerk.username, data_entry_clerk.raw_password)
 
     # Kary clicks on the `split` link on the left sidebar to view content on the right side
-    link = browser.find_element_by_link_text("Splits")
+    link = browser.find_element_by_link_text("Stones")
     browser.slowly_click(link)
 
     # Kary clicks on `upload stone data` link on the right view. A new page is opened displaying links to do the actual upload
@@ -37,7 +37,7 @@ def test_sarine_data_csv_upload_fails_if_grader_parcel_code_is_incorrect(browser
     browser.login(data_entry_clerk.username, data_entry_clerk.raw_password)
 
     # Kary clicks on the `split` link on the left sidebar to view content on the right side
-    link = browser.find_element_by_link_text("Splits")
+    link = browser.find_element_by_link_text("Stones")
     browser.slowly_click(link)
 
     # Kary clicks on `upload stone data` link on the right view. A new page is opened displaying links to do the actual upload
@@ -74,7 +74,7 @@ def test_sarine_data_csv_upload_fails_if_invalid_data_type(browser, data_entry_c
     browser.login(data_entry_clerk.username, data_entry_clerk.raw_password)
 
     # Kary clicks on the `split` link on the left sidebar to view content on the right side
-    link = browser.find_element_by_link_text("Splits")
+    link = browser.find_element_by_link_text("Stones")
     browser.slowly_click(link)
 
     # Kary clicks on `upload stone data` link on the right view. A new page is opened displaying links to do the actual upload
@@ -109,7 +109,7 @@ def test_field_names_are_not_correct(browser, data_entry_clerk, parcels):
 
     browser.login(data_entry_clerk.username, data_entry_clerk.raw_password)
 
-    link = browser.find_element_by_link_text("Splits")
+    link = browser.find_element_by_link_text("Stones")
     browser.slowly_click(link)
 
     upload_link = browser.find_element_by_link_text("UPLOAD STONE DATA")
@@ -201,7 +201,7 @@ def test_field_names_are_not_correct(browser, data_entry_clerk, parcels):
 def test_uploading_the_same_stone_twice_should_error(browser, data_entry_clerk, parcels):
     browser.login(data_entry_clerk.username, data_entry_clerk.raw_password)
 
-    link = browser.find_element_by_link_text("Splits")
+    link = browser.find_element_by_link_text("Stones")
     browser.slowly_click(link)
 
     upload_link = browser.find_element_by_link_text("UPLOAD STONE DATA")
@@ -220,7 +220,7 @@ def test_uploading_the_same_stone_twice_should_error(browser, data_entry_clerk, 
     home_link = browser.find_element_by_link_text("Home")
     browser.slowly_click(home_link)
 
-    link = browser.find_element_by_link_text("Splits")
+    link = browser.find_element_by_link_text("Stones")
     browser.slowly_click(link)
 
     upload_link = browser.find_element_by_link_text("UPLOAD STONE DATA")

@@ -8,7 +8,7 @@ def test_user_can_upload_gia_data(browser, data_entry_clerk, initial_stones, gia
     browser.login(data_entry_clerk.username, data_entry_clerk.raw_password)
 
     # Kary clicks on the `split` link on the left sidebar to view content on the right side
-    link = browser.find_element_by_link_text("Splits")
+    link = browser.find_element_by_link_text("Stones")
     browser.slowly_click(link)
 
     # Kary clicks on `upload stone data` link on the right view. A new page is opened displaying links to do the actual upload
@@ -38,7 +38,7 @@ def test_gia_data_upload_fails_if_date_from_gia_is_not_provided(browser, data_en
     browser.login(data_entry_clerk.username, data_entry_clerk.raw_password)
 
     # Kary clicks on the `split` link on the left sidebar to view content on the right side
-    link = browser.find_element_by_link_text("Splits")
+    link = browser.find_element_by_link_text("Stones")
     browser.slowly_click(link)
 
     # Kary clicks on `upload stone data` link on the right view. A new page is opened displaying links to do the actual upload

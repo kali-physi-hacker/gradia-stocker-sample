@@ -6,7 +6,7 @@ def test_user_can_upload_basic_stone_data(browser, data_entry_clerk, tanly, gary
 
     browser.login(data_entry_clerk.username, data_entry_clerk.raw_password)
 
-    link = browser.find_element_by_link_text("Splits")
+    link = browser.find_element_by_link_text("Stones")
     browser.slowly_click(link)
 
     upload_link = browser.find_element_by_link_text("UPLOAD STONE DATA")
@@ -31,7 +31,7 @@ def test_upload_fails_if_invalid_basic_inclusions_field(
 
     browser.login(data_entry_clerk.username, data_entry_clerk.raw_password)
 
-    link = browser.find_element_by_link_text("Splits")
+    link = browser.find_element_by_link_text("Stones")
     browser.slowly_click(link)
 
     upload_link = browser.find_element_by_link_text("UPLOAD STONE DATA")
@@ -59,7 +59,7 @@ def test_basic_data_upload_fails_if_invalid_data_type(
 
     browser.login(data_entry_clerk.username, data_entry_clerk.raw_password)
 
-    link = browser.find_element_by_link_text("Splits")
+    link = browser.find_element_by_link_text("Stones")
     browser.slowly_click(link)
 
     upload_link = browser.find_element_by_link_text("UPLOAD STONE DATA")

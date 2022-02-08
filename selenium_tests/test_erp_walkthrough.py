@@ -83,13 +83,13 @@ def test_walk_through(browser, django_user_model, erp, admin_user, tanly, kary, 
     browser.find_element_by_name("_save").click()
 
     # Stones are split into parcels
-    browser.find_element_by_link_text("Splits").click()
+    browser.find_element_by_link_text("Stones").click()
     browser.find_element_by_link_text("UPLOAD STONE DATA").click()
     browser.find_element_by_link_text("Sarine Stone").click()
     upload_file_data(browser=browser, file_name="sarine-01.csv")
 
     # Upload basic grading results
-    browser.find_element_by_link_text("Splits").click()
+    browser.find_element_by_link_text("Stones").click()
     browser.find_element_by_link_text("UPLOAD STONE DATA").click()
     browser.find_element_by_link_text("Basic Stone Data").click()
     upload_file_data(browser=browser, file_name="basic-01.csv")
@@ -102,7 +102,7 @@ def test_walk_through(browser, django_user_model, erp, admin_user, tanly, kary, 
 
     # Upload Goldway results
     browser.find_element_by_link_text("Home").click()
-    browser.find_element_by_link_text("Splits").click()
+    browser.find_element_by_link_text("Stones").click()
     browser.find_element_by_link_text("UPLOAD STONE DATA").click()
     browser.find_element_by_link_text("Goldway Stone Data").click()
     upload_file_data(browser=browser, file_name="gold_way-01.csv")
@@ -117,7 +117,7 @@ def test_walk_through(browser, django_user_model, erp, admin_user, tanly, kary, 
 
     # Upload GIA results
     browser.find_element_by_link_text("Home").click()
-    browser.find_element_by_link_text("Splits").click()
+    browser.find_element_by_link_text("Stones").click()
     browser.find_element_by_link_text("UPLOAD STONE DATA").click()
     browser.find_element_by_link_text("Gia Grading Data").click()
     upload_file_data(browser=browser, file_name="gia.csv")

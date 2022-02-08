@@ -520,7 +520,7 @@ class DownloadCSVAdminTest(TestCase):
         disposition_type, file_name = response["Content-Disposition"].split("=")
         disposition_type = disposition_type.split(";")[0]
         self.assertEqual(disposition_type, "attachment")
-        self.assertTrue(file_name.startswith("Gradia_id_"))
+        self.assertTrue(file_name.startswith("Gradia_ids_"))
 
         headers, content = [row for row in response.content.decode().split('\n"')]
         header = headers.split(",")

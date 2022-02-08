@@ -7,7 +7,7 @@ def test_user_can_upload_gw_if_valid_csv_file(
 ):
     browser.login(username=data_entry_clerk.username, password=data_entry_clerk.raw_password)
 
-    browser.find_element_by_link_text("Splits").click()
+    browser.find_element_by_link_text("Stones").click()
     browser.find_element_by_link_text("UPLOAD STONE DATA").click()
 
     browser.find_element_by_link_text("Goldway Stone Data").click()
@@ -25,7 +25,7 @@ def test_user_can_upload_gw_if_valid_csv_file(
 def test_user_upload_gw_fails_if_invalid_csv_file(browser, data_entry_clerk, tanly, gary, kary, initial_stones):
     browser.login(username=data_entry_clerk.username, password=data_entry_clerk.raw_password)
 
-    browser.find_element_by_link_text("Splits").click()
+    browser.find_element_by_link_text("Stones").click()
     browser.find_element_by_link_text("UPLOAD STONE DATA").click()
 
     browser.find_element_by_link_text("Goldway Stone Data").click()
