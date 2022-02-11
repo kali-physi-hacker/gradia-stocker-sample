@@ -653,7 +653,7 @@ class Stone(
 
     remarks = models.TextField(blank=True, null=True)
     internal_id = models.IntegerField(unique=True)
-    external_id = models.CharField(max_length=11, unique=True, blank=True, null=True)
+    external_id = models.CharField(max_length=11, db_index=True, unique=True, blank=True, null=True)
 
     objects = StoneManager()
 
