@@ -142,7 +142,7 @@ class GWStoneTransferForm(BaseTransferUploadForm):
         :returns:
         """
         stone_id, invoice_number = super().clean()
-        
+
         try:
             GoldwayVerification.objects.get(invoice_number=invoice_number)
             raise forms.ValidationError(
@@ -177,20 +177,19 @@ class GWStoneTransferForm(BaseTransferUploadForm):
 class GiaStoneTransferForm(BaseTransferUploadForm):
     def save(self):
         stone_ids, _ = self.cleaned_data
-        
+
         transfers = []
 
         for stone_id in stone_ids:
             stone = Stone.objects.get(internal_id=stone_id)
-            if stone.gw_verification:           
+            if stone.gw_verification:
                 gia_user = User.objects.get(username="gia")
                 transfer = self.transfer_to(to_user=gia_user, stone_id=stone_id)
                 transfers.append(transfer)
             else:
                 raise forms.ValidationError(
-                {"file": f"Stone doesn't have goldway verification, have you confirmed with goldway"}
-            )
-
+                    {"file": f"Stone doesn't have goldway verification, have you confirmed with goldway"}
+                )
 
         return transfers
 
