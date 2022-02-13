@@ -151,15 +151,26 @@ class GiaTransferFormTest(TestCase):
             user=self.user,
             files={"file": SimpleUploadedFile(basic_file.name, basic_file.read())},
         )
+
+        
         form.is_valid()
         form.save()
+        
+        gw_file = open("ownerships/tests/resources/G048RV.csv", "rb")
 
+        form = GWStoneTransferForm(
+            data={}, user=self.user, files={"file": SimpleUploadedFile(gw_file.name, gw_file.read())}
+        )
+        form.is_valid()
+        form.save()
+        
     def test_form_is_valid_if_valid_csv_file(self):
         """
         Tests that form is valid if all stone ids in the csv file exist
         :returns:  ===> convention in python ==> snake_case
         """
         self.do_initial_uploads()
+        
 
         form = GiaStoneTransferForm(
             data={}, user=self.user, files={"file": SimpleUploadedFile(self.gia_file.name, self.gia_file.read())}
@@ -169,7 +180,7 @@ class GiaTransferFormTest(TestCase):
 
         stone_transfers = form.save()
 
-        # Check here that stones have been transferred to gw
+        # Check here that stones have been transferred to gia
         for transfer in stone_transfers:
             current_owner = StoneTransfer.most_recent_transfer(item=transfer.item).to_user
             self.assertEqual(current_owner, self.gia_user)

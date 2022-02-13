@@ -74,7 +74,9 @@ class StoneTransferViews(TestCase):
         self.do_initial_uploads()
 
         csv_file = open("ownerships/tests/resources/gia.csv")
+        csv_file2 = open("ownerships/tests/resources/G048RV.csv")
         self.client.login(**self.grader_user)
+        response = self.client.post(reverse("ownerships:goldway_transfer_upload_url"), data={"file": csv_file2})
         response = self.client.post(reverse("ownerships:gia_transfer_upload_url"), data={"file": csv_file})
         self.assertEqual(response.status_code, 200)
 

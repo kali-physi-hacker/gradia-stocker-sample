@@ -67,7 +67,6 @@ class TransferView(LoginRequiredMixin, View):
         form = self.transfer_form(user=request.user, data=request.POST, files=request.FILES)
         if not form.is_valid():
             return errors_page(request=request, title=f"{self.title} Stone Transfer", form=form)
-
         form.save()
 
         stones = Stone.objects.filter(internal_id__in=form.cleaned_data[0])
