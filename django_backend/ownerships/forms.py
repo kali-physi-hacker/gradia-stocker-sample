@@ -8,7 +8,7 @@ from django.utils.timezone import utc
 from django.contrib.auth import get_user_model
 from django.http import HttpResponse
 
-from grading.models import GiaVerification, GoldwayVerification, Stone
+from grading.models import GoldwayVerification, Stone
 from grading.forms import get_error_headers
 from grading.views import errors_page
 
@@ -177,7 +177,6 @@ class GWStoneTransferForm(BaseTransferUploadForm):
 class GiaStoneTransferForm(BaseTransferUploadForm):
     def save(self):
         stone_ids, _ = self.cleaned_data
-
         transfers = []
 
         for stone_id in stone_ids:

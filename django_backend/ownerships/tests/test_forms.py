@@ -134,6 +134,7 @@ class GiaTransferFormTest(TestCase):
         self.gia_file = open("ownerships/tests/resources/gia.csv", "rb")
         self.user = User.objects.get(username="kary")
         self.gia_user = User.objects.get(username="gia")
+        self.stone_ids = (1, 5, 6)
 
     def do_initial_uploads(self):
         # Do Sarine upload
@@ -155,20 +156,17 @@ class GiaTransferFormTest(TestCase):
         form.is_valid()
         form.save()
 
-        gw_file = open("ownerships/tests/resources/G048RV.csv", "rb")
-
-        form = GWStoneTransferForm(
-            data={}, user=self.user, files={"file": SimpleUploadedFile(gw_file.name, gw_file.read())}
-        )
-        form.is_valid()
-        form.save()
-
     def test_form_is_valid_if_valid_csv_file(self):
         """
         Tests that form is valid if all stone ids in the csv file exist
         :returns:  ===> convention in python ==> snake_case
         """
         self.do_initial_uploads()
+
+        for stone_id in self.stone_ids:
+            stone = Stone.objects.get(internal_id=stone_id)
+            stone.gw_verification = GoldwayVerification.objects.create(invoice_number=stone_id)
+            stone.save()
 
         form = GiaStoneTransferForm(
             data={}, user=self.user, files={"file": SimpleUploadedFile(self.gia_file.name, self.gia_file.read())}

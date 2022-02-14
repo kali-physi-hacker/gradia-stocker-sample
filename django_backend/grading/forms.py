@@ -823,13 +823,11 @@ class GIAUploadForm(BaseUploadForm):
             stone = Stone.objects.get(internal_id=data["internal_id"])
             for field, value in stone_data.items():
                 setattr(stone, field, value)
-
             try:
                 gia_verification = GiaVerification.objects.get(receipt_number=gia_code)
             except GiaVerification.DoesNotExist:
                 gia_verification = GiaVerification.objects.create(receipt_number=gia_code)
             setattr(stone, "gia_verification", gia_verification)
-
             stone.save()
             gia = User.objects.get(username="gia")
             vault = User.objects.get(username="vault")
