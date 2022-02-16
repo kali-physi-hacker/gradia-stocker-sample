@@ -165,7 +165,7 @@ class GiaTransferFormTest(TestCase):
 
         for stone_id in self.stone_ids:
             stone = Stone.objects.get(internal_id=stone_id)
-            stone.gw_verification = GoldwayVerification.objects.create(invoice_number=f'invoice-for-{stone_id}')
+            stone.gw_verification = GoldwayVerification.objects.create(invoice_number=f"invoice-for-{stone_id}")
             stone.save()
 
         form = GiaStoneTransferForm(

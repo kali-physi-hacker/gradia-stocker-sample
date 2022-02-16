@@ -181,7 +181,7 @@ class GiaStoneTransferForm(BaseTransferUploadForm):
 
         for stone_id in stone_ids:
             stone = Stone.objects.get(internal_id=stone_id)
-            if  stone.gw_verification is None:
+            if stone.gw_verification is None:
                 raise forms.ValidationError(
                     {"file": f"Stone doesn't have goldway verification, have you confirmed with goldway"}
                 )
@@ -189,7 +189,6 @@ class GiaStoneTransferForm(BaseTransferUploadForm):
             gia_user = User.objects.get(username="gia")
             transfer = self.transfer_to(to_user=gia_user, stone_id=stone_id)
             transfers.append(transfer)
-                
 
         return transfers
 
