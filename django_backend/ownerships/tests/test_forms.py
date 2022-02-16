@@ -135,6 +135,10 @@ class GiaTransferFormTest(TestCase):
         self.user = User.objects.get(username="kary")
         self.gia_user = User.objects.get(username="gia")
         self.stone_ids = (1, 5, 6)
+        for stone_id in self.stone_ids:
+            stone = Stone.objects.get(internal_id=stone_id)
+            stone.gw_verification = GoldwayVerification.objects.create(invoice_number='invoice-for-GW-{stone_id}')
+            stone.save()
 
     def do_initial_uploads(self):
         # Do Sarine upload
@@ -163,10 +167,7 @@ class GiaTransferFormTest(TestCase):
         """
         self.do_initial_uploads()
 
-        for stone_id in self.stone_ids:
-            stone = Stone.objects.get(internal_id=stone_id)
-            stone.gw_verification = GoldwayVerification.objects.create(invoice_number=stone_id)
-            stone.save()
+        
 
         form = GiaStoneTransferForm(
             data={}, user=self.user, files={"file": SimpleUploadedFile(self.gia_file.name, self.gia_file.read())}
