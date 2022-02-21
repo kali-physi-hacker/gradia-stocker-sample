@@ -134,6 +134,7 @@ class GiaTransferFormTest(TestCase):
         self.gia_file = open("ownerships/tests/resources/gia.csv", "rb")
         self.user = User.objects.get(username="kary")
         self.gia_user = User.objects.get(username="gia")
+        self.stone_ids = (1, 5, 6)
 
     def do_initial_uploads(self):
         # Do Sarine upload
@@ -151,6 +152,7 @@ class GiaTransferFormTest(TestCase):
             user=self.user,
             files={"file": SimpleUploadedFile(basic_file.name, basic_file.read())},
         )
+
         form.is_valid()
         form.save()
 
@@ -161,6 +163,11 @@ class GiaTransferFormTest(TestCase):
         """
         self.do_initial_uploads()
 
+        for stone_id in self.stone_ids:
+            stone = Stone.objects.get(internal_id=stone_id)
+            stone.gw_verification = GoldwayVerification.objects.create(invoice_number=f"invoice-for-{stone_id}")
+            stone.save()
+
         form = GiaStoneTransferForm(
             data={}, user=self.user, files={"file": SimpleUploadedFile(self.gia_file.name, self.gia_file.read())}
         )
@@ -169,7 +176,7 @@ class GiaTransferFormTest(TestCase):
 
         stone_transfers = form.save()
 
-        # Check here that stones have been transferred to gw
+        # Check here that stones have been transferred to gia
         for transfer in stone_transfers:
             current_owner = StoneTransfer.most_recent_transfer(item=transfer.item).to_user
             self.assertEqual(current_owner, self.gia_user)

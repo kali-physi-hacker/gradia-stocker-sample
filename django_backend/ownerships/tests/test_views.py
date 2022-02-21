@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 from grading.forms import SarineUploadForm, BasicUploadForm
-from grading.models import Stone
+from grading.models import Stone, GoldwayVerification
 
 
 User = get_user_model()
@@ -17,6 +17,7 @@ class StoneTransferViews(TestCase):
 
     def setUp(self):
         self.grader_user = {"username": "kary", "password": "password"}
+        self.stone_ids = (1, 5, 6)
 
     def do_initial_uploads(self):
         user = User.objects.get(username="kary")
@@ -36,6 +37,11 @@ class StoneTransferViews(TestCase):
         )
         form.is_valid()
         form.save()
+
+        for stone_id in self.stone_ids:
+            stone = Stone.objects.get(internal_id=stone_id)
+            stone.gw_verification = GoldwayVerification.objects.create(invoice_number=f"invoice-for-{stone_id}")
+            stone.save()
 
     def test_transfer_to_goldway_success(self):
         self.do_initial_uploads()
@@ -75,6 +81,7 @@ class StoneTransferViews(TestCase):
 
         csv_file = open("ownerships/tests/resources/gia.csv")
         self.client.login(**self.grader_user)
+
         response = self.client.post(reverse("ownerships:gia_transfer_upload_url"), data={"file": csv_file})
         self.assertEqual(response.status_code, 200)
 
