@@ -876,7 +876,6 @@ class ImageFileNameUploadBaseForm(forms.Form):
             raise ValidationError({"file": "The csv file contains errors, call .csv_errors to know specific errors"})
 
         cleaned_data = [dict(zip(data_frame.columns, data)) for data in data_frame.values]
-        # import pdb; pdb.set_trace()
 
         return cleaned_data
 
@@ -885,7 +884,6 @@ class MacroImageFilenameUploadForm(ImageFileNameUploadBaseForm):
     def clean(self):
         cleaned_data = super().clean()
 
-        # import pdb; pdb.set_trace()
         return cleaned_data
 
         # Validate the macro_photo column name
@@ -899,7 +897,6 @@ class MacroImageFilenameUploadForm(ImageFileNameUploadBaseForm):
 
             stone.save()
             stones.append(stone)
-        # import pdb; pdb.set_trace()
         return stones
 
 

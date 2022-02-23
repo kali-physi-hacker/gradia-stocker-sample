@@ -1194,9 +1194,6 @@ class MacroImageFilenameUploadFormTest(TestCase):
             data={}, files={"file": SimpleUploadedFile(self.csv_file_name.name, self.csv_file_name.read())}
         )
         self.assertTrue(form.is_valid())
-        import pdb
-
-        pdb.set_trace()
         form.save()
 
         stones = Stone.objects.all()
