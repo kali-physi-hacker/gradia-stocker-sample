@@ -3,6 +3,7 @@ import os
 import pandas as pd
 
 from django import forms
+from django.forms import ModelForm
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.utils.timezone import utc
@@ -842,4 +843,79 @@ class GIAUploadForm(BaseUploadForm):
             StoneTransfer.confirm_received(item=stone)
             stones.append(stone)
 
+        return stones
+
+
+class ImageFileNameUploadBaseForm(forms.Form):
+    file = forms.FileField()
+
+    def __init__(self, data, files, *args, **kwargs):
+        super().__init__(data, files, *args, **kwargs)
+
+        self.csv_errors = []
+
+    def clean(self):
+        """
+        Checking to be sure stones in the csv file are valid
+        :returns:
+        """
+        data_frame = pd.read_csv(self.cleaned_data["file"])
+
+        if "external_id" not in data_frame.columns:
+            raise ValidationError({"file": "external_id column required"})
+
+        for row_index, external_id in enumerate(data_frame.external_id):
+            row_errors = {row_index: {}}
+            try:
+                Stone.objects.get(external_id=external_id)
+            except Stone.DoesNotExist:
+                row_errors[row_index] = {"external_id": f"Stone with id {external_id}"}
+                self.csv_errors.append(row_errors)
+
+        if len(self.csv_errors) > 0:
+            raise ValidationError({"file": "The csv file contains errors, call .csv_errors to know specific errors"})
+
+        cleaned_data = [dict(zip(data_frame.columns, data)) for data in data_frame.values]
+        # import pdb; pdb.set_trace()
+
+        return cleaned_data
+
+
+class MacroImageFilenameUploadForm(ImageFileNameUploadBaseForm):
+    def clean(self):
+        cleaned_data = super().clean()
+
+        # import pdb; pdb.set_trace()
+        return cleaned_data
+
+        # Validate the macro_photo column name
+
+    def save(self):
+
+        stones = []
+        for data in self.cleaned_data:
+            stone = Stone.objects.get(external_id=data["external_id"])
+            stone.macro_filename = data["macro_filename"]
+
+            stone.save()
+            stones.append(stone)
+        # import pdb; pdb.set_trace()
+        return stones
+
+
+class NanoImageFilenameUploadForm(ImageFileNameUploadBaseForm):
+    def clean(self):
+        cleaned_data = super().clean()
+
+        return cleaned_data
+        # Validate the nano_photo column name
+
+    def save(self):
+        stones = []
+        for data in self.cleaned_data:
+            stone = Stone.objects.get(external_id=data["external_id"])
+            stone.nano_filename = data["nano_filename"]
+
+            stone.save()
+            stones.append(stone)
         return stones
