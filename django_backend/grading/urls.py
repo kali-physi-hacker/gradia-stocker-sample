@@ -7,6 +7,7 @@ urlpatterns = [
     path("confirm_received/<int:pk>/", views.ConfirmReceivedView.as_view(), name="confirm_received"),
     path("close_receipt/<int:pk>/", views.CloseReceiptView.as_view(), name="close_receipt"),
     path("upload/all/", views.AllUploadView.as_view(), name="upload_all"),
+    path("upload/filenames", views.FileNameUploadView.as_view(), name="upload_filenames"),
     path("upload/sarine/", views.SarineUploadView.as_view(), name="sarine_data_upload_url"),
     path("upload/basic_grading/", views.BasicGradingUploadView.as_view(), name="basic_grading_data_upload_url"),
     path("upload/gia_adjusting/", views.GIAGradingAdjustView.as_view(), name="gia_adjusting_data_upload_url"),
@@ -15,4 +16,6 @@ urlpatterns = [
     path("upload/errors/", views.errors_page, name="errors_page"),
     path("gw_data_upload_url/", views.GWGradingUploadView.as_view(), name="gw_data_upload_url"),
     path("upload/gia_grading/", views.GIAGradingUploadView.as_view(), name="gia_grading_data_upload_url"),
+    path("upload/macro_filename", views.MacroFileNameUpload.as_view(), name="macro_filename"),
+    path("upload/nano_filename", views.NanoFileNameUpload.as_view(), name="nano_filename"),
 ]
