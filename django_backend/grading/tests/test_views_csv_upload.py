@@ -199,6 +199,52 @@ class TestCSVUpload(TestCase):
         self.assertEqual(response.status_code, 200)
         # Maybe more tests ==> Test for the actual content of the page (response.content.decode())
 
+    def test_macro_file_name_upload_success(self):
+
+        self.csv_file = open("grading/tests/fixtures/macro_image.csv")
+        Stone.objects.all().delete()
+        self.setup_sarine_data()
+
+        # Generate external_id for stones
+        for stone in Stone.objects.all():
+            stone.generate_triple_verified_external_id()
+            stone.save()
+
+        self.client.login(**self.grader)
+        response = self.client.post(reverse("grading:macro_filename"), {"file": self.csv_file})
+        self.assertEqual(response.status_code, 302)
+        self.assertIsNotNone(re.match(r"^/admin/grading/split/\d+/change/", response.url))
+
+    def test_macro_file_name_upload_fails(self):
+
+        self.csv_file = open("grading/tests/fixtures/macro_image.csv")
+        self.client.login(**self.grader)
+        response = self.client.post(reverse("grading:macro_filename"), {"file": self.csv_file})
+        self.assertEqual(response.status_code, 200)
+
+    def test_nano_file_name_upload_success(self):
+
+        self.csv_file = open("grading/tests/fixtures/nano_image.csv")
+
+        Stone.objects.all().delete()
+        self.setup_sarine_data()
+        # Generate external_id for stones
+        for stone in Stone.objects.all():
+            stone.generate_triple_verified_external_id()
+            stone.save()
+
+        self.client.login(**self.grader)
+        response = self.client.post(reverse("grading:nano_filename"), {"file": self.csv_file})
+        self.assertEqual(response.status_code, 302)
+        self.assertIsNotNone(re.match(r"^/admin/grading/split/\d+/change/", response.url))
+
+    def test_nano_file_name_upload_fails(self):
+
+        self.csv_file = open("grading/tests/fixtures/nano_image.csv")
+        self.client.login(**self.grader)
+        response = self.client.post(reverse("grading:nano_filename"), {"file": self.csv_file})
+        self.assertEqual(response.status_code, 200)
+
     def test_views_basic_grading_does_not_upload_and_returns_400_with_invalid_csv_file_field_values(self):
         pass
 
