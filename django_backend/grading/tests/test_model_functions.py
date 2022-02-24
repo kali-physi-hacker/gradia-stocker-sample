@@ -223,3 +223,52 @@ class StoneModelTest(TestCase):
         for stone_id in self.stone_ids:
             stone = Stone.objects.get(internal_id=stone_id)
             self.assertTrue(stone.is_gia_adjusting_grading_complete)
+
+    def test_macro_filename_upload_returns_false(self):
+        """
+        Tests that macro_filename_upload returns false if macro_filename has not been uploaded
+        """
+        self.upload_sarine_grading_results()
+
+        for stone_id in self.stone_ids:
+            stone = Stone.objects.get(internal_id=stone_id)
+            self.assertFalse(stone.macro_image_uploaded)
+
+    def test_nano_filename_upload_returns_false(self):
+        """
+        Tests that nano_filename_upload returns false if nano_filename has not been uploaded
+        """
+
+        self.upload_sarine_grading_results()
+
+        for stone_id in self.stone_ids:
+            stone = Stone.objects.get(internal_id=stone_id)
+            self.assertFalse(stone.nano_image_uploaded)
+
+    def test_macro_filename_upload_returns_true(self):
+        """
+        Tests that macro_filename_upload returns true if macro_filename has been uploaded
+        """
+
+        self.upload_sarine_grading_results()
+
+        filenames = ["G30204352_macro", "Gb46e9350_macro", "G02da2347_macro"]
+        for stone_id in self.stone_ids:
+            stone = Stone.objects.get(internal_id=stone_id)
+            for filename in filenames:
+                stone.macro_filename = filename
+            self.assertTrue(stone.macro_image_uploaded)
+
+    def test_nano_filename_upload_returns_true(self):
+        """
+        Tests that nano_filename_upload returns true if nano_filename has been uploaded
+        """
+
+        self.upload_sarine_grading_results()
+
+        filenames = ["G30204352_nano", "Gb46e9350_nano", "G02da2347_nano"]
+        for stone_id in self.stone_ids:
+            stone = Stone.objects.get(internal_id=stone_id)
+            for filename in filenames:
+                stone.macro_filename = filename
+            self.assertTrue(stone.macro_image_uploaded)
