@@ -653,13 +653,38 @@ class Stone(
 
     remarks = models.TextField(blank=True, null=True)
     internal_id = models.IntegerField(unique=True)
-    external_id = models.CharField(max_length=11, unique=True, blank=True, null=True)
+    external_id = models.CharField(max_length=11, db_index=True, unique=True, blank=True, null=True)
+
+    macro_filename = models.CharField(max_length=20, unique=True, null=True, blank=True)
+    nano_filename = models.CharField(max_length=20, unique=True, null=True, blank=True)
 
     objects = StoneManager()
 
     def __str__(self):
         text = self.external_id if self.external_id is not None else self.internal_id
         return str(text)
+
+    @property
+    def macro_image_uploaded(self):
+        """
+        Returns True if macro image has been upload and returns False otherwise.
+        Here, were technically just returning True if the macro_filename field is not None
+        and returning False otherwise
+        """
+        if self.macro_filename is None:
+            return False
+
+        return True
+
+    @property
+    def nano_image_uploaded(self):
+        """
+        Returns True if nano image has been uploaded and returns False otherwise.
+        """
+        if self.nano_filename is None:
+            return False
+
+        return True
 
     @property
     def customer_receipt_number(self):

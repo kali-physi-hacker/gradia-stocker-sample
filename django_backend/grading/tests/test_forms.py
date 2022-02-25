@@ -14,6 +14,8 @@ from grading.forms import (
     GIAUploadForm,
     GWAdjustingUploadForm,
     GIAAdjustingUploadForm,
+    MacroImageFilenameUploadForm,
+    NanoImageFilenameUploadForm,
 )
 from grading.models import Stone, GiaVerification
 from stonegrading.mixins import SarineGradingMixin
@@ -1159,3 +1161,79 @@ class GiaAdjustGradingUploadFormTest(TestCase):
                 actual_value = float(raw_actual_value) if type(raw_actual_value) == Decimal else raw_actual_value
                 expected_value = expected_stone[field]
                 self.assertEqual(actual_value, expected_value)
+
+
+class MacroImageFilenameUploadFormTest(TestCase):
+    fixtures = ("grading/fixtures/test_data.json",)
+
+    def setUp(self):
+        self.sarine_csv_file = open("grading/tests/fixtures/sarine-01.csv", "rb")
+        self.csv_file_name = open("grading/tests/fixtures/macro_image.csv", "rb")
+
+    def do_initial_upload(self):
+        """
+        Do initial uploads to create stones for updating
+        :return:
+        """
+        Stone.objects.all().delete()
+        form = SarineUploadForm(
+            data={},
+            files={"file": SimpleUploadedFile(self.sarine_csv_file.name, self.sarine_csv_file.read())},
+            user=User.objects.get(username="gary"),
+        )
+        if form.is_valid():
+            form.save()
+
+    def test_save_updates_stones(self):
+
+        self.do_initial_upload()
+        for stone in Stone.objects.all():
+            stone.generate_triple_verified_external_id()
+            stone.save()
+        form = MacroImageFilenameUploadForm(
+            data={}, files={"file": SimpleUploadedFile(self.csv_file_name.name, self.csv_file_name.read())}
+        )
+        self.assertTrue(form.is_valid())
+        form.save()
+
+        stones = Stone.objects.all()
+
+        self.assertEqual(len(stones), 3)
+
+
+class NanoImageFilenameUploadFormTest(TestCase):
+    fixtures = ("grading/fixtures/test_data.json",)
+
+    def setUp(self):
+        self.sarine_csv_file = open("grading/tests/fixtures/sarine-01.csv", "rb")
+        self.csv_file_name = open("grading/tests/fixtures/nano_image.csv", "rb")
+
+    def do_initial_upload(self):
+        """
+        Do initial uploads to create stones for updating
+        :return:
+        """
+        Stone.objects.all().delete()
+        form = SarineUploadForm(
+            data={},
+            files={"file": SimpleUploadedFile(self.sarine_csv_file.name, self.sarine_csv_file.read())},
+            user=User.objects.get(username="gary"),
+        )
+        if form.is_valid():
+            form.save()
+
+    def test_save_updates_stones(self):
+
+        self.do_initial_upload()
+        for stone in Stone.objects.all():
+            stone.generate_triple_verified_external_id()
+            stone.save()
+        form = NanoImageFilenameUploadForm(
+            data={}, files={"file": SimpleUploadedFile(self.csv_file_name.name, self.csv_file_name.read())}
+        )
+        self.assertTrue(form.is_valid())
+        form.save()
+
+        stones = Stone.objects.all()
+
+        self.assertEqual(len(stones), 3)

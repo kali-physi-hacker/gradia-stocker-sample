@@ -1,0 +1,18 @@
+{% extends 'admin/base.html' %}
+
+{% block content %}
+<h1>Select stone upload stage</h1>
+<ul>
+    <li>
+        <a style="margin-left: 15px;" href="{% url 'grading:macro_filename' %}" class="addlink">
+            Macro File Name
+        </a>
+    </li>
+    <li>
+        <a style="margin-left: 15px;" href="{% url 'grading:nano_filename' %}" class="addlink">
+            Nano File Name
+        </a>
+    </li>
+
+</ul>
+{% endblock %}

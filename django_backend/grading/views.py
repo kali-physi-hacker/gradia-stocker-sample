@@ -1,4 +1,6 @@
 from datetime import datetime
+from multiprocessing import context
+from re import template
 
 from django.contrib.auth.models import User
 from django.http import HttpResponse, HttpResponseRedirect
@@ -18,6 +20,8 @@ from .forms import (
     GWAdjustingUploadForm,
     GIAUploadForm,
     GIAAdjustingUploadForm,
+    MacroImageFilenameUploadForm,
+    NanoImageFilenameUploadForm,
 )
 
 from stonegrading.mixins import BasicGradingMixin, SarineGradingMixin, GWGradingMixin, GIAGradingMixin
@@ -112,6 +116,18 @@ def errors_page(request, title, form):
     template = "grading/csv_errors.html"
     context = {"form": form, "title": title}
     return render(request, template, context)
+
+
+class FileNameUploadView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        template = "grading/all-filename-uploads.html"
+        context = {}
+        return render(request, template, context)
+
+    def errors_page(request, title, form):
+        template = "grading/csv_errors.html"
+        context = {"form": form, "title": title}
+        return render(request, template, context)
 
 
 class SarineUploadView(LoginRequiredMixin, View):
@@ -308,6 +324,45 @@ class GIAGradingUploadView(LoginRequiredMixin, View):
             return errors_page(request=request, title="GIA Grading", form=form)
 
         stones = form.save()
+        split_id = stones[0].split_from.pk
+
+        return HttpResponseRedirect(reverse("admin:grading_split_change", args=(split_id,)))
+
+
+class MacroFileNameUpload(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+
+        form = CSVImportForm()
+        context = {"template_title": "Upload a csv file containing macro image filename and stone id", "form": form}
+        return render(request, "grading/upload.html", context)
+
+    def post(self, request, *args, **kwargs):
+
+        form = MacroImageFilenameUploadForm(data={}, files=request.FILES)
+
+        if not form.is_valid():
+            return errors_page(request=request, title="Macro Filename", form=form)
+        stones = form.save()
+        split_id = stones[0].split_from.pk
+
+        return HttpResponseRedirect(reverse("admin:grading_split_change", args=(split_id,)))
+
+
+class NanoFileNameUpload(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+
+        form = CSVImportForm()
+        context = {"template_title": "Upload a csv file containing nano image filename and stone id", "form": form}
+        return render(request, "grading/upload.html", context)
+
+    def post(self, request, *args, **kwargs):
+
+        form = NanoImageFilenameUploadForm(data={}, files=request.FILES)
+
+        if not form.is_valid():
+            return errors_page(request=request, title="Nano Filename", form=form)
+        stones = form.save()
+
         split_id = stones[0].split_from.pk
 
         return HttpResponseRedirect(reverse("admin:grading_split_change", args=(split_id,)))
