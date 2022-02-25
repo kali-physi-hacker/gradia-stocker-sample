@@ -224,7 +224,7 @@ class StoneModelTest(TestCase):
             stone = Stone.objects.get(internal_id=stone_id)
             self.assertTrue(stone.is_gia_adjusting_grading_complete)
 
-    def test_macro_filename_upload_returns_false(self):
+    def test_macro_image_uploaded_returns_false_if_no_macro_filename(self):
         """
         Tests that macro_filename_upload returns false if macro_filename has not been uploaded
         """
@@ -234,7 +234,7 @@ class StoneModelTest(TestCase):
             stone = Stone.objects.get(internal_id=stone_id)
             self.assertFalse(stone.macro_image_uploaded)
 
-    def test_nano_filename_upload_returns_false(self):
+    def test_nano_image_uploaded_returns_false_if_no_nano_filename(self):
         """
         Tests that nano_filename_upload returns false if nano_filename has not been uploaded
         """
@@ -245,7 +245,7 @@ class StoneModelTest(TestCase):
             stone = Stone.objects.get(internal_id=stone_id)
             self.assertFalse(stone.nano_image_uploaded)
 
-    def test_macro_filename_upload_returns_true(self):
+    def test_macro_image_uploaded_returns_true_if_there_is_macro_filename(self):
         """
         Tests that macro_filename_upload returns true if macro_filename has been uploaded
         """
@@ -259,7 +259,7 @@ class StoneModelTest(TestCase):
                 stone.macro_filename = filename
             self.assertTrue(stone.macro_image_uploaded)
 
-    def test_nano_filename_upload_returns_true(self):
+    def test_nano_image_uploaded_returns_true_if_there_is_nano_filename(self):
         """
         Tests that nano_filename_upload returns true if nano_filename has been uploaded
         """
