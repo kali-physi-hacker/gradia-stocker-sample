@@ -40,9 +40,8 @@ class StoneTransferViews(TestCase):
 
         for stone_id in self.stone_ids:
             stone = Stone.objects.get(internal_id=stone_id)
-            stone.gw_verification = GoldwayVerification.objects.create(invoice_number=f'invoice-for-{stone_id}')
+            stone.gw_verification = GoldwayVerification.objects.create(invoice_number=f"invoice-for-{stone_id}")
             stone.save()
-
 
     def test_transfer_to_goldway_success(self):
         self.do_initial_uploads()
@@ -77,15 +76,12 @@ class StoneTransferViews(TestCase):
 
         self.assertEqual(len(matches), 3)
 
-        
-
     def test_transfer_to_gia_success(self):
         self.do_initial_uploads()
 
         csv_file = open("ownerships/tests/resources/gia.csv")
         self.client.login(**self.grader_user)
 
-        
         response = self.client.post(reverse("ownerships:gia_transfer_upload_url"), data={"file": csv_file})
         self.assertEqual(response.status_code, 200)
 

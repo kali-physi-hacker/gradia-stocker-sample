@@ -165,13 +165,13 @@ class GiaTransferFormTest(TestCase):
 
         for stone_id in self.stone_ids:
             stone = Stone.objects.get(internal_id=stone_id)
-            stone.gw_verification = GoldwayVerification.objects.create(invoice_number=f'invoice-for-{stone_id}')
+            stone.gw_verification = GoldwayVerification.objects.create(invoice_number=f"invoice-for-{stone_id}")
             stone.save()
 
         form = GiaStoneTransferForm(
             data={}, user=self.user, files={"file": SimpleUploadedFile(self.gia_file.name, self.gia_file.read())}
         )
-    
+
         self.assertTrue(form.is_valid())
 
         stone_transfers = form.save()
@@ -204,7 +204,7 @@ class GiaTransferFormTest(TestCase):
         :returns:
         """
         self.do_initial_uploads()
-    
+
         form = GiaStoneTransferForm(
             data={}, user=self.user, files={"file": SimpleUploadedFile(self.gia_file.name, self.gia_file.read())}
         )
