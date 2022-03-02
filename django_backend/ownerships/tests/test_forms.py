@@ -198,6 +198,23 @@ class GiaTransferFormTest(TestCase):
         for id, (_, error) in zip(ids, form.csv_errors.items()):
             self.assertEqual(error["internal_id"][0], f"Stone With ID `{id}` does not exist")
 
+    def test_cannot_upload_to_gia_before_uploading_to_goldway(self):
+        """
+        Tests that validation error raise when upload to gia does not contain goldway verifications
+        :returns:
+        """
+        self.do_initial_uploads()
+
+        form = GiaStoneTransferForm(
+            data={}, user=self.user, files={"file": SimpleUploadedFile(self.gia_file.name, self.gia_file.read())}
+        )
+        self.assertFalse(form.is_valid())
+
+        self.assertEqual(
+            form.errors["file"][0],
+            f"Stone doesn't have goldway verification, have you confirmed with goldway",
+        )
+
 
 class ExternalStoneTransferFormTest(TestCase):
 
