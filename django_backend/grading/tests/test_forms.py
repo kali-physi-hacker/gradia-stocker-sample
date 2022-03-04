@@ -700,10 +700,28 @@ class BasicUploadFormTest(TestCase):
                 raw_actual_value = getattr(actual_stone, field)
                 actual_value = float(raw_actual_value) if type(raw_actual_value) == Decimal else raw_actual_value
                 expected_value = expected_stone[field]
-
                 if "inclusion" not in field:
                     self.assertEqual(actual_value, expected_value)
 
+    def test_uploading_the_same_stone_twice_should_error(self):
+        self.do_sarine_upload()
+
+        form = BasicUploadForm(
+            data={},
+            user=self.grader,
+            files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())},
+        )
+        self.assertTrue(form.is_valid())
+        form.save()
+
+        with open("grading/tests/fixtures/basic-01.csv", "rb") as file:
+            uploaded_file = SimpleUploadedFile(file.name, file.read())
+
+        form = BasicUploadForm(data={}, files={"file": uploaded_file}, user=self.grader)
+
+        self.assertFalse(form.is_valid())
+        self.assertEqual(form.errors['file'][0], "Stone has already been uploaded")
+    
 
 def get_date_from_str(date_string):
     day, month, year = [int(value) for value in date_string.split("/")]
