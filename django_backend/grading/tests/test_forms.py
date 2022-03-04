@@ -1044,6 +1044,30 @@ class GWAdjustingUploadFormTest(TestCase):
                 expected_value = expected_stone[field]
                 self.assertEqual(actual_value, expected_value)
 
+    def test_cannot_upload_to_golway_adjust_when_gw_adjust_is_already_complete(self):
+        self.do_initial_upload()
+        form = GWAdjustingUploadForm(
+            data={}, files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())}
+        )
+        self.assertTrue(form.is_valid())
+        form.save()
+
+        form = GWAdjustingUploadForm(
+            data={}, files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())}
+        )
+        self.assertFalse(form.is_valid())
+        self.assertEqual(
+            form.errors["file"][0],
+            f"goldway adjust form is already complete,",
+        )
+
+        
+
+        
+
+
+    
+
 
 class GiaAdjustGradingUploadFormTest(TestCase):
     fixtures = ("grading/fixtures/test_data.json",)
