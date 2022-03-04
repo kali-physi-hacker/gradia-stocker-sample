@@ -608,9 +608,28 @@ class BasicUploadForm(BaseUploadForm):
 
         return stone_data, errors
 
+    def __process_stone_upload(self, stone_data, file_name):
+        """
+        Check that basic stone has already been uploaded and returns an error if true
+        """
+
+        errors = {}
+        for row, data in enumerate(stone_data):
+            stone = Stone.objects.get(internal_id=data['internal_id'])
+            try:
+                if stone.is_basic_grading_complete is True:
+                    errors.update({
+                        "file": "Stone has already been uploaded"
+                    })
+            except:
+                pass
+        
+        return stone_data, errors
+
     def save(self):
         stones = []
         for data in self.cleaned_data:
+
             stone = Stone.objects.get(internal_id=data["internal_id"])  # After resolving the id stuff
 
             inclusions_fields = (
