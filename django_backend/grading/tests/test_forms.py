@@ -720,8 +720,8 @@ class BasicUploadFormTest(TestCase):
         form = BasicUploadForm(data={}, files={"file": uploaded_file}, user=self.grader)
 
         self.assertFalse(form.is_valid())
-        self.assertEqual(form.errors['file'][0], "Stone has already been uploaded")
-    
+        self.assertEqual(form.errors["file"][0], "Stone has already been uploaded")
+
 
 def get_date_from_str(date_string):
     day, month, year = [int(value) for value in date_string.split("/")]

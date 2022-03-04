@@ -615,15 +615,13 @@ class BasicUploadForm(BaseUploadForm):
 
         errors = {}
         for row, data in enumerate(stone_data):
-            stone = Stone.objects.get(internal_id=data['internal_id'])
+            stone = Stone.objects.get(internal_id=data["internal_id"])
             try:
                 if stone.is_basic_grading_complete is True:
-                    errors.update({
-                        "file": "Stone has already been uploaded"
-                    })
+                    errors.update({"file": "Stone has already been uploaded"})
             except:
                 pass
-        
+
         return stone_data, errors
 
     def save(self):
