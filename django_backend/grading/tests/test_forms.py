@@ -720,7 +720,15 @@ class BasicUploadFormTest(TestCase):
         form = BasicUploadForm(data={}, files={"file": uploaded_file}, user=self.grader)
 
         self.assertFalse(form.is_valid())
-        self.assertEqual(form.errors["file"][0], "Stone has already been uploaded")
+
+        expected_errors = [
+            "Stone with 1 has already been uploaded",
+            "Stone with 5 has already been uploaded",
+            "Stone with 6 has already been uploaded",
+        ]
+        for _, error in form.csv_errors.items():
+
+            self.assertIn(error["internal_id"], expected_errors)
 
 
 def get_date_from_str(date_string):
