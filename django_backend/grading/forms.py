@@ -731,6 +731,21 @@ class GWAdjustingUploadForm(BaseUploadForm):
     class Meta:
         mixin = GWGradingAdjustMixin
 
+    def __process_gw_adjust_stone_upload(self, stone_data, file_name):
+        """
+        Check if GWAdjustingUploadForm is already complete its grading and returns an error message
+        """
+        errors = {}
+        for row, data in enumerate(stone_data):
+            stone = Stone.objects.get(internal_id=data["internal_id"])
+            if stone.is_goldway_adjusting_grading_complete:
+                errors[row] = {}
+                errors[row][
+                    "internal_id"
+                ] = f"goldway adjust form is already complete for stone with internal_id: {stone.internal_id }"
+
+        return stone_data, errors
+
     def __process_graders(self, stone_data, file_name):
         """
         Check that graders (user accounts) exists and raise validation error or return stone_data
