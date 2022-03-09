@@ -1073,26 +1073,27 @@ class GWAdjustingUploadFormTest(TestCase):
     def test_cannot_upload_to_golway_adjust_when_gw_adjust_is_already_complete(self):
         self.do_initial_upload()
         form = GWAdjustingUploadForm(
-            data={}, files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())}
+            data={},
+            files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())},
         )
         self.assertTrue(form.is_valid())
         form.save()
 
-        form = GWAdjustingUploadForm(
-            data={}, files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())}
-        )
+        with open("grading/tests/fixtures/gw_adjust.csv", "rb") as file:
+            uploaded_file = SimpleUploadedFile(file.name, file.read())
+
+        form = GWAdjustingUploadForm(data={}, files={"file": uploaded_file})
+
         self.assertFalse(form.is_valid())
-        self.assertEqual(
-            form.errors["file"][0],
-            f"goldway adjust form is already complete,",
-        )
 
-        
+        expected_errors = [
+            "goldway adjust form is already complete for stone with internal_id: 1",
+            "goldway adjust form is already complete for stone with internal_id: 5",
+            "goldway adjust form is already complete for stone with internal_id: 6",
+        ]
+        for _, error in form.csv_errors.items():
 
-        
-
-
-    
+            self.assertIn(error["internal_id"], expected_errors)
 
 
 class GiaAdjustGradingUploadFormTest(TestCase):
