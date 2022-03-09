@@ -465,7 +465,7 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
             for column, error in error_dict.items():
                 for error_column in error_columns:
                     if error_column == column:
-                        row += f'<td class="error">{error[0]}</td>'
+                        row += f'<td class="error">{error}</td>'
                     else:
                         row += '<td><i class="fas fa-check"></i></td>'
                 row += "</tr>"
@@ -495,13 +495,19 @@ class BaseUploadForm(forms.Form, metaclass=UploadFormMetaClass):
             raise ValidationError(method_errors)
 
         # Do error handling here and return error_dict
+
         form_errors = self.__build_error_dict(stone_data)
 
         for row, error_dict in method_errors.items():
             for field, error in error_dict.items():
+                if row not in form_errors:
+                    form_errors[row] = {}
+
                 if field in form_errors[row]:
                     form_errors[row][field].clear()
                     form_errors[row][field].append(error)
+                else:
+                    form_errors[row][field] = error
 
         if form_errors:
             self.__csv_errors = form_errors
@@ -610,9 +616,25 @@ class BasicUploadForm(BaseUploadForm):
 
         return stone_data, errors
 
+    def __process_stone_upload(self, stone_data, file_name):
+        """
+        Check if stone has already gone through basic grading, add return an error message.
+        """
+
+        errors = {}
+        for row, data in enumerate(stone_data):
+
+            stone = Stone.objects.get(internal_id=data["internal_id"])
+            if stone.is_basic_grading_complete:
+                errors[row] = {}
+                errors[row]["internal_id"] = f"Stone with {stone.internal_id} has already been uploaded"
+
+        return stone_data, errors
+
     def save(self):
         stones = []
         for data in self.cleaned_data:
+
             stone = Stone.objects.get(internal_id=data["internal_id"])  # After resolving the id stuff
 
             inclusions_fields = (
