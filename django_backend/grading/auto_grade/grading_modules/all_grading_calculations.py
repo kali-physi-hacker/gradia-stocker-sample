@@ -1,9 +1,9 @@
 import os
 import sys
 
-from django.conf import settings 
+from django.conf import settings
 
-from grading.auto_grade.cut_grade_estimation_table_generation_tool.core.table_ds_generator import TableDSGenerator
+from grading.auto_grade.cut_grade_estimation_table_generation_tool.core.angle_grader import DiamondAngleGrader
 
 GRADE_PARA = {
     "table_size_rounded": [52, 62, 50, 66, 47, 69, 44, 72],
@@ -67,7 +67,7 @@ def grade_girdle_thick_pct(stone_dict: dict) -> dict:
 
 def grade_girdle(stone_dict: dict) -> dict:
     # auto_girdle_grade
-    stone_dict["auto_girdle_grade"] = grade_with_girlde_description(
+    stone_dict["auto_girdle_grade"] = grade_with_girdle_description(
         g_min=stone_dict["girdle_min_grade"], g_max=stone_dict["girdle_max_grade"]
     )
     return stone_dict
@@ -99,9 +99,9 @@ def grade_individual_cut_grade(stone_dict: dict) -> dict:
         stone_dict["star_length_dev_grade"],
         stone_dict["lower_half_dev_grade"],
         stone_dict["girdle_thick_dev_grade"],
-        stone_dict["auto_girdle_grade"], # from auto grading
+        stone_dict["auto_girdle_grade"],  # from auto grading
         stone_dict["crown_height_dev_grade"],
-        stone_dict["auto_total_depth_rounded_grade"], # from auto grading
+        stone_dict["auto_total_depth_rounded_grade"],  # from auto grading
     ]
     result = grade_with_list_return_lowest_grade(stone_data_list=stone_data_list)
     stone_dict["auto_individual_cut_grade_grade"] = result
@@ -129,7 +129,9 @@ def grade_gradia_cut_grade(stone_dict: dict) -> dict:
 def grade_final_sarine_cut(stone_dict: dict) -> dict:
     # auto_final_sarine_cut_grade_grade
     stone_dict["auto_final_sarine_cut_grade"] = grade_determind_if_cut_needs_downgrade_with_two_parameter(
-        cut=stone_dict["sarine_cut_pre_polish_symmetry"], para1=stone_dict["sarine_symmetry"], para2=stone_dict["basic_polish_final"]
+        cut=stone_dict["sarine_cut_pre_polish_symmetry"],
+        para1=stone_dict["sarine_symmetry"],
+        para2=stone_dict["basic_polish_final"],
     )
     return stone_dict
 
@@ -138,7 +140,9 @@ def grade_final_gradia_cut(stone_dict: dict) -> dict:
     # auto_final_gradia_cut_grade
     # stone_dict["sarine_symmetry"] = convert_long_grade_to_short(stone_dict["sarine_symmetry"])
     stone_dict["auto_final_gradia_cut_grade"] = grade_determind_if_cut_needs_downgrade_with_two_parameter(
-        cut=stone_dict["auto_gradia_cut_grade_grade"], para1=stone_dict["basic_polish_final"], para2=stone_dict["sarine_symmetry"]
+        cut=stone_dict["auto_gradia_cut_grade_grade"],
+        para1=stone_dict["basic_polish_final"],
+        para2=stone_dict["sarine_symmetry"],
     )
     return stone_dict
 
@@ -159,7 +163,7 @@ def grade_with_range_parameters(stone_data: str, parameters: list) -> str:
         return "PR"
 
 
-def grade_with_girlde_description(g_min: str, g_max: str) -> str:
+def grade_with_girdle_description(g_min: str, g_max: str) -> str:
     if not g_min or not g_max:
         return ""
     if g_min == "ETN to VTN":
@@ -205,11 +209,19 @@ def grade_with_cut_grade_estimation_table(
     if table_size_pct == "" or not 50 <= int(table_size_pct) <= 67:
         return ""
 
-    table_data_path = os.path.join(settings.BASE_DIR, "grading", "auto_grade", "cut_grade_estimation_table_generation_tool", "core", "all_grade_tables", f"{table_size_pct}.txt")
+    table_data_path = os.path.join(
+        settings.BASE_DIR,
+        "grading",
+        "auto_grade",
+        "cut_grade_estimation_table_generation_tool",
+        "core",
+        "all_grade_tables",
+        f"{table_size_pct}.txt",
+    )
     # table_data_path = os.path.join(
     #     "cut_grade_estimation_table_generation_tool", "core", "all_grade_tables", table_size_pct + ".txt"
     # )
-    table = TableDSGenerator(table_file_path=table_data_path)
+    table = DiamondAngleGrader(table_file_path=table_data_path)
     if not table:
         return ""
     return table.get_grade(float(crown_angle_degree), float(pavilion_angle_degree))
@@ -221,18 +233,19 @@ def grade_determind_if_cut_needs_downgrade_with_two_parameter(cut: str, para1: s
     para1 = para1[:2]
     para2 = para2[:2]
     standard_grade = ["PR", "FR", "GD", "VG", "EX"]
-    print(cut, para1, para2)
+
     if cut not in standard_grade or para1 not in standard_grade or para2 not in standard_grade:
         print("EMPTY")
         return ""
-    cut_index, para1_index, para2_index = (
-        standard_grade.index(cut),
-        standard_grade.index(para1) + 1,
-        standard_grade.index(para2) + 1,
-    )
+
+    cut_index = standard_grade.index(cut)
+    para1_index = standard_grade.index(para1) + 1
+    para2_index = standard_grade.index(para2) + 1
+
     if para1_index < cut_index or para2_index < cut_index:
         return standard_grade[para1_index] if para2_index > para1_index else standard_grade[para2_index]
     return standard_grade[cut_index]
+
 
 def convert_long_grade_to_short(long):
     if long == "Poor":

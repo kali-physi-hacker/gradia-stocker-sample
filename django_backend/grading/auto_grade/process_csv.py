@@ -20,18 +20,10 @@ all_grading_calculations = [
     grade_final_gradia_cut,
 ]
 
-# from .grading_modules.check_differences import check_differences_print_and_store_log
-
-# in the management command we get the stones we want to auto grade
-# loop through:
-#   1. convert to stone_dict
-#   2. call `get_input_csv_and_process...(stone_dict)`
-# Stone instance 
-
 
 def auto_grade_stone(stone_dict):
     for calculation in all_grading_calculations:
-        
+
         stone_dict.update(calculation(stone_dict=stone_dict))
-    
+
     return stone_dict

@@ -1,9 +1,9 @@
 import io
 
 from django.test import TestCase
-from django.core.management import call_command 
+from django.core.management import call_command
 
-from grading.models import Stone 
+from grading.models import Stone
 
 """
 1. command (python manage.py auto_grade) works successfully
@@ -17,12 +17,12 @@ call_command("auto_grade", stdout=out)
 #  1. search for stones that have completed all the other grading stages
 #  2. run the auto grade on them
 
-# test for output after command is called 
+# test for output after command is called
 
 
 class AutoGradeTest(TestCase):
     def setUp(self):
-        pass 
+        pass
 
     def test_command_auto_grades_successfully(self):
         """
@@ -31,8 +31,8 @@ class AutoGradeTest(TestCase):
             2. runs only one stones that have completed sarine and basic stages
         :returns:
         """
-        
-        pass 
+
+        pass
 
     def test_auto_grade_is_deterministic(self):
         """

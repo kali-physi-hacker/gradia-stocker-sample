@@ -3,10 +3,10 @@ import unittest
 import os
 import csv
 
-from django.conf import settings 
-from django.test import TestCase 
+from django.conf import settings
+from django.test import TestCase
 
-from grading.models import Stone 
+from grading.models import Stone
 
 # sys.path.append(".")
 from grading.auto_grade.process_csv import auto_grade_stone
@@ -48,9 +48,12 @@ from grading.auto_grade.process_csv import auto_grade_stone
  'auto_final_gradia_cut_grade'
 """
 
+
 class AutoGradeTest(TestCase):
     def setUp(self):
-        self.input_file_path = os.path.join(settings.BASE_DIR, "grading", "auto_grade", "tests", "test_input_file.csv")
+        self.input_file_path = os.path.join(
+            settings.BASE_DIR, "grading", "auto_grade", "tests", "test_input_file.csv"
+        )
         stone_list = self.convert_csv_to_list(self.input_file_path)
 
         self.auto_graded_list = []
@@ -63,11 +66,10 @@ class AutoGradeTest(TestCase):
         Upload basic and sarine
         :returns:
         """
-        with open(csv_file, 'r') as file:
+        with open(csv_file, "r") as file:
             reader = csv.DictReader(file)
             return list(reader)
 
-    
     def test_generate_correct_table_size_grade(self):
         """
         Test to check if table size is generated correctly
@@ -76,12 +78,11 @@ class AutoGradeTest(TestCase):
         input: 51 output: VG
         input: 47 output: GD
         input: 30 output: PR
-        input: 69 output: GD 
+        input: 69 output: GD
         """
-        expected_outputs = ['EX', 'EX', 'VG', 'GD', 'PR', 'GD']
+        expected_outputs = ["EX", "EX", "VG", "GD", "PR", "GD"]
         for row, expected_output in zip(self.auto_graded_list, expected_outputs):
-            self.assertEqual(row['table_size_pct_grade'], expected_output)
-    
+            self.assertEqual(row["table_size_pct_grade"], expected_output)
 
     def test_generate_correct_crown_angle_grade(self):
         """
@@ -93,10 +94,9 @@ class AutoGradeTest(TestCase):
         input: 40.1 output: FR
         input: 60.5 output: PR
         """
-        expected_outputs = ['EX', 'EX', 'VG', 'GD', 'FR', 'PR']
+        expected_outputs = ["EX", "EX", "VG", "GD", "FR", "PR"]
         for row, expected_output in zip(self.auto_graded_list, expected_outputs):
-            self.assertEqual(row['crown_angle_degree_grade'], expected_output)
-
+            self.assertEqual(row["crown_angle_degree_grade"], expected_output)
 
     def test_generate_correct_pavilion_angle_degree_grade(self):
         """
@@ -108,10 +108,9 @@ class AutoGradeTest(TestCase):
         input: 37.4 output: FR
         input: 37.3 output: PR
         """
-        expected_outputs = ['EX', 'EX', 'VG', 'GD', 'FR', 'PR']
+        expected_outputs = ["EX", "EX", "VG", "GD", "FR", "PR"]
         for row, expected_output in zip(self.auto_graded_list, expected_outputs):
-            self.assertEqual(row['pavilion_angle_degree_grade'], expected_output)
-
+            self.assertEqual(row["pavilion_angle_degree_grade"], expected_output)
 
     def test_generate_correct_star_length_pct_grade(self):
         """
@@ -123,9 +122,9 @@ class AutoGradeTest(TestCase):
         30              GD
         80              GD
         """
-        expected_outputs = ['EX', 'EX', 'VG', 'VG', 'GD', 'GD']
+        expected_outputs = ["EX", "EX", "VG", "VG", "GD", "GD"]
         for row, expected_output in zip(self.auto_graded_list, expected_outputs):
-            self.assertEqual(row['star_length_pct_grade'], expected_output)
+            self.assertEqual(row["star_length_pct_grade"], expected_output)
 
     def test_generate_correct_lower_half_pct_grade(self):
         """
@@ -137,9 +136,9 @@ class AutoGradeTest(TestCase):
         50              GD
         100             GD
         """
-        expected_outputs = ['EX', 'EX', 'VG', 'VG', 'GD', 'GD']
+        expected_outputs = ["EX", "EX", "VG", "VG", "GD", "GD"]
         for row, expected_output in zip(self.auto_graded_list, expected_outputs):
-            self.assertEqual(row['lower_half_pct_grade'], expected_output)
+            self.assertEqual(row["lower_half_pct_grade"], expected_output)
 
     def test_generate_correct_girdle_thick_pct_grade(self):
         """
@@ -151,10 +150,9 @@ class AutoGradeTest(TestCase):
         10.4            FR
         2               PR
         """
-        expected_outputs = ['EX', 'EX', 'VG', 'GD', 'FR', 'PR']
+        expected_outputs = ["EX", "EX", "VG", "GD", "FR", "PR"]
         for row, expected_output in zip(self.auto_graded_list, expected_outputs):
-            self.assertEqual(row['girdle_thick_pct_grade'], expected_output)
-
+            self.assertEqual(row["girdle_thick_pct_grade"], expected_output)
 
     def test_generate_correct_girdle_grade(self):
         """
@@ -166,9 +164,9 @@ class AutoGradeTest(TestCase):
         MED             THK               VG
         THK             VTK               GD
         """
-        expected_outputs = ['GD', 'EX', 'FR', 'EX', 'VG', 'GD']
+        expected_outputs = ["GD", "EX", "FR", "EX", "VG", "GD"]
         for row, expected_output in zip(self.auto_graded_list, expected_outputs):
-            self.assertEqual(row['girdle_grade'], expected_output)
+            self.assertEqual(row["girdle_grade"], expected_output)
 
     def test_generate_correct_crown_height_pct_grade(self):
         """
@@ -180,9 +178,9 @@ class AutoGradeTest(TestCase):
         18          VG
         18.5        GD
         """
-        expected_outputs = ['EX', 'EX', 'EX', 'VG', 'VG', 'GD']
+        expected_outputs = ["EX", "EX", "EX", "VG", "VG", "GD"]
         for row, expected_output in zip(self.auto_graded_list, expected_outputs):
-            self.assertEqual(row['crown_height_pct_grade'], expected_output)
+            self.assertEqual(row["crown_height_pct_grade"], expected_output)
 
     def test_generate_correct_total_depth_pct_grade(self):
         """
@@ -194,14 +192,13 @@ class AutoGradeTest(TestCase):
         51.9        FR
         78.5        PR
         """
-        expected_outputs = ['EX', 'EX', 'VG', 'GD', 'FR', 'PR']
+        expected_outputs = ["EX", "EX", "VG", "GD", "FR", "PR"]
         for row, expected_output in zip(self.auto_graded_list, expected_outputs):
-            self.assertEqual(row['total_depth_pct_grade'], expected_output)
-
+            self.assertEqual(row["total_depth_pct_grade"], expected_output)
 
     def test_generate_correct_individual_cut_grade(self):
         """
-        Test if program correctly return the gradia_cut 
+        Test if program correctly return the gradia_cut
         (lowest grade within list of grades)
         input:
             [table_size_grade: VG,
@@ -215,9 +212,9 @@ class AutoGradeTest(TestCase):
             total_depth: GD]
         output: 'GD'
         """
-        expected_outputs = ['GD', 'EX', 'FR', 'GD', 'PR', 'PR']
+        expected_outputs = ["GD", "EX", "FR", "GD", "PR", "PR"]
         for row, expected_output in zip(self.auto_graded_list, expected_outputs):
-            self.assertEqual(row['individual_cut_grade'], expected_output)
+            self.assertEqual(row["individual_cut_grade"], expected_output)
 
     def test_generate_correct_est_table_cut_grade(self):
         """
@@ -230,17 +227,17 @@ class AutoGradeTest(TestCase):
         30          x       x           '' (table size overflow)
         69          x       x           '' (table size overflow)
         """
-        expected_outputs = ['VG', 'VG', 'VG', '', '', '']
+        expected_outputs = ["VG", "VG", "VG", "", "", ""]
         for row, expected_output in zip(self.auto_graded_list, expected_outputs):
-            self.assertEqual(row['est_table_cut_grade'], expected_output)
+            self.assertEqual(row["est_table_cut_grade"], expected_output)
 
     def test_generate_correct_gradia_cut(self):
         """
         check if return the lower grade between individual_cut_grade and est_table_cut_grade.
         """
-        expected_outputs = ['GD', 'VG', 'FR', '', '', '']
+        expected_outputs = ["GD", "VG", "FR", "", "", ""]
         for row, expected_output in zip(self.auto_graded_list, expected_outputs):
-            self.assertEqual(row['gradia_cut'], expected_output)
+            self.assertEqual(row["gradia_cut"], expected_output)
 
     def test_generate_correct_final_sarine_cut(self):
         """
@@ -251,9 +248,9 @@ class AutoGradeTest(TestCase):
             sarine_symmetry: GD]
         output: 'VG'
         """
-        expected_outputs = ['EX', 'VG', 'GD', 'FR', 'PR', 'GD']
+        expected_outputs = ["EX", "VG", "GD", "FR", "PR", "GD"]
         for row, expected_output in zip(self.auto_graded_list, expected_outputs):
-            self.assertEqual(row['final_sarine_cut'], expected_output)
+            self.assertEqual(row["final_sarine_cut"], expected_output)
 
     def test_generate_correct_final_gradia_cut(self):
         """
@@ -264,9 +261,9 @@ class AutoGradeTest(TestCase):
             sarine_symmetry: GD]
         output: 'VG'
         """
-        expected_outputs = ['GD', 'VG', 'FR', '', '', '']
+        expected_outputs = ["GD", "VG", "FR", "", "", ""]
         for row, expected_output in zip(self.auto_graded_list, expected_outputs):
-            self.assertEqual(row['final_gradia_cut'], expected_output)
+            self.assertEqual(row["final_gradia_cut"], expected_output)
 
     # def test_generate_correct_check_result(self):
     #     """

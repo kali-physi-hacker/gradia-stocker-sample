@@ -32,7 +32,7 @@ from stonegrading.mixins import (
 from stonegrading.models import Inclusion
 
 from .models import Parcel, Stone, Split, GiaVerification, GoldwayVerification
-from grading.auto_grade.process_csv import auto_grade_stone 
+from grading.auto_grade.process_csv import auto_grade_stone
 
 User = get_user_model()
 
@@ -643,7 +643,7 @@ class BasicUploadForm(BaseUploadForm):
             stone_dict = model_to_dict(stone)
             auto_graded_stone_dict = auto_grade_stone(stone_dict)
             for field, value in auto_graded_stone_dict.items():
-                if "auto" in field:
+                if field.startswith("auto"):
                     setattr(stone, field, value)
             stone.save()
 
