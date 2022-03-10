@@ -695,6 +695,7 @@ class BasicUploadFormTest(TestCase):
 
         fields = self.expected_stones[0].keys()
 
+        auto_grade_fields = [field.name for field in Stone._meta.get_fields() if field.name.startswith("auto")]
         for actual_stone, expected_stone in zip(stones, self.expected_stones):
             for field in fields:
                 raw_actual_value = getattr(actual_stone, field)
@@ -702,6 +703,10 @@ class BasicUploadFormTest(TestCase):
                 expected_value = expected_stone[field]
                 if "inclusion" not in field:
                     self.assertEqual(actual_value, expected_value)
+
+            # Test to be sure auto_grade runs right after this.
+            for auto_grade_field in auto_grade_fields:
+                self.assertIsNotNone(getattr(actual_stone, auto_grade_field))
 
     def test_uploading_the_same_stone_twice_should_error(self):
         self.do_sarine_upload()

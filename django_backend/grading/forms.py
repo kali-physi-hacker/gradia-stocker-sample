@@ -8,6 +8,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.utils.timezone import utc
 from django.utils.datetime_safe import datetime
+from django.forms.models import model_to_dict
 
 from ownerships.models import ParcelTransfer, StoneTransfer
 
@@ -31,6 +32,7 @@ from stonegrading.mixins import (
 from stonegrading.models import Inclusion
 
 from .models import Parcel, Stone, Split, GiaVerification, GoldwayVerification
+from grading.auto_grade.process_csv import auto_grade_stone
 
 User = get_user_model()
 
@@ -659,6 +661,14 @@ class BasicUploadForm(BaseUploadForm):
             stone.generate_basic_external_id()
             stone.save()
 
+            # Perform auto_grading here
+            stone_dict = model_to_dict(stone)
+            auto_graded_stone_dict = auto_grade_stone(stone_dict)
+            for field, value in auto_graded_stone_dict.items():
+                if field.startswith("auto"):
+                    setattr(stone, field, value)
+            stone.save()
+
             stones.append(stone)
 
         return stones
@@ -768,7 +778,6 @@ class GWAdjustingUploadForm(BaseUploadForm):
             stone = Stone.objects.get(internal_id=data["internal_id"])
             for field, value in data.items():
                 setattr(stone, field, value)
-
             stone.save()
             stones.append(stone)
 
