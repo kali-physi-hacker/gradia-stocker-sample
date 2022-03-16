@@ -166,9 +166,9 @@ def grade_with_range_parameters(stone_data: str, parameters: list) -> str:
 def grade_with_girdle_description(g_min: str, g_max: str) -> str:
     if not g_min or not g_max:
         return ""
-    if g_min == "ETN to VTN":
+    if g_min.upper() == "ETN TO VTN":
         g_min = "ETN"
-    if g_max == "ETN to VTN":
+    if g_max.upper() == "ETN TO VTN":
         g_max = "ETN"
     g_dict = {}
     g_dict["ETN"] = {
