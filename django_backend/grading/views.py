@@ -92,7 +92,8 @@ class CloseParcelView(View):
         parcel.release_date = datetime.utcnow().replace(tzinfo=utc)
         parcel.save()
         return HttpResponseRedirect(reverse("admin:grading_parcel_change", args=[parcel.id]))
-        
+
+
 class CloseReceiptView(View):
     def get(self, request, pk, *args, **kwargs):
         receipt = Receipt.objects.get(pk=pk)

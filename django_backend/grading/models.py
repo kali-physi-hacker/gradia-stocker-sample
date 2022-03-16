@@ -531,7 +531,7 @@ class AbstractParcel(models.Model):
     reference_price_per_carat = models.PositiveIntegerField()
 
     admin_url = "admin:grading_parcel_change"
-    close_url ="grading:close_parcel"
+    close_url = "grading:close_parcel"
 
     def __str__(self):
         return f"parcel {self.customer_parcel_code} ({self.total_carats}ct, {self.total_pieces}pcs, {self.receipt})"
@@ -587,27 +587,25 @@ class Parcel(AbstractParcel):
         if transfer.fresh:
             if transfer.to_user == user:
                 if transfer.in_transit():
-                    confirm_received = f"<a href='{reverse('grading:confirm_received', args=[self.id])}'>Confirm Received</a>"
-                    return format_html(
-                        f"<ul><li>{close_parcel}</li><{confirm_received}</li></ul>"
+                    confirm_received = (
+                        f"<a href='{reverse('grading:confirm_received', args=[self.id])}'>Confirm Received</a>"
                     )
+                    return format_html(f"<ul><li>{close_parcel}</li><{confirm_received}</li></ul>")
                 else:
-                    return_to_vault = f"<a href='{reverse('grading:return_to_vault', args=[self.id])}'>Return to Vault</a>"
-                    return format_html(
-                        f"<ul><li>{close_parcel}</li><{return_to_vault}</li></ul>"
+                    return_to_vault = (
+                        f"<a href='{reverse('grading:return_to_vault', args=[self.id])}'>Return to Vault</a>"
                     )
+                    return format_html(f"<ul><li>{close_parcel}</li><{return_to_vault}</li></ul>")
             if (
                 transfer.in_transit()
                 and transfer.to_user.username == "vault"
                 and user.groups.filter(name="vault_manager").exists()
             ):
-                confirm_stones = f"<a href='{reverse('grading:confirm_received', args=[self.id])}'>Confirm Stones for Vault</a>"
-                return format_html(
-                        f"<ul><li>{close_parcel}</li><{confirm_stones}</li></ul>"
-                    )
-        return format_html(
-                        f"{close_parcel}"
-                    )
+                confirm_stones = (
+                    f"<a href='{reverse('grading:confirm_received', args=[self.id])}'>Confirm Stones for Vault</a>"
+                )
+                return format_html(f"<ul><li>{close_parcel}</li><{confirm_stones}</li></ul>")
+        return format_html(f"{close_parcel}")
 
     get_action_html_link_for_user.short_description = "action"
 
