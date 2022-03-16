@@ -1,0 +1,10 @@
+Hi {{ username }},
+
+
+<form action="{% url 'grading:close_parcel' parcel.id %}" method="post">
+      {% csrf_token %}
+      <p>You are about to close out the parcel:</p>
+      <p><a href="{% url 'admin:grading_parcel_change' parcel.id %}">{{parcel}}</a></p>
+      <p>This means that you have already retrieved the physical copy of the parcel from the client.</p>
+      <input type="submit" value="Proceed" name="proceed">
+</form>
