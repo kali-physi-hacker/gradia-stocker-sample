@@ -1,0 +1,63 @@
+{% extends 'admin/base.html' %}
+{% block extrahead %}
+<style>
+    td,
+    th,
+    tr {
+        border-right: 1px solid #ddd;
+    }
+
+    td.error {
+        background-color: red;
+        color: white;
+    }
+
+    td {
+        text-align: center;
+    }
+
+    td i.fas {
+        color: green;
+    }
+
+    td,
+    th {
+        padding: 0 9px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h3>Data Upload Failed <i style="color: red" class="fas fa-times"></i></h3>
+
+<body>
+    <p>
+        Stone filename data upload failed. Check the table below to find out the problems with your csv file.
+        Fix them and <a style="text-decoration: underline" href="/grading/upload/filenames">try
+            again</a>
+    </p>
+    {% if form.csv_errors %}
+    <table>
+        <thead>
+            <tr>
+                <th>row no.</th>
+                <th>
+                    external_id
+                </th>
+            </tr>
+        </thead>
+        {% for dict_errors in form.csv_errors %}
+        {% for index, errors in dict_errors.items %}
+        {% for _, error in errors.items %}
+        <tr>
+            <td>{{index|add:'1'}}</td>
+            <td class="error">{{error}}</td>
+        </tr>
+        {% endfor %}
+        {% endfor %}
+        {% endfor %}
+    </table>
+    {% endif %}
+
+</body>
+{% endblock %}
