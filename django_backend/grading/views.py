@@ -160,7 +160,7 @@ class SarineUploadView(LoginRequiredMixin, View):
         """
         form = SarineUploadForm(user=request.user, data={}, files=request.FILES)
         if not form.is_valid():
-            return errors_page(request=request, title="Sarine Grading", form=form)
+            return errors_page(request=request, title="Sarine Grading", form=form, link="grading")
 
         stones = form.save()
         split_id = stones[0].split_from.pk
