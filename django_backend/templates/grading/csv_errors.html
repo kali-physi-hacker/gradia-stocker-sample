@@ -33,7 +33,7 @@
 <body>
     <p>
         Stone csv data upload failed. Check the table below to find out the problems with your csv file.
-        Fix them and <a style="text-decoration: underline" href="{% url 'grading:upload_all' %}">try
+        Fix them and <a style="text-decoration: underline" href="/{{link}}/upload/all/">try
             again</a>
     </p>
     {% if form.csv_errors %}
