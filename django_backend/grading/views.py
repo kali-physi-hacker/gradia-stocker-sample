@@ -112,9 +112,9 @@ class AllUploadView(LoginRequiredMixin, View):
         return render(request, template, context)
 
 
-def errors_page(request, title, form):
+def errors_page(request, title, form, link):
     template = "grading/csv_errors.html"
-    context = {"form": form, "title": title}
+    context = {"form": form, "title": title, "link": link}
     return render(request, template, context)
 
 
@@ -196,7 +196,8 @@ class BasicGradingUploadView(LoginRequiredMixin, View):
         """
         form = BasicUploadForm(data={}, user=request.user, files=request.FILES)
         if not form.is_valid():
-            return errors_page(request=request, title="Basic Grading", form=form)
+            # import pdb; pdb.set_trace()
+            return errors_page(request=request, title="Basic Grading", form=form, link="grading")
 
         stones = form.save()
         split_id = stones[0].split_from.pk
@@ -220,7 +221,7 @@ class GIAGradingAdjustView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         form = GIAAdjustingUploadForm(data={}, files=request.FILES)
         if not form.is_valid():
-            return errors_page(request=request, title="GIA Adjusting Grading", form=form)
+            return errors_page(request=request, title="GIA Adjusting Grading", form=form, link="grading")
 
         stones = form.save()
         split_id = stones[0].split_from_id
@@ -263,7 +264,7 @@ class GWGradingAdjustView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         form = GWAdjustingUploadForm(data={}, files=request.FILES)
         if not form.is_valid():
-            return errors_page(request=request, title="GW Adjusting Grading", form=form)
+            return errors_page(request=request, title="GW Adjusting Grading", form=form, link="grading")
 
         stones = form.save()
         split_id = stones[0].split_from_id
@@ -287,7 +288,7 @@ class GWGradingUploadView(LoginRequiredMixin, View):
 
         form = GWGradingUploadForm(data={}, user=request.user, files=request.FILES)
         if not form.is_valid():
-            return errors_page(request=request, title="Goldway Grading", form=form)
+            return errors_page(request=request, title="Goldway Grading", form=form, link="grading")
 
         stones = form.save()
         split_id = stones[0].split_from.pk
@@ -321,7 +322,7 @@ class GIAGradingUploadView(LoginRequiredMixin, View):
         """
         form = GIAUploadForm(data={}, user=request.user, files=request.FILES)
         if not form.is_valid():
-            return errors_page(request=request, title="GIA Grading", form=form)
+            return errors_page(request=request, title="GIA Grading", form=form, link="grading")
 
         stones = form.save()
         split_id = stones[0].split_from.pk
@@ -341,7 +342,8 @@ class MacroFileNameUpload(LoginRequiredMixin, View):
         form = MacroImageFilenameUploadForm(data={}, files=request.FILES)
 
         if not form.is_valid():
-            return errors_page(request=request, title="Macro Filename", form=form)
+           
+            return render(request, "grading/file_upload_csv_error.html", {"form": form})
         stones = form.save()
         split_id = stones[0].split_from.pk
 
@@ -360,7 +362,7 @@ class NanoFileNameUpload(LoginRequiredMixin, View):
         form = NanoImageFilenameUploadForm(data={}, files=request.FILES)
 
         if not form.is_valid():
-            return errors_page(request=request, title="Nano Filename", form=form)
+            return render(request, "grading/file_upload_csv_error.html", {"form":form})
         stones = form.save()
 
         split_id = stones[0].split_from.pk
