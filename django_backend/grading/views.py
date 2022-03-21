@@ -342,7 +342,7 @@ class MacroFileNameUpload(LoginRequiredMixin, View):
         form = MacroImageFilenameUploadForm(data={}, files=request.FILES)
 
         if not form.is_valid():
-           
+
             return render(request, "grading/filename_upload_csv_error.html", {"form": form})
         stones = form.save()
         split_id = stones[0].split_from.pk
@@ -362,7 +362,7 @@ class NanoFileNameUpload(LoginRequiredMixin, View):
         form = NanoImageFilenameUploadForm(data={}, files=request.FILES)
 
         if not form.is_valid():
-            return render(request, "grading/filename_upload_csv_error.html", {"form":form})
+            return render(request, "grading/filename_upload_csv_error.html", {"form": form})
         stones = form.save()
 
         split_id = stones[0].split_from.pk

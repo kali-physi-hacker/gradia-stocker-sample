@@ -910,7 +910,7 @@ class ImageFileNameUploadBaseForm(forms.Form):
             try:
                 Stone.objects.get(external_id=external_id)
             except Stone.DoesNotExist:
-                
+
                 row_errors[row_index] = {"external_id": f"Stone with id {external_id} does not exist"}
                 self.csv_errors.append(row_errors)
                 # import pdb; pdb.set_trace()
