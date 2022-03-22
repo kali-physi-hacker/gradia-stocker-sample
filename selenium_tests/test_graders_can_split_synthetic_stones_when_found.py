@@ -14,17 +14,16 @@ def grading_receipt(django_user_model, vault_manager):
     )
     parcel1 = Parcel.objects.create(
         receipt=created_receipt,
-        gradia_parcel_code = "R50221",
+        gradia_parcel_code="R50221",
         customer_parcel_code="VK_01",
         total_carats=2,
         total_pieces=2,
         reference_price_per_carat=1,
     )
 
-
     parcel2 = Parcel.objects.create(
         receipt=created_receipt,
-        gradia_parcel_code = "R50222",
+        gradia_parcel_code="R50222",
         customer_parcel_code="Vk_02",
         total_carats=4,
         total_pieces=3,
@@ -32,7 +31,7 @@ def grading_receipt(django_user_model, vault_manager):
     )
     parcel3 = Parcel.objects.create(
         receipt=created_receipt,
-        gradia_parcel_code = "R50223",
+        gradia_parcel_code="R50223",
         customer_parcel_code="VK_03",
         total_carats=1,
         total_pieces=1,
@@ -65,16 +64,14 @@ def grading_receipt(django_user_model, vault_manager):
     ParcelTransfer.confirm_received(parcel3)
     created_receipt.parcel_set.add(parcel3)
     return created_receipt
- 
 
-def test_graders_can_close_out_a_rejected_parcel(
-    browser, vault_manager, grading_receipt
-):
+
+def test_graders_can_close_out_a_rejected_parcel(browser, vault_manager, grading_receipt):
     browser.login(vault_manager.username, vault_manager.raw_password)
-    #we now realize that we need to reject some stones in the parcel.
+    # we now realize that we need to reject some stones in the parcel.
 
-    #first vault manager anthony goes to split up a parcel into _accepted and _rejected.
-    #then we send the rejected stones back to the user.
+    # first vault manager anthony goes to split up a parcel into _accepted and _rejected.
+    # then we send the rejected stones back to the user.
     browser.go_to_split_page()
     browser.click_add()
     parcel_dropdown = Select(browser.find_element_by_id("id_original_parcel"))
@@ -97,10 +94,9 @@ def test_graders_can_close_out_a_rejected_parcel(
     browser.find_element_by_name("parcel_set-1-total_pieces").send_keys("1")
     browser.find_element_by_name("parcel_set-1-reference_price_per_carat").send_keys("500")
 
-    
     browser.click_save()
 
-    #anthony goes to the rejected parcel and hits "close out"
+    # anthony goes to the rejected parcel and hits "close out"
     browser.go_to_parcel_page()
 
     browser.find_element_by_link_text("R50221_rejected")
@@ -110,7 +106,7 @@ def test_graders_can_close_out_a_rejected_parcel(
     proceed_button = browser.find_element_by_name("proceed")
     browser.slowly_click(proceed_button)
 
-    #when anthony goes to the receipt page, he sees in the details that _accepted is still open, and _rejected is closed out
+    # when anthony goes to the receipt page, he sees in the details that _accepted is still open, and _rejected is closed out
     parcel2 = grading_receipt.parcel_set.last()
     parcel2.refresh_from_db()
     assert parcel2.closed_out() is True

@@ -199,7 +199,7 @@ class ParcelAdmin(admin.ModelAdmin):
             "split_into",
             "gradia_parcel_code",
             "customer_parcel_code",
-            'closed_out',
+            "closed_out",
             "get_receipt_with_html_link",
             "total_carats",
             "total_pieces",

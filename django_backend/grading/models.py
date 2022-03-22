@@ -540,8 +540,8 @@ class AbstractParcel(models.Model):
         abstract = True
 
     def closed_out(self):
-        return  self.closed
-        
+        return self.closed
+
     def get_receipt_with_html_link(self):
         return self.receipt.get_receipt_with_html_link()
 
