@@ -525,9 +525,9 @@ class Receipt(AbstractReceipt):
 class AbstractParcel(models.Model):
     receipt = models.ForeignKey(Receipt, on_delete=models.PROTECT)
     customer_parcel_code = models.CharField(max_length=15)
-
     total_carats = models.DecimalField(max_digits=5, decimal_places=3)
     total_pieces = models.IntegerField()
+    closed = models.BooleanField(default=False)
     reference_price_per_carat = models.PositiveIntegerField()
 
     admin_url = "admin:grading_parcel_change"
@@ -540,10 +540,8 @@ class AbstractParcel(models.Model):
         abstract = True
 
     def closed_out(self):
-        return self.release_by is not None and self.release_date is not None
-
-    closed_out.boolean = True
-
+        return  self.closed
+        
     def get_receipt_with_html_link(self):
         return self.receipt.get_receipt_with_html_link()
 
