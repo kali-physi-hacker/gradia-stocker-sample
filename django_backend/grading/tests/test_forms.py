@@ -1240,7 +1240,7 @@ class MacroImageFilenameUploadFormTest(TestCase):
         if form.is_valid():
             form.save()
 
-    def test_save_updates_stones(self):
+    def test_save_updates_macro_image_file_name(self):
 
         self.do_initial_upload()
         for stone in Stone.objects.all():
@@ -1253,8 +1253,12 @@ class MacroImageFilenameUploadFormTest(TestCase):
         form.save()
 
         stones = Stone.objects.all()
-
         self.assertEqual(len(stones), 3)
+
+        expected_filenames = ("G0f0a4001_macro", "Gddc8d005_macro", "G401ec006_macro")
+
+        for stone_macro_filename in stones:
+            self.assertIn(stone_macro_filename.macro_filename, expected_filenames)
 
 
 class NanoImageFilenameUploadFormTest(TestCase):
@@ -1293,3 +1297,8 @@ class NanoImageFilenameUploadFormTest(TestCase):
         stones = Stone.objects.all()
 
         self.assertEqual(len(stones), 3)
+
+        expected_filenames = ("G0f0a4001_nano", "Gddc8d005_nano", "G401ec006_nano")
+
+        for stone_nano_filename in stones:
+            self.assertIn(stone_nano_filename.nano_filename, expected_filenames)
