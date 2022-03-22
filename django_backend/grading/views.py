@@ -196,7 +196,6 @@ class BasicGradingUploadView(LoginRequiredMixin, View):
         """
         form = BasicUploadForm(data={}, user=request.user, files=request.FILES)
         if not form.is_valid():
-            # import pdb; pdb.set_trace()
             return errors_page(request=request, title="Basic Grading", form=form, link="grading")
 
         stones = form.save()
