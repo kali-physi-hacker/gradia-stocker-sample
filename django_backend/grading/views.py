@@ -88,8 +88,7 @@ class CloseParcelView(View):
 
     def post(self, request, pk, *args, **kwargs):
         parcel = Parcel.objects.get(pk=pk)
-        parcel.release_by = request.user
-        parcel.release_date = datetime.utcnow().replace(tzinfo=utc)
+        parcel.closed = True
         parcel.save()
         return HttpResponseRedirect(reverse("admin:grading_parcel_change", args=[parcel.id]))
 
