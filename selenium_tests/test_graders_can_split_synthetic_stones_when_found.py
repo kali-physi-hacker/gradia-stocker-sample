@@ -75,13 +75,13 @@ def test_graders_can_close_out_a_rejected_parcel(browser, vault_manager, grading
     parcel_dropdown = Select(browser.find_element_by_id("id_original_parcel"))
 
     # our target parcel is the first parcel R50221
-    target_parcel = grading_receipt.parcel_set.first()  
+    target_parcel = grading_receipt.parcel_set.first()
 
-    #anthony select the parcel which had be rejected, that is the target parcel
+    # anthony select the parcel which had be rejected, that is the target parcel
     parcel_dropdown.select_by_visible_text(str(target_parcel))
 
-    #anthony splits the target_parcel into smaller sub_parcels with
-    #anthony adds the passed_parcel details
+    # anthony splits the target_parcel into smaller sub_parcels with
+    # anthony adds the passed_parcel details
     add_link = browser.find_element_by_link_text("Add another Parcel")
     add_link.click()
     browser.find_element_by_name("parcel_set-0-gradia_parcel_code").send_keys("R50221_passed")
@@ -90,7 +90,7 @@ def test_graders_can_close_out_a_rejected_parcel(browser, vault_manager, grading
     browser.find_element_by_name("parcel_set-0-total_pieces").send_keys("1")
     browser.find_element_by_name("parcel_set-0-reference_price_per_carat").send_keys("500")
 
-    #adds the rejected_parcel details
+    # adds the rejected_parcel details
     add_link = browser.find_element_by_link_text("Add another Parcel")
     add_link.click()
     browser.find_element_by_name("parcel_set-1-gradia_parcel_code").send_keys("R50221_rejected")
@@ -103,20 +103,20 @@ def test_graders_can_close_out_a_rejected_parcel(browser, vault_manager, grading
     # anthony goes to the parcel page
     browser.go_to_parcel_page()
 
-    #anthony find the rejected_parcels and close it out
+    # anthony find the rejected_parcels and close it out
     browser.find_element_by_link_text("R50221_rejected")
     browser.slowly_click(browser.find_element_by_link_text("Close Parcel"))
 
-    #anthony confirms that he wants to close out and click proceed
+    # anthony confirms that he wants to close out and click proceed
     browser.assert_body_contains_text("You are about to close out the parcel")
     proceed_button = browser.find_element_by_name("proceed")
     browser.slowly_click(proceed_button)
 
-    #after anthony clicks on proceed, a page shows up with details showing that parcel is closed
+    # after anthony clicks on proceed, a page shows up with details showing that parcel is closed
 
-    #last parcel is the rejected parcel
-    rejected_parcel = grading_receipt.parcel_set.last() 
+    # last parcel is the rejected parcel
+    rejected_parcel = grading_receipt.parcel_set.last()
     rejected_parcel.refresh_from_db()
 
-    #checks if rejected parcel closed out is True
+    # checks if rejected parcel closed out is True
     assert rejected_parcel.closed_out() is True
