@@ -525,18 +525,22 @@ class Receipt(AbstractReceipt):
 class AbstractParcel(models.Model):
     receipt = models.ForeignKey(Receipt, on_delete=models.PROTECT)
     customer_parcel_code = models.CharField(max_length=15)
-
     total_carats = models.DecimalField(max_digits=5, decimal_places=3)
     total_pieces = models.IntegerField()
+    closed = models.BooleanField(default=False)
     reference_price_per_carat = models.PositiveIntegerField()
 
     admin_url = "admin:grading_parcel_change"
+    close_url = "grading:close_parcel"
 
     def __str__(self):
         return f"parcel {self.customer_parcel_code} ({self.total_carats}ct, {self.total_pieces}pcs, {self.receipt})"
 
     class Meta:
         abstract = True
+
+    def closed_out(self):
+        return self.closed
 
     def get_receipt_with_html_link(self):
         return self.receipt.get_receipt_with_html_link()
@@ -576,25 +580,30 @@ class Parcel(AbstractParcel):
     def get_action_html_link_for_user(self, user):
         # in the future might have to check user permissions here
         transfer = ParcelTransfer.most_recent_transfer(self)
+        close_parcel = f"<a href='{reverse('grading:close_parcel', args=[self.id])}'>Close Parcel</a>"
+
         if transfer.fresh:
             if transfer.to_user == user:
                 if transfer.in_transit():
-                    return format_html(
+                    confirm_received = (
                         f"<a href='{reverse('grading:confirm_received', args=[self.id])}'>Confirm Received</a>"
                     )
+                    return format_html(f"<ul><li>{close_parcel}</li><{confirm_received}</li></ul>")
                 else:
-                    return format_html(
+                    return_to_vault = (
                         f"<a href='{reverse('grading:return_to_vault', args=[self.id])}'>Return to Vault</a>"
                     )
+                    return format_html(f"<ul><li>{close_parcel}</li><{return_to_vault}</li></ul>")
             if (
                 transfer.in_transit()
                 and transfer.to_user.username == "vault"
                 and user.groups.filter(name="vault_manager").exists()
             ):
-                return format_html(
+                confirm_stones = (
                     f"<a href='{reverse('grading:confirm_received', args=[self.id])}'>Confirm Stones for Vault</a>"
                 )
-        return "-"
+                return format_html(f"<ul><li>{close_parcel}</li><{confirm_stones}</li></ul>")
+        return format_html(f"{close_parcel}")
 
     get_action_html_link_for_user.short_description = "action"
 
