@@ -41,7 +41,9 @@ def test_user_upload_gia_fails_if_invalid_csv_file(browser, data_entry_clerk, ta
     browser.assert_body_contains_text("Grader user `boo` account does not exist")  # Some error message
 
 
-def test_user_cannot_upload_gia_adjust_grading_results_twice_for_the_same_stone(browser, data_entry_clerk, tanly, gary, kary, initial_stones):
+def test_user_cannot_upload_gia_adjust_grading_results_twice_for_the_same_stone(
+    browser, data_entry_clerk, tanly, gary, kary, initial_stones
+):
     # 1st Upload
     browser.login(username=data_entry_clerk.username, password=data_entry_clerk.raw_password)
 
@@ -59,7 +61,7 @@ def test_user_cannot_upload_gia_adjust_grading_results_twice_for_the_same_stone(
 
     assert re.match(r"^http://localhost:\d+/admin/grading/split/\d+/change/", browser.current_url) is not None
 
-    # 2nd Upload 
+    # 2nd Upload
     browser.find_element_by_link_text("Splits").click()
 
     browser.find_element_by_link_text("Stones").click()

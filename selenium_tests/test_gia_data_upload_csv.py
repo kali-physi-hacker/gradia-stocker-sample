@@ -65,6 +65,7 @@ def test_gia_data_upload_fails_if_date_from_gia_is_not_provided(browser, data_en
         "Select a valid choice. bar is not one of the available choices."
     )  # Some error message
 
+
 def test_user_cannot_upload_grading_results_twice_for_the_same_stone(browser, data_entry_clerk, gia_transfer):
 
     # 1st Upload

@@ -41,7 +41,10 @@ def test_user_upload_gw_fails_if_invalid_csv_file(browser, data_entry_clerk, tan
     browser.assert_body_contains_text("Data Upload Failed")
     browser.assert_body_contains_text("Enter a valid date/time.")  # Some error message
 
-def test_upload_fails_if_user_uploads_same_stone_twice(browser, data_entry_clerk, tanly, gary, kary, initial_stones, goldway_transfer):
+
+def test_upload_fails_if_user_uploads_same_stone_twice(
+    browser, data_entry_clerk, tanly, gary, kary, initial_stones, goldway_transfer
+):
     """
     Tests that gia upload fails if user uploads gia for the same stone twice
     :returns:
@@ -63,7 +66,6 @@ def test_upload_fails_if_user_uploads_same_stone_twice(browser, data_entry_clerk
     browser.find_element_by_name("_upload").click()
 
     assert re.match(r"^http://localhost:\d+/admin/grading/split/\d+/change/", browser.current_url) is not None
-
 
     # 2nd Upload
     browser.find_element_by_link_text("Splits").click()
