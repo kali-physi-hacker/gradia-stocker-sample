@@ -84,6 +84,6 @@ def test_upload_fails_if_user_uploads_same_stone_twice(
 
     body_text = browser.get_body_text()
     for internal_id in (1, 5, 6):
-        error_string = f"Stone with {internal_id} has already been uploaded"
+        error_string = f"Stone with internal_id: `{internal_id}` has already been uploaded"
         found_error = body_text.find(error_string)
         assert found_error != -1

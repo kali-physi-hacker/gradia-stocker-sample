@@ -123,6 +123,6 @@ def test_user_cannot_upload_grading_results_twice_for_the_same_stone(browser, da
 
     body_text = browser.get_body_text()
     for internal_id in (1, 5, 6):
-        error_string = f"Stone with {internal_id} has already been uploaded"
+        error_string = f"Stone with internal_id: `{internal_id}` has already been uploaded"
         found_error = body_text.find(error_string)
         assert found_error != -1

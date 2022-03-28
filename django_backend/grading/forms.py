@@ -627,7 +627,9 @@ class BasicUploadForm(BaseUploadForm):
             stone = Stone.objects.get(internal_id=data["internal_id"])
             if stone.is_basic_grading_complete:
                 errors[row] = {}
-                errors[row]["internal_id"] = f"Stone with {stone.internal_id} has already been uploaded"
+                errors[row][
+                    "internal_id"
+                ] = f"Stone with internal_id: `{stone.internal_id}` has already been uploaded"
 
         return stone_data, errors
 
@@ -711,7 +713,9 @@ class GWGradingUploadForm(BaseUploadForm):
             stone = Stone.objects.get(internal_id=data["internal_id"])
             if stone.is_goldway_grading_complete:
                 errors[row] = {}
-                errors[row]["internal_id"] = f"Stone with {stone.internal_id} has already been uploaded"
+                errors[row][
+                    "internal_id"
+                ] = f"Stone with internal_id: `{stone.internal_id}` has already been uploaded"
 
         return stone_data, errors
 
@@ -767,7 +771,7 @@ class GWAdjustingUploadForm(BaseUploadForm):
                 errors[row] = {}
                 errors[row][
                     "internal_id"
-                ] = f"goldway adjust form is already complete for stone with internal_id: {stone.internal_id }"
+                ] = f"Stone with internal_id: `{stone.internal_id}` has already been uploaded"
 
         return stone_data, errors
 
@@ -912,7 +916,9 @@ class GIAUploadForm(BaseUploadForm):
             stone = Stone.objects.get(internal_id=data["internal_id"])
             if stone.is_gia_grading_complete:
                 errors[row] = {}
-                errors[row]["internal_id"] = f"Stone with {stone.internal_id} has already been uploaded"
+                errors[row][
+                    "internal_id"
+                ] = f"Stone with internal_id: `{stone.internal_id}` has already been uploaded"
 
         return stone_data, errors
 

@@ -726,14 +726,13 @@ class BasicUploadFormTest(TestCase):
 
         self.assertFalse(form.is_valid())
 
-        expected_errors = [
-            "Stone with 1 has already been uploaded",
-            "Stone with 5 has already been uploaded",
-            "Stone with 6 has already been uploaded",
-        ]
-        for _, error in form.csv_errors.items():
-
-            self.assertIn(error["internal_id"], expected_errors)
+        self.assertFalse(form.is_valid())
+        stone_ids = (1, 5, 6)
+        for row_number, error_dict in form.csv_errors.items():
+            for field, error in error_dict.items():
+                self.assertEqual(
+                    error, f"Stone with internal_id: `{stone_ids[row_number]}` has already been uploaded"
+                )
 
 
 def get_date_from_str(date_string):
@@ -897,7 +896,9 @@ class GoldWayGradingDataTest(TestCase):
         stone_ids = (1, 5, 6)
         for row_number, error_dict in form.csv_errors.items():
             for field, error in error_dict.items():
-                self.assertEqual(error, f"Stone with {stone_ids[row_number]} has already been uploaded")
+                self.assertEqual(
+                    error, f"Stone with internal_id: `{stone_ids[row_number]}` has already been uploaded"
+                )
 
 
 class GiaGradingUploadForm(TestCase):
@@ -1025,7 +1026,9 @@ class GiaGradingUploadForm(TestCase):
         stone_ids = (1, 5, 6)
         for row_number, error_dict in form.csv_errors.items():
             for field, error in error_dict.items():
-                self.assertEqual(error, f"Stone with {stone_ids[row_number]} has already been uploaded")
+                self.assertEqual(
+                    error, f"Stone with internal_id: `{stone_ids[row_number]}` has already been uploaded"
+                )
 
 
 class GWAdjustingUploadFormTest(TestCase):
