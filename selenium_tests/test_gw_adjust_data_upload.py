@@ -41,7 +41,10 @@ def test_user_can_upload_gia_if_invalid_csv_file(browser, data_entry_clerk, tanl
 
     browser.assert_body_contains_text("Grader user `foo` account does not exist")  # Some error message
 
-def test_user_cannot_upload_gw_adjust_twice_for_the_same_stone(browser, data_entry_clerk, tanly, gary, kary, initial_stones):
+
+def test_user_cannot_upload_gw_adjust_twice_for_the_same_stone(
+    browser, data_entry_clerk, tanly, gary, kary, initial_stones
+):
     # 1st Upload
     browser.login(username=data_entry_clerk.username, password=data_entry_clerk.raw_password)
 
