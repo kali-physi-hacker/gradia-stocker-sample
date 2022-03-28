@@ -969,6 +969,35 @@ class GiaGradingUploadForm(TestCase):
 
                 self.assertEqual(actual_value, expected_value)
 
+    def test_cannot_upload_stone_twice(self):
+        """
+        Tests that uploading stone more than once errors
+        :returns:
+        """
+        for stone_id in (1, 5, 6):
+            stone = Stone.objects.get(internal_id=stone_id)
+            split = User.objects.get(username="split")
+            gia = User.objects.get(username="gia")
+            StoneTransfer.initiate_transfer(item=stone, from_user=split, to_user=gia, created_by=self.user)
+            StoneTransfer.confirm_received(item=stone)
+
+        form = GIAUploadForm(
+            data={}, user=self.user, files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())}
+        )
+
+        self.assertTrue(form.is_valid())
+        form.save()
+
+        self.csv_file.seek(0)
+        form = GIAUploadForm(
+            data={}, user=self.user, files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())}
+        )
+        self.assertFalse(form.is_valid())
+        stone_ids = (1, 5, 6)
+        for row_number, error_dict in form.csv_errors.items():
+            for field, error in error_dict.items():
+                self.assertEqual(error, f"Stone with {stone_ids[row_number]} has already been uploaded")
+
 
 class GWAdjustingUploadFormTest(TestCase):
     fixtures = ("grading/fixtures/test_data.json",)
