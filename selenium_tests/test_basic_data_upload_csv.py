@@ -80,3 +80,53 @@ def test_basic_data_upload_fails_if_invalid_data_type(
     )
     browser.assert_body_contains_text("Enter a number.")
     browser.assert_body_contains_text("Select a valid choice. 9.0 is not one of the available choices.")
+
+
+def test_basic_data_upload_fails_if_user_stone_has_already_been_uploaded(
+    browser, data_entry_clerk, tanly, gary, kary, initial_stones, inclusions
+):
+    # 1st Upload
+    browser.login(data_entry_clerk.username, data_entry_clerk.raw_password)
+
+    link = browser.find_element_by_link_text("Stones")
+    browser.slowly_click(link)
+
+    upload_link = browser.find_element_by_link_text("UPLOAD STONE DATA")
+    browser.slowly_click(upload_link)
+
+    gia_link = browser.find_element_by_link_text("Basic Stone Data")
+    browser.slowly_click(gia_link)
+
+    os.chdir("../django_backend")
+    basic_csv_file_path = os.path.join(os.getcwd(), "grading/tests/fixtures/basic-01.csv")
+    upload_file_input = browser.find_element_by_name("file")
+    upload_file_input.send_keys(basic_csv_file_path)
+
+    browser.find_element_by_name("_upload").click()
+
+    assert re.match(r"^http://localhost:\d+/admin/grading/split/\d+/change/", browser.current_url) is not None
+
+    # 2nd Upload
+    browser.find_element_by_link_text("Splits").click()
+
+    link = browser.find_element_by_link_text("Stones")
+    browser.slowly_click(link)
+
+    upload_link = browser.find_element_by_link_text("UPLOAD STONE DATA")
+    browser.slowly_click(upload_link)
+
+    gia_link = browser.find_element_by_link_text("Basic Stone Data")
+    browser.slowly_click(gia_link)
+
+    os.chdir("../django_backend")
+    basic_csv_file_path = os.path.join(os.getcwd(), "grading/tests/fixtures/basic-01.csv")
+    upload_file_input = browser.find_element_by_name("file")
+    upload_file_input.send_keys(basic_csv_file_path)
+
+    browser.find_element_by_name("_upload").click()
+
+    body_text = browser.get_body_text()
+    for internal_id in (1, 5, 6):
+        error_string = f"Stone with internal_id: `{internal_id}` has already been uploaded"
+        found_error = body_text.find(error_string)
+        assert found_error != -1
