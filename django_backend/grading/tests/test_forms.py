@@ -1279,6 +1279,32 @@ class GiaAdjustGradingUploadFormTest(TestCase):
                 expected_value = expected_stone[field]
                 self.assertEqual(actual_value, expected_value)
 
+    def test_cannot_upload_stone_twice(self):
+        """
+        Tests that uploading stone more than once errors
+        :returns:
+        """
+        self.do_initial_upload()
+
+        form = GIAAdjustingUploadForm(
+            data={}, files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())}
+        )
+
+        self.assertTrue(form.is_valid())
+        form.save()
+
+        self.csv_file.seek(0)
+        form = GIAAdjustingUploadForm(
+            data={}, files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())}
+        )
+        self.assertFalse(form.is_valid())
+        stone_ids = (1, 5, 6)
+        for row_number, error_dict in form.csv_errors.items():
+            for field, error in error_dict.items():
+                self.assertEqual(
+                    error, f"Stone with internal_id: `{stone_ids[row_number]}` has already been uploaded"
+                )
+
 
 class MacroImageFilenameUploadFormTest(TestCase):
     fixtures = ("grading/fixtures/test_data.json",)

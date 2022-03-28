@@ -864,6 +864,23 @@ class GIAAdjustingUploadForm(BaseUploadForm):
 
         return stone_data, errors
 
+    def __process_stone_upload(self, stone_data, file_name):
+        """
+        Check if stone has already gone through gia adjusting grading, add return an error message.
+        """
+
+        errors = {}
+        for row, data in enumerate(stone_data):
+
+            stone = Stone.objects.get(internal_id=data["internal_id"])
+            if stone.is_gia_adjusting_grading_complete:
+                errors[row] = {}
+                errors[row][
+                    "internal_id"
+                ] = f"Stone with internal_id: `{stone.internal_id}` has already been uploaded"
+
+        return stone_data, errors
+
 
 class GIAUploadForm(BaseUploadForm):
     def __init__(self, user, *args, **kwargs):
