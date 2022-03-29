@@ -727,6 +727,7 @@ class BasicUploadFormTest(TestCase):
         self.assertFalse(form.is_valid())
 
         self.assertFalse(form.is_valid())
+        self.assertEqual(len(form.csv_errors), 3)
         stone_ids = (1, 5, 6)
         for row_number, error_dict in form.csv_errors.items():
             for field, error in error_dict.items():
@@ -893,6 +894,7 @@ class GoldWayGradingDataTest(TestCase):
             data={}, user=self.grader, files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())}
         )
         self.assertFalse(form.is_valid())
+        self.assertEqual(len(form.csv_errors), 3)
         stone_ids = (1, 5, 6)
         for row_number, error_dict in form.csv_errors.items():
             for field, error in error_dict.items():
@@ -1023,6 +1025,7 @@ class GiaGradingUploadForm(TestCase):
             data={}, user=self.user, files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())}
         )
         self.assertFalse(form.is_valid())
+        self.assertEqual(len(form.csv_errors), 3)
         stone_ids = (1, 5, 6)
         for row_number, error_dict in form.csv_errors.items():
             for field, error in error_dict.items():
@@ -1152,14 +1155,13 @@ class GWAdjustingUploadFormTest(TestCase):
 
         self.assertFalse(form.is_valid())
 
-        expected_errors = [
-            "goldway adjust form is already complete for stone with internal_id: 1",
-            "goldway adjust form is already complete for stone with internal_id: 5",
-            "goldway adjust form is already complete for stone with internal_id: 6",
-        ]
-        for _, error in form.csv_errors.items():
-
-            self.assertIn(error["internal_id"], expected_errors)
+        self.assertEqual(len(form.csv_errors), 3)
+        stone_ids = (1, 5, 6)
+        for row_number, error_dict in form.csv_errors.items():
+            for field, error in error_dict.items():
+                self.assertEqual(
+                    error, f"Stone with internal_id: `{stone_ids[row_number]}` has already been uploaded"
+                )
 
 
 class GiaAdjustGradingUploadFormTest(TestCase):
@@ -1298,6 +1300,7 @@ class GiaAdjustGradingUploadFormTest(TestCase):
             data={}, files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())}
         )
         self.assertFalse(form.is_valid())
+        self.assertEqual(len(form.csv_errors), 3)
         stone_ids = (1, 5, 6)
         for row_number, error_dict in form.csv_errors.items():
             for field, error in error_dict.items():
