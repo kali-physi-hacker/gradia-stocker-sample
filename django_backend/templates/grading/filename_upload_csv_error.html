@@ -57,7 +57,8 @@
         {% endfor %}
         {% endfor %}
     </table>
+    {% else %}
+    <p style="color: red">{{ form.errors.file | first }}</p>
     {% endif %}
-
 </body>
 {% endblock %}
