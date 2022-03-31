@@ -66,7 +66,7 @@ class TestCSVUpload(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Stone.objects.count(), 3)
 
-    def xtest_sarine_data_upload_fails_if_invalid_csv_filename(self):
+    def test_sarine_data_upload_fails_if_invalid_csv_filename(self):
         """
         Tests that sarine data upload endpoint errors if invalid csv file
         Format: ==> We're expecting that csv filename to be equal to gradia_parcel_code
@@ -74,18 +74,15 @@ class TestCSVUpload(TestCase):
         """
         self.client.login(**self.grader)
         response = self.client.post(reverse("grading:sarine_data_upload_url"), {"file": self.invalid_csv_file})
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, reverse("grading:sarine_data_upload_url"))
-        request = response.wsgi_request
-        django_messages = get_messages(request)
-        self.assertEqual(len(django_messages), 1)
-        for message in django_messages:
-            self.assertEqual(str(message), "Parcel name does not exist")
-
-    def xtest_sarine_data_upload_fails_field_names_missing(self):
-        self.client.login(**self.grader)
-        response = self.client.post(reverse("grading:sarine_data_upload_url"), {"file": self.invalid_csv_file})
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.templates[0].name, "grading/csv_errors.html")
+        has_error_message = (
+            response.content.decode().find(
+                "No parcel with such a parcel code. Please be sure the csv file name matches the parcel code"
+            )
+            != -1
+        )
+        self.assertTrue(has_error_message)
 
     def test_basic_grading_data_upload_get_page(self):
         """
@@ -113,31 +110,6 @@ class TestCSVUpload(TestCase):
         stone_1 = Stone.objects.get(internal_id=1)
         # float() because django will return a Decimal of 0.090
         self.assertEqual(float(stone_1.basic_carat), 0.09)
-
-    def xtest_views_basic_csv_upload_generates_basic_id_hash(self):
-        """
-        Tests that basic csv upload generates id hashing
-        :return:
-        """
-        # upload sarine file
-        Stone.objects.all().delete()
-        self.setup_sarine_data()
-
-        # Before Upload Check that all external IDs from CSV file is None (not in use because no such column)
-        # basic_grading_data = pd.read_csv(self.basic_grading_upload_csv_file)
-        # self.basic_grading_upload_csv_file.close()
-        # external_ids = pd.DataFrame(basic_grading_data, columns=("external_id",))
-
-        # for external_id in external_ids.values:
-        #     self.assertTrue(pd.isna(external_id[0]))
-
-        # uploads basic grading csv
-        self.client.login(**self.grader)
-        self.client.post(self.basic_grading_data_upload_url, {"file": self.basic_grading_upload_csv_file})
-
-        # Check that all uploaded stones have external_ids
-        for stone in Stone.objects.all():
-            self.assertIsNotNone(stone.external_id)
 
     def test_gw_grading_data_upload_get_page(self):
         """
@@ -197,7 +169,8 @@ class TestCSVUpload(TestCase):
             reverse("grading:gia_adjusting_data_upload_url"), data={"file": invalid_csv_file}
         )
         self.assertEqual(response.status_code, 200)
-        # Maybe more tests ==> Test for the actual content of the page (response.content.decode())
+        has_error_message = response.content.decode().find("Data Upload Failed") != -1
+        self.assertTrue(has_error_message)
 
     def test_macro_file_name_upload_success(self):
 

@@ -783,13 +783,7 @@ class Stone(
         Returns true / false on whether it is done with goldway grading
         :return:
         """
-        fields = [field.name for field in GWGradingMixin._meta.get_fields()]
-        is_empty = False
-        for field in fields:
-            if getattr(self, field) is None:
-                is_empty = True
-                break
-        return not is_empty
+        return self.gw_verification is not None
 
     @property
     def is_gia_grading_complete(self):
@@ -797,13 +791,7 @@ class Stone(
         Returns true /false on whether it is done with gia grading
         :return:
         """
-        fields = [field.name for field in GIAGradingMixin._meta.get_fields()]
-        is_empty = False
-        for field in fields:
-            if getattr(self, field) is None:
-                is_empty = True
-                break
-        return not is_empty
+        return self.gia_verification is not None
 
     @property
     def is_goldway_adjusting_grading_complete(self):

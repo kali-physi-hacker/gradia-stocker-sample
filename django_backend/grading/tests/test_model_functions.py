@@ -185,7 +185,7 @@ class StoneModelTest(TestCase):
             stone = Stone.objects.get(internal_id=stone_id)
             self.assertTrue(stone.is_goldway_adjusting_grading_complete)
 
-    def xtest_is_gia_grading_complete(self):  # Temporary until unused field in Stone model is removed
+    def test_is_gia_grading_complete(self):
         """
         Tests that is_gia_grading_complete returns True if gia grading results
         have been uploaded and returns False otherwise

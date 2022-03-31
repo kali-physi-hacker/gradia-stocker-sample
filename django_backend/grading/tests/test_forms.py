@@ -726,14 +726,14 @@ class BasicUploadFormTest(TestCase):
 
         self.assertFalse(form.is_valid())
 
-        expected_errors = [
-            "Stone with 1 has already been uploaded",
-            "Stone with 5 has already been uploaded",
-            "Stone with 6 has already been uploaded",
-        ]
-        for _, error in form.csv_errors.items():
-
-            self.assertIn(error["internal_id"], expected_errors)
+        self.assertFalse(form.is_valid())
+        self.assertEqual(len(form.csv_errors), 3)
+        stone_ids = (1, 5, 6)
+        for row_number, error_dict in form.csv_errors.items():
+            for field, error in error_dict.items():
+                self.assertEqual(
+                    error, f"Stone with internal_id: `{stone_ids[row_number]}` has already been uploaded"
+                )
 
 
 def get_date_from_str(date_string):
@@ -870,6 +870,38 @@ class GoldWayGradingDataTest(TestCase):
             stone = Stone.objects.get(internal_id=internal_id)
             self.assertEqual(stone.external_id, external_id)
 
+    def test_cannot_upload_stone_twice(self):
+        """
+        Tests that uploading stone more than once errors
+        :returns:
+        """
+        for stone_id in (1, 5, 6):
+            stone = Stone.objects.get(internal_id=stone_id)
+            split = User.objects.get(username="split")
+            goldway = User.objects.get(username="goldway")
+            StoneTransfer.initiate_transfer(item=stone, from_user=split, to_user=goldway, created_by=self.grader)
+            StoneTransfer.confirm_received(item=stone)
+
+        form = GWGradingUploadForm(
+            data={}, user=self.grader, files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())}
+        )
+
+        self.assertTrue(form.is_valid())
+        form.save()
+
+        self.csv_file.seek(0)
+        form = GWGradingUploadForm(
+            data={}, user=self.grader, files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())}
+        )
+        self.assertFalse(form.is_valid())
+        self.assertEqual(len(form.csv_errors), 3)
+        stone_ids = (1, 5, 6)
+        for row_number, error_dict in form.csv_errors.items():
+            for field, error in error_dict.items():
+                self.assertEqual(
+                    error, f"Stone with internal_id: `{stone_ids[row_number]}` has already been uploaded"
+                )
+
 
 class GiaGradingUploadForm(TestCase):
     fixtures = ("grading/fixtures/test_data.json",)
@@ -968,6 +1000,38 @@ class GiaGradingUploadForm(TestCase):
                     expected_value = GiaVerification.objects.get(receipt_number=expected_value)
 
                 self.assertEqual(actual_value, expected_value)
+
+    def test_cannot_upload_stone_twice(self):
+        """
+        Tests that uploading stone more than once errors
+        :returns:
+        """
+        for stone_id in (1, 5, 6):
+            stone = Stone.objects.get(internal_id=stone_id)
+            split = User.objects.get(username="split")
+            gia = User.objects.get(username="gia")
+            StoneTransfer.initiate_transfer(item=stone, from_user=split, to_user=gia, created_by=self.user)
+            StoneTransfer.confirm_received(item=stone)
+
+        form = GIAUploadForm(
+            data={}, user=self.user, files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())}
+        )
+
+        self.assertTrue(form.is_valid())
+        form.save()
+
+        self.csv_file.seek(0)
+        form = GIAUploadForm(
+            data={}, user=self.user, files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())}
+        )
+        self.assertFalse(form.is_valid())
+        self.assertEqual(len(form.csv_errors), 3)
+        stone_ids = (1, 5, 6)
+        for row_number, error_dict in form.csv_errors.items():
+            for field, error in error_dict.items():
+                self.assertEqual(
+                    error, f"Stone with internal_id: `{stone_ids[row_number]}` has already been uploaded"
+                )
 
 
 class GWAdjustingUploadFormTest(TestCase):
@@ -1091,14 +1155,13 @@ class GWAdjustingUploadFormTest(TestCase):
 
         self.assertFalse(form.is_valid())
 
-        expected_errors = [
-            "goldway adjust form is already complete for stone with internal_id: 1",
-            "goldway adjust form is already complete for stone with internal_id: 5",
-            "goldway adjust form is already complete for stone with internal_id: 6",
-        ]
-        for _, error in form.csv_errors.items():
-
-            self.assertIn(error["internal_id"], expected_errors)
+        self.assertEqual(len(form.csv_errors), 3)
+        stone_ids = (1, 5, 6)
+        for row_number, error_dict in form.csv_errors.items():
+            for field, error in error_dict.items():
+                self.assertEqual(
+                    error, f"Stone with internal_id: `{stone_ids[row_number]}` has already been uploaded"
+                )
 
 
 class GiaAdjustGradingUploadFormTest(TestCase):
@@ -1217,6 +1280,33 @@ class GiaAdjustGradingUploadFormTest(TestCase):
                 actual_value = float(raw_actual_value) if type(raw_actual_value) == Decimal else raw_actual_value
                 expected_value = expected_stone[field]
                 self.assertEqual(actual_value, expected_value)
+
+    def test_cannot_upload_stone_twice(self):
+        """
+        Tests that uploading stone more than once errors
+        :returns:
+        """
+        self.do_initial_upload()
+
+        form = GIAAdjustingUploadForm(
+            data={}, files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())}
+        )
+
+        self.assertTrue(form.is_valid())
+        form.save()
+
+        self.csv_file.seek(0)
+        form = GIAAdjustingUploadForm(
+            data={}, files={"file": SimpleUploadedFile(self.csv_file.name, self.csv_file.read())}
+        )
+        self.assertFalse(form.is_valid())
+        self.assertEqual(len(form.csv_errors), 3)
+        stone_ids = (1, 5, 6)
+        for row_number, error_dict in form.csv_errors.items():
+            for field, error in error_dict.items():
+                self.assertEqual(
+                    error, f"Stone with internal_id: `{stone_ids[row_number]}` has already been uploaded"
+                )
 
 
 class MacroImageFilenameUploadFormTest(TestCase):
