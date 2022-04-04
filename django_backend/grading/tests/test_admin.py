@@ -222,9 +222,10 @@ class DownloadCSVAdminTest(TestCase):
 
         headers, content = [row for row in response.content.decode().split("\n") if row != ""]
         headers = headers.split(",")
-        self.assertEqual(len(headers), 22)
+        self.assertEqual(len(headers), 23)
 
         fields = [field.name for field in GIAGradingAdjustMixin._meta.get_fields() if "polish" not in field.name] + [
+            "internal_id",
             "gia_code",
             "nano_etch_inscription",
             "gia_color",
