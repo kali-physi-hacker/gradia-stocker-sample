@@ -784,7 +784,7 @@ class Stone(
         Returns true / false on whether it is done with goldway grading
         :return:
         """
-        return self.gw_verification is not None
+        return self.gw_verification is not None and self.date_from_gw is not None
 
     @property
     def is_gia_grading_complete(self):
@@ -792,7 +792,7 @@ class Stone(
         Returns true /false on whether it is done with gia grading
         :return:
         """
-        return self.gia_verification is not None
+        return self.gia_verification is not None and self.date_from_gia is not None
 
     @property
     def is_goldway_adjusting_grading_complete(self):

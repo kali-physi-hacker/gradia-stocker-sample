@@ -167,6 +167,67 @@ class StoneModelTest(TestCase):
             stone = Stone.objects.get(internal_id=stone_id)
             self.assertTrue(stone.is_goldway_grading_complete)
 
+    def test_is_goldway_grading_complete_returns_false(self):
+        """
+        Tests that is_goldway_grading_complete returns False if
+        stone has been transferred to goldway but has not completed
+        goldway grading
+        :return:
+        """
+        self.upload_sarine_grading_results()
+
+        stones = [Stone.objects.get(internal_id=internal_id) for internal_id in self.stone_ids]
+
+        for stone in stones:
+            self.assertFalse(stone.is_goldway_grading_complete)
+
+        vault = User.objects.get(username="vault")
+        split = User.objects.get(username="split")
+        goldway = User.objects.get(username="goldway")
+        tanly = User.objects.get(username="tanly")
+
+        # transfer to vault
+        for stone in stones:
+            StoneTransfer.initiate_transfer(item=stone, from_user=split, to_user=vault, created_by=tanly)
+            StoneTransfer.confirm_received(item=stone)
+
+        # transfer to goldway
+        for stone in stones:
+            StoneTransfer.initiate_transfer(item=stone, from_user=vault, to_user=goldway, created_by=tanly)
+
+        # check that is_grading_complete should still be False
+        for stone in stones:
+            self.assertFalse(stone.is_goldway_grading_complete)
+
+    def test_is_gia_grading_complete_returns_false(self):
+        """
+        Test that is_gia_grading_complete return False if
+        stone has been transferred to gia but has not completed
+        gia grading
+        :return:
+        """
+        self.upload_sarine_grading_results()
+
+        stones = [Stone.objects.get(internal_id=internal_id) for internal_id in self.stone_ids]
+
+        for stone in stones:
+            self.assertFalse(stone.is_goldway_grading_complete)
+
+        gia = User.objects.get(username="gia")
+        vault = User.objects.get(username="vault")
+        tanly = User.objects.get(username="tanly")
+
+        self.upload_goldway_grading_results()
+
+        # transfer to gia
+        for stone in stones:
+            StoneTransfer.initiate_transfer(item=stone, from_user=vault, to_user=gia, created_by=tanly)
+            StoneTransfer.confirm_received(item=stone)
+
+        # be sure is_gia_grading_complete is still False
+        for stone in stones:
+            self.assertFalse(stone.is_gia_grading_complete)
+
     def test_is_goldway_adjusting_grading_complete(self):
         """
         Tests that is_goldway_adjusting_complete returns True if goldway adjusting results
