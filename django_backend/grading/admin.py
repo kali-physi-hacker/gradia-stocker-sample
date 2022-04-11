@@ -283,6 +283,7 @@ class StoneAdmin(admin.ModelAdmin):
     def get_list_display(self, request):
         return [
             "external_id",
+            "parcel_code",
             "customer_receipt_number",
             "current_location",
             "basic_carat",
