@@ -700,6 +700,10 @@ class Stone(
     def customer_receipt_number(self):
         return self.split_from.original_parcel.receipt.code
 
+    @property
+    def parcel_code(self):
+        return self.split_from.original_parcel.gradia_parcel_code
+
     def current_location(self):
         return StoneTransfer.get_current_location(self)
 
